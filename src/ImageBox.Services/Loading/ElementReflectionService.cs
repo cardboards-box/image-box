@@ -1,4 +1,6 @@
-﻿namespace ImageBox.Services.Loading;
+﻿using System.Collections;
+
+namespace ImageBox.Services.Loading;
 
 using Ast;
 using Scripting;
@@ -16,6 +18,14 @@ public interface IElementReflectionService
     /// <returns>All of the <see cref="IElement"/> instances</returns>
     /// <exception cref="MissingMemberException">Thrown if <paramref name="throwErr"/> is true and an element instance or attribute instance is missing</exception>
     IEnumerable<IElement> BindTemplates(IEnumerable<AstElement> elements, bool throwErr = true);
+
+    /// <summary>
+    /// Converts the given string to the property type and sets it's value
+    /// </summary>
+    /// <param name="property">The property to bind to</param>
+    /// <param name="instance">The object to set the value on</param>
+    /// <param name="value">The string to set the value to</param>
+    void TypeCastBind(PropertyInfo property, object instance, object? value);
 }
 
 internal class ElementReflectionService(
@@ -147,7 +157,7 @@ internal class ElementReflectionService(
     /// <param name="property">The property to bind to</param>
     /// <param name="instance">The object to set the value on</param>
     /// <param name="value">The string to set the value to</param>
-    public static void TypeCastBind(PropertyInfo property, object instance, string? value)
+    public void TypeCastBind(PropertyInfo property, object instance, object? value)
     {
         void Set(object? value) => property.SetValue(instance, value);
         //Check if the property is nullable
@@ -160,45 +170,66 @@ internal class ElementReflectionService(
                 Set(null);
             return;
         }
-
-        if (property.PropertyType == typeof(string))
+        var valueType = value.GetType();
+        //If the property types match, just set the value
+        if (property.PropertyType == valueType)
         {
             Set(value);
             return;
         }
-
-        if (property.PropertyType == typeof(SizeUnit))
-        {
-            Set(SizeUnit.Parse(value));
-            return;
-        }
-
-        if (property.PropertyType == typeof(TimeUnit))
-        {
-            Set(TimeUnit.Parse(value));
-            return;
-        }
-
-        if (property.PropertyType == typeof(IOPath))
-        {
-            Set(new IOPath(value));
-            return;
-        }
-
         if (property.PropertyType == typeof(object))
         {
             Set(value);
             return;
         }
-
+        //Check the properties and set the value if there's a match
+        if (property.PropertyType == typeof(SizeUnit))
+        {
+            Set(SizeUnit.Parse(value.ToString() ?? string.Empty));
+            return;
+        }
+        if (property.PropertyType == typeof(TimeUnit))
+        {
+            Set(TimeUnit.Parse(value.ToString() ?? string.Empty));
+            return;
+        }
+        if (property.PropertyType == typeof(IOPath))
+        {
+            Set(new IOPath(value.ToString() ?? string.Empty));
+            return;
+        }
+        //Try bind object arrays (specifically for arrays)
         if (property.PropertyType == typeof(object?[]))
         {
+            //If the value is an array, enumerate it and set the values
+            if (typeof(IEnumerable).IsAssignableFrom(valueType))
+            {
+                var collection = (IEnumerable)value;
+                var output = new List<object>();
+                foreach (var item in collection)
+                    output.Add(item);
+
+                Set(output.ToArray());
+                return;
+            }
+            //If it's not an array, just set the value
             Set(new object?[] { value });
             return;
         }
-
+        //Get the non-nullable type for conversion
         var nonNullable = notNullType ?? property.PropertyType;
-        var converted = Convert.ChangeType(value, nonNullable);
+        object? converted;
+        try
+        {
+            //Try to convert the raw value
+            converted = Convert.ChangeType(value, nonNullable);
+        }
+        catch
+        {
+            //If it fails, try to convert the string version of the value
+            converted = Convert.ChangeType(value.ToString(), nonNullable);
+        }
+        //set the converted value
         Set(converted);
     }
 
@@ -208,7 +239,7 @@ internal class ElementReflectionService(
     /// <param name="element">The instance of the <see cref="IElement"/> to bind to</param>
     /// <param name="attribute">The information about the property to set</param>
     /// <param name="ast">The AST value to bind from</param>
-    public static void BindProperty(IElement element, ReflectedAttribute attribute, AstAttribute ast)
+    public void BindProperty(IElement element, ReflectedAttribute attribute, AstAttribute ast)
     {
         //Skip spread syntax properties
         if (ast.Type == AstAttributeType.Spread) return;

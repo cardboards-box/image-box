@@ -11,7 +11,7 @@ using Ast;
 /// <param name="Context">The AST element context</param>
 public class RenderContextException(
     string Message,
-    BoxedImage Image,
+    BoxedImage? Image = null,
     Exception? InnerException = null,
     AstElement?[]? Context = null) : Exception(Message, InnerException)
 {
@@ -34,6 +34,24 @@ public class RenderContextException(
     public RenderContextException(string message, Exception inner, BoxedImage image, params AstElement?[] Context)
         : this(message, image, inner, Context) { }
 
+
+    /// <summary>
+    /// An exception thrown if there is an error rendering or loading the boxed image
+    /// </summary>
+    /// <param name="message">The exception message</param>
+    /// <param name="Context">The AST element context</param>
+    public RenderContextException(string message, params AstElement?[] Context)
+        : this(message, (BoxedImage?)null, null, Context) { }
+
+    /// <summary>
+    /// An exception thrown if there is an error rendering or loading the boxed image
+    /// </summary>
+    /// <param name="message">The exception message</param>
+    /// <param name="inner">The inner exception that caused all of this</param>
+    /// <param name="Context">The AST element context</param>
+    public RenderContextException(string message, Exception inner, params AstElement?[] Context)
+        : this(message, null, inner, Context) { }
+
     /// <summary>
     /// Converts the exception to a string for displaying
     /// </summary>
@@ -42,9 +60,12 @@ public class RenderContextException(
     {
         var sb = new StringBuilder();
         sb.AppendLine(Message);
-        sb.AppendLine("Image:");
-        sb.AppendLine($"\tWorking Directory: {Image.WorkingDirectory}");
-        sb.AppendLine($"\tFile Name: {Image.FileName}");
+        if (Image is not null)
+        {
+            sb.AppendLine("Image:");
+            sb.AppendLine($"\tWorking Directory: {Image.WorkingDirectory}");
+            sb.AppendLine($"\tFile Name: {Image.FileName}");
+        }
         if (Context is not null)
         {
             sb.AppendLine("Context:");

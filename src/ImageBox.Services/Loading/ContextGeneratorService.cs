@@ -66,7 +66,7 @@ internal class ContextGeneratorService(
         //Return the created render context
         return new RenderContext
         {
-            Image = image,
+            Context = image,
             Template = template,
             Runner = runner,
             Size = context,

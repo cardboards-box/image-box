@@ -54,6 +54,8 @@ public static class DiExtensions
     internal static IServiceCollection AddBaseImageBox(this IServiceCollection services)
     {
         return services
+            .AddJson()
+            .AddCardboardHttp()
             .AddCore()
             .AddAst()
             .AddDrawing()

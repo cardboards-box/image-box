@@ -1,9 +1,9 @@
-﻿using Jint;
-using Jint.Native;
+﻿using Jint.Native;
 
 namespace ImageBox.Services;
 
 using Ast;
+using Scripting;
 
 /// <summary>
 /// Represents the rendering scope for boxed images
@@ -36,27 +36,7 @@ public class RenderScope
     /// <param name="value">The value to attach by</param>
     public void Set(JsValue? value)
     {
-        if (value is null ||
-            value.IsUndefined() ||
-            value.IsNull()) return;
-
-
-        if (value.IsArray())
-        {
-            foreach (var item in value.AsArray())
-                Set(item);
-            return;
-        }
-
-        if (!value.IsObject()) return;
-
-        var dic = value.AsObject().GetOwnProperties();
-        foreach (var prop in dic)
-        {
-            var key = prop.Key.ToString();
-            if (Variables.TryAdd(key, prop.Value))
-                Variables[key] = prop.Value;
-        }
+        value.AppendTo(Variables);
     }
 
     /// <summary>

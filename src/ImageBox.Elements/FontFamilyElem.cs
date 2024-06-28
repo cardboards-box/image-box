@@ -10,11 +10,11 @@ public class FontFamilyElem : Element
     /// The name of the font family
     /// </summary>
     [AstAttribute("name")]
-    public AstValue<string> Name { get; set; } = new();
+    public string? Name { get; set; }
 
     /// <summary>
     /// Where to find the font file
     /// </summary>
     [AstAttribute("source"), AstAttribute("src"), AstAttribute("path")]
-    public AstValue<IOPath> Source { get; set; } = new();
+    public IOPath? Source { get; set; }
 }

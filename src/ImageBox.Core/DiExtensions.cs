@@ -9,8 +9,6 @@ public static class DiExtensions
     public static IServiceCollection AddCore(this IServiceCollection services)
     {
         return services
-            .AddJson()
-            .AddCardboardHttp()
             .AddTransient<IFileCacheService, FileCacheService>()
             .AddTransient<IFileResolverService, FileResolverService>();
     }

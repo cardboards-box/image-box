@@ -20,6 +20,7 @@ public interface ITemplateLoaderService
     /// <exception cref="InvalidOperationException">Thrown if the file does not exist after downloading</exception>
     /// <exception cref="InvalidOperationException">Thrown if the zip file contains another zip file</exception>
     /// <exception cref="InvalidOperationException">Thrown if a module with the same name is already loaded</exception>
+    /// <exception cref="RenderContextException">Thrown if there is a top-level bind or spread</exception>
     Task<BoxedImage> Load(IOPath path, AstConfig? config = null);
 }
 
@@ -40,6 +41,7 @@ internal class TemplateLoaderService(
     /// <exception cref="InvalidOperationException">Thrown if the file does not exist after downloading</exception>
     /// <exception cref="InvalidOperationException">Thrown if the zip file contains another zip file</exception>
     /// <exception cref="InvalidOperationException">Thrown if a module with the same name is already loaded</exception>
+    /// <exception cref="RenderContextException">Thrown if there is a top-level bind or spread</exception>
     public Task<BoxedImage> Load(IOPath path, AstConfig? config = null)
     {
         config ??= AstConfig.Default;
@@ -67,6 +69,8 @@ internal class TemplateLoaderService(
         var entryName = Path.GetFileName(filePath)!;
         //Load all of the elements from the file
         var elements = _parser.ParseFile(filePath, config).ToArray();
+        //Validate that there are no top level contextual attributes
+        NoTopLevelContextual(elements);
         //Load all of the templates from the elements
         var templates = _elements.BindTemplates(elements, config.ThrowErrorsOnBind).ToArray();
         //Create the boxed image instance
@@ -158,6 +162,23 @@ internal class TemplateLoaderService(
             if (Directory.Exists(dir))
                 Directory.Delete(dir, true);
             throw;
+        }
+    }
+
+    /// <summary>
+    /// Validate that there are no top level contextual attributes on elements
+    /// </summary>
+    /// <param name="elements">The elements to validate</param>
+    /// <exception cref="RenderContextException">Thrown if there is a top-level bind or spread</exception>
+    /// <remarks>Contextual attributes are classified as anything that requires a script to interpret, this includes: <see cref="AstAttributeType.Bind"/> or <see cref="AstAttributeType.Spread"/></remarks>
+    public static void NoTopLevelContextual(AstElement[] elements)
+    {
+        AstAttributeType[] contextual = [AstAttributeType.Bind, AstAttributeType.Spread];
+        foreach(var element in elements)
+        {
+            var hasContextual = element.Attributes.Any(t => contextual.Contains(t.Type));
+            if (hasContextual)
+                throw new RenderContextException("Top level elements cannot have contextual attributes (binds or spreads)", element);
         }
     }
 

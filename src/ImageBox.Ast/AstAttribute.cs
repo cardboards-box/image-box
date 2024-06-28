@@ -21,4 +21,9 @@ public class AstAttribute
     /// </summary>
     /// <remarks>Can be the bind type or script if the case that <see cref="Type"/> is <see cref="AstAttributeType.Bind"/></remarks>
     public string? Value { get; set; }
+
+    /// <summary>
+    /// Cache object for attributes
+    /// </summary>
+    public object? Cache { get; set; }
 }

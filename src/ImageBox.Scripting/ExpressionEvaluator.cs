@@ -21,24 +21,8 @@ public class ExpressionEvaluator(
     /// <returns>The current expression evaluator for chaining</returns>
     public ExpressionEvaluator SetContext(JsValue? value)
     {
-        if (value is null ||
-            value.IsUndefined() ||
-            value.IsNull()) return this;
-
-        if (value.IsArray())
-        {
-            foreach (var item in value.AsArray())
-                SetContext(item);
-            return this;
-        }
-
-        if (!value.IsObject()) return this;
-
-        var dic = value.AsObject().GetOwnProperties();
-        foreach (var prop in dic)
-        {
-            _engine.SetValue(prop.Key.ToString(), prop.Value);
-        }
+        foreach(var (key, obj) in value.Enumerator())
+            _engine.SetValue(key, obj);
         return this;
     }
 
@@ -58,12 +42,11 @@ public class ExpressionEvaluator(
     /// <summary>
     /// Evaluates the current expression
     /// </summary>
-    /// <param name="context"></param>
-    /// <returns></returns>
-    public JsValue? Evaluate(JsValue? context)
+    /// <param name="context">The context of the execution</param>
+    /// <returns>The value of the expression</returns>
+    public JsValue? Evaluate(JsValue? context = null)
     {
-        SetContext(context);
+        if (context is null) SetContext(context);
         return _engine.Evaluate(_statement);
     }
 }
-

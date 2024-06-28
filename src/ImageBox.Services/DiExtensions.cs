@@ -13,6 +13,7 @@ public static class DiExtensions
         return services
             .AddTransient<IContextGeneratorService, ContextGeneratorService>()
             .AddTransient<IElementReflectionService, ElementReflectionService>()
+            .AddTransient<IScriptExecutionService, ScriptExecutionService>()
             .AddTransient<ITemplateLoaderService, TemplateLoaderService>();
     }
 }

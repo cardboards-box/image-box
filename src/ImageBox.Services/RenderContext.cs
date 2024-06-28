@@ -1,20 +1,23 @@
-﻿namespace ImageBox.Services;
+﻿using Jint.Native;
+using SixLabors.ImageSharp;
 
-using Jint.Native;
+namespace ImageBox.Services;
+
 using Scripting;
 
 /// <summary>
 /// Represents a cached instance of a <see cref="BoxedImage"/> for rendering
 /// </summary>
-public class RenderContext
+public class RenderContext : IDisposable
 {
     private readonly List<RenderScope> _scopes = [];
     private RenderScope? _globalScope;
+    private Image? _image;
 
     /// <summary>
     /// The boxed image to render
     /// </summary>
-    public required BoxedImage Image { get; init; }
+    public required BoxedImage Context { get; init; }
 
     /// <summary>
     /// The template for the image render
@@ -24,7 +27,7 @@ public class RenderContext
     /// <summary>
     /// The font families from the template
     /// </summary>
-    public required FontFamilyElem[] FontFamilies { get; init; } = [];
+    public required FontFamilyElem[] FontFamilies { get; init; }
 
     /// <summary>
     /// The context of the image size from unit conversion
@@ -45,6 +48,25 @@ public class RenderContext
     /// The delay between frames in milliseconds
     /// </summary>
     public int FrameDelay { get; init; }
+
+    /// <summary>
+    /// The renderer for the image
+    /// </summary>
+    public Image? Image
+    {
+        get => ValidateImage();
+        set => _image = value;
+    }
+
+    /// <summary>
+    /// The current frame (if animation is enabled)
+    /// </summary>
+    public int? Frame { get; set; }
+
+    /// <summary>
+    /// Whether or not the image render has been set
+    /// </summary>
+    public bool HasImage => _image is not null;
 
     /// <summary>
     /// Whether or not animation is enabled
@@ -82,11 +104,6 @@ public class RenderContext
     public int FontSize => Size.FontSize;
 
     /// <summary>
-    /// The current frame (if animation is enabled)
-    /// </summary>
-    public int? Frame { get; set; }
-
-    /// <summary>
     /// Gets all of the variables for the global scope
     /// </summary>
     /// <returns></returns>
@@ -98,12 +115,15 @@ public class RenderContext
             Element = Template,
             Variables = new()
             {
-                ["image"] = Image,
-                ["imageWidth"] = Width,
-                ["imageHeight"] = Height,
+                ["animate"] = Animate,
+                ["fonts"] = FontFamilies,
                 ["fontSize"] = FontSize,
                 ["frame"] = Frame,
-                ["fonts"] = FontFamilies,
+                ["frameTotal"] = TotalFrames,
+                ["frameDelay"] = FrameDelay,
+                ["image"] = Context,
+                ["imageWidth"] = Width,
+                ["imageHeight"] = Height,
             }
         };
     }
@@ -139,20 +159,20 @@ public class RenderContext
     /// Adds or sets the variables for the root scope
     /// </summary>
     /// <param name="variables">The variables to set</param>
-    public void AddRootScope(Dictionary<string, object?> variables)
+    public void SetRootScope(Dictionary<string, object?> variables)
     {
-        if (HasGlobalScope)
-        {
-            _scopes[0].Set(variables);
-            return;
-        }
+        var scope = GetRootScope();
+        scope.Set(variables);
+    }
 
-        AddScope(new RenderScope
-        {
-            Element = Template,
-            Variables = variables,
-            Size = Size
-        });
+    /// <summary>
+    /// Adds or sets the variables for the root scope
+    /// </summary>
+    /// <param name="variables">The variables to set</param>
+    public void SetRootScope(JsValue? variables)
+    {
+        var scope = GetRootScope();
+        scope.Set(variables);
     }
 
     /// <summary>
@@ -166,13 +186,70 @@ public class RenderContext
     }
 
     /// <summary>
-    /// Sets the scope of the expression evaluator
+    /// Binds the scope of the expression evaluator
     /// </summary>
-    /// <param name="expression"></param>
-    public void SetScope(ExpressionEvaluator expression)
+    /// <param name="expression">The expression evaluator to bind to</param>
+    public void BindTo(ExpressionEvaluator expression)
     {
         //Set the variables from each of the scopes
         foreach (var scope in Stack)
             expression.SetContext(scope.Variables);
+    }
+
+    /// <summary>
+    /// Get the value of the scope variable or null if it doesn't exist
+    /// </summary>
+    /// <param name="names">The potential names of the variables</param>
+    /// <returns>The value of the scope variable</returns>
+    public object? GetScopeValue(params string[] names)
+    {
+        //Get the stacks in reverse order so that the most recent scope is first
+        var stack = Stack
+            .ToArray()
+            .Reverse();
+        //Iterate through each stack
+        foreach (var scope in stack)
+        {
+            foreach(var name in names)
+            {
+                //If the variable exists in the current scope, return it
+                if (scope.Variables.TryGetValue(name, out var value))
+                    return value;
+            }
+        }
+        //If the variable does not exist in any scope, return null
+        return null;
+    }
+
+    /// <summary>
+    /// Get the current image renderer or throw an exception if it has not been set yet
+    /// </summary>
+    /// <returns>The image renderer</returns>
+    /// <exception cref="RenderContextException">Thrown if the renderer hasn't been set  yet</exception>
+    internal Image ValidateImage()
+    {
+        return _image ?? throw new RenderContextException("The image has not been rendered yet", Context, CurrentScope.AstElement);
+    }
+
+    /// <summary>
+    /// Gets or creates the root scope for the image
+    /// </summary>
+    /// <returns>The root scope</returns>
+    internal RenderScope GetRootScope()
+    {
+        if (HasGlobalScope)
+            return _scopes.First();
+
+        return AddScope(Template);
+    }
+
+    /// <summary>
+    /// Dispose the render context
+    /// </summary>
+    public void Dispose()
+    {
+        _scopes.Clear();
+        _image?.Dispose();
+        GC.SuppressFinalize(this);
     }
 }
