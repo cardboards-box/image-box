@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\ImageBox.Core\ImageBox.Core.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Compile Include="./../global.cs" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <PackageReference Include="Svg" Version="3.4.7" />
+	</ItemGroup>
+
+</Project>
