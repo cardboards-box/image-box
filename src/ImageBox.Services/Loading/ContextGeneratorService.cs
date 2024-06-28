@@ -1,9 +1,8 @@
 ﻿using Module = Esprima.Ast.Module;
 using Jint;
 
-namespace ImageBox.Services;
+namespace ImageBox.Services.Loading;
 
-using Elements.Elements.Other;
 using Scripting;
 using SystemModules;
 
@@ -49,6 +48,21 @@ internal class ContextGeneratorService(
         var context = GetContext(template, image);
         //Get all of the font families from the image
         var fontFamilies = image.Elements.OfType<FontFamilyElem>().ToArray();
+        //Determine animation stuff
+        int totalFrames = 1, frameDelay = 0;
+        int? currentFrame = null;
+        if (template.Animate)
+        {
+            if (template.AnimateDuration is null)
+                throw new RenderContextException("Template animation is enabled but animation duration is not set", image, template.Context);
+            //Total number of seconds for the animation
+            var duration = template.AnimateDuration.Value.Milliseconds * 1000;
+            //Total number of frames
+            var fps = template.AnimateFps ?? _config.AnimateFps;
+            totalFrames = (int)Math.Round(duration * fps, 0);
+            frameDelay = (int)Math.Round(duration / totalFrames, 0);
+            currentFrame = 1;
+        }
         //Return the created render context
         return new RenderContext
         {
@@ -56,7 +70,10 @@ internal class ContextGeneratorService(
             Template = template,
             Runner = runner,
             Size = context,
-            FontFamilies = fontFamilies
+            FontFamilies = fontFamilies,
+            TotalFrames = totalFrames,
+            FrameDelay = frameDelay,
+            Frame = currentFrame
         };
     }
 
@@ -143,7 +160,7 @@ export function main(args) {
     public async IAsyncEnumerable<RenderModule> Modules(ScriptElem[] scripts, BoxedImage image)
     {
         //Iterate over the scripts and resolve and prepare them
-        foreach(var script in scripts)
+        foreach (var script in scripts)
         {
             //Resolve the scripts
             var module = await GetScript(script, image);
@@ -183,8 +200,8 @@ export function main(args) {
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, 
-                    "Error occurred while fetching script from source: {Path}. {Context}", 
+                _logger.LogError(ex,
+                    "Error occurred while fetching script from source: {Path}. {Context}",
                     actualPath, script.Context?.ExceptionString());
                 //Script failed to resolve; box the exception and report it
                 throw new RenderContextException(
@@ -218,7 +235,7 @@ export function main(args) {
         setup = null;
         var scripts = new List<ScriptElem>();
         //Iterate through all of the script elements in the root context of the template
-        foreach(var script in image.Elements.OfType<ScriptElem>())
+        foreach (var script in image.Elements.OfType<ScriptElem>())
         {
             //If the script is setup, treat it differently
             if (script.Setup)
@@ -226,9 +243,9 @@ export function main(args) {
                 //THERE CAN ONLY BE ONE!!
                 if (setup is not null)
                     throw new RenderContextException(
-                        "Multiple setup scripts found", 
-                        image, 
-                        setup.Context, 
+                        "Multiple setup scripts found",
+                        image,
+                        setup.Context,
                         script.Context);
                 //Set the setup script
                 setup = script;
@@ -250,7 +267,7 @@ export function main(args) {
                 image,
                 scripts.Select(t => t.Context).ToArray());
         //Return the non-setup scripts
-        return [..scripts];
+        return [.. scripts];
     }
 
     /// <summary>
@@ -271,8 +288,8 @@ export function main(args) {
             throw new RenderContextException("No template element found", image);
         //Ensure there is only one template element
         if (template.Length > 1)
-            throw new RenderContextException("Multiple template elements found", 
-                image, 
+            throw new RenderContextException("Multiple template elements found",
+                image,
                 template.Select(t => t.Context).ToArray());
         //Get the template element
         return template.First();

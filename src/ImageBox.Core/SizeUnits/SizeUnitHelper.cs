@@ -1,6 +1,4 @@
-﻿using TradingCardMaker.Core;
-
-namespace ImageBox.Core.SizeUnits;
+﻿namespace ImageBox.Core.SizeUnits;
 
 /// <summary>
 /// Helper utility for size unit operations

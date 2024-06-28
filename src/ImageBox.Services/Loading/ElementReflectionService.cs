@@ -1,8 +1,6 @@
-﻿namespace ImageBox.Services;
+﻿namespace ImageBox.Services.Loading;
 
 using Ast;
-using Elements.Attributes;
-using Elements.Base;
 using Scripting;
 
 /// <summary>
@@ -184,6 +182,18 @@ internal class ElementReflectionService(
         if (property.PropertyType == typeof(IOPath))
         {
             Set(new IOPath(value));
+            return;
+        }
+
+        if (property.PropertyType == typeof(object))
+        {
+            Set(value);
+            return;
+        }
+
+        if (property.PropertyType == typeof(object?[]))
+        {
+            Set(new object?[] { value });
             return;
         }
 

@@ -1,10 +1,9 @@
 ﻿using Jint;
 using Jint.Native;
 
-namespace ImageBox;
+namespace ImageBox.Services;
 
 using Ast;
-using Elements.Base;
 
 /// <summary>
 /// Represents the rendering scope for boxed images
@@ -20,6 +19,11 @@ public class RenderScope
     /// All the variables in this scope
     /// </summary>
     public Dictionary<string, object?> Variables { get; init; } = [];
+
+    /// <summary>
+    /// The render size in the current scope
+    /// </summary>
+    public required SizeContext Size { get; init; }
 
     /// <summary>
     /// The AST element that owns this scope

@@ -1,11 +1,9 @@
-﻿using ImageBox.Core.SizeUnits;
-
-namespace ImageBox.Elements.Base;
+﻿namespace ImageBox.Rendering.Base;
 
 /// <summary>
 /// Represents a GDI element that can be drawn with positional data
 /// </summary>
-public abstract class PositionalGDIElement : GDIElement
+public abstract class PositionalElement : RenderElement
 {
     /// <summary>
     /// The x offset

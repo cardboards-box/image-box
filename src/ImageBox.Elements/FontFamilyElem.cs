@@ -1,4 +1,4 @@
-﻿namespace ImageBox.Elements.Elements.Other;
+﻿namespace ImageBox.Elements;
 
 /// <summary>
 /// Element to allow for importing of custom fonts

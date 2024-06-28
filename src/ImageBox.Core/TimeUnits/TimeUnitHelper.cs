@@ -1,6 +1,4 @@
-﻿using TradingCardMaker.Core;
-
-namespace ImageBox.Core.TimeUnits;
+﻿namespace ImageBox.Core.TimeUnits;
 
 /// <summary>
 /// Helper utility for time units

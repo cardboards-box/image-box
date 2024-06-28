@@ -1,9 +1,8 @@
 ﻿using System.IO.Compression;
 
-namespace ImageBox.Services;
+namespace ImageBox.Services.Loading;
 
 using Ast;
-using ImageBox;
 
 /// <summary>
 /// Service for loading <see cref="BoxedImage"/> from a file
@@ -147,14 +146,14 @@ internal class TemplateLoaderService(
             if (type == EntryPointType.Zip)
                 throw new InvalidOperationException("Failed to extract zip file - Why the zip-ception?");
             //Load the boxed image from the entry point file
-            var card = await Local(file, config);
+            var image = await Local(file, config);
             //Add the directory to the cleanup list
-            card.Cleanup.Add(dir);
-            return card;
+            image.Cleanup.Add(dir);
+            return image;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to load card set - Zip file");
+            _logger.LogError(ex, "Failed to load image - Zip file");
             //Delete the directory if it exists - Clean up after ourselves, it's only polite.
             if (Directory.Exists(dir))
                 Directory.Delete(dir, true);

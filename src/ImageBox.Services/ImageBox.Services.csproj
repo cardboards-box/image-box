@@ -8,11 +8,11 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<Compile Include="./../global.cs" />
+		<ProjectReference Include="..\ImageBox.Elements\ImageBox.Elements.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\ImageBox.Rendering\ImageBox.Rendering.csproj" />
+		<Compile Include="./../global.cs" />
 	</ItemGroup>
 
 </Project>

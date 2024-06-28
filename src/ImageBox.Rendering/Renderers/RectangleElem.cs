@@ -1,12 +1,10 @@
-﻿using ImageBox.Core.SizeUnits;
-
-namespace ImageBox.Elements.Elements.GDIs;
+﻿namespace ImageBox.Rendering.Renderers;
 
 /// <summary>
 /// Represents a rectangle that can be filled or bordered
 /// </summary>
 [AstElement("rectangle")]
-public class RectangleElem : PositionalGDIElement, IParentElement
+public class RectangleElem : PositionalElement, IParentElement
 {
     /// <summary>
     /// The radius of the curved corners
@@ -36,4 +34,14 @@ public class RectangleElem : PositionalGDIElement, IParentElement
     /// All of the child elements on the parent element
     /// </summary>
     public IElement[] Children { get; set; } = [];
+
+    /// <summary>
+    /// Applies the element to the render context
+    /// </summary>
+    /// <param name="context">The rendering context</param>
+    /// <returns></returns>
+    public override Task Render(RenderContext context)
+    {
+        return Task.CompletedTask;
+    }
 }

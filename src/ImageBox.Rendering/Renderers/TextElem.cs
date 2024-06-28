@@ -1,15 +1,13 @@
-﻿using ImageBox.Core.SizeUnits;
-
-namespace ImageBox.Elements.Elements.GDIs;
+﻿namespace ImageBox.Rendering.Renderers;
 
 /// <summary>
-/// Represents text to be drawn to the card
+/// Represents text to be drawn to the image
 /// </summary>
 [AstElement("text")]
-public class TextElem : PositionalGDIElement
+public class TextElem : PositionalElement
 {
     /// <summary>
-    /// The value of the text to draw to the card
+    /// The value of the text to draw to the image
     /// </summary>
     [AstAttribute("value")]
     public AstValue<string> Value { get; set; } = new();
@@ -43,4 +41,14 @@ public class TextElem : PositionalGDIElement
     /// </summary>
     [AstAttribute("align-horizontal")]
     public AstValue<string> AlignHorizontal { get; set; } = new();
+
+    /// <summary>
+    /// Applies the element to the render context
+    /// </summary>
+    /// <param name="context">The rendering context</param>
+    /// <returns></returns>
+    public override Task Render(RenderContext context)
+    {
+        return Task.CompletedTask;
+    }
 }

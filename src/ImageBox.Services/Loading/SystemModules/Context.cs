@@ -1,4 +1,4 @@
-﻿namespace ImageBox.SystemModules;
+﻿namespace ImageBox.Services.Loading.SystemModules;
 
 [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = JUSTIFICATION)]
 internal class Context(
@@ -13,7 +13,7 @@ internal class Context(
             .ToArray()
             .Reverse();
         //Iterate through each stack
-        foreach(var scope in stack)
+        foreach (var scope in stack)
         {
             //If the variable exists in the current scope, return it
             if (scope.Variables.TryGetValue(name, out var value))

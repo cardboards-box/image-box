@@ -17,6 +17,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImageBox.Drawing", "ImageBo
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImageBox.Tests", "ImageBox.Tests\ImageBox.Tests.csproj", "{5FF99774-60CF-4DAD-A893-FA96D84D31B7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImageBox.Rendering", "ImageBox.Rendering\ImageBox.Rendering.csproj", "{020C3056-E13E-411F-9099-F9CDCDF25D96}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImageBox.Services", "ImageBox.Services\ImageBox.Services.csproj", "{51869084-EA05-4F0E-A5E2-733705B23351}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,6 +55,14 @@ Global
 		{5FF99774-60CF-4DAD-A893-FA96D84D31B7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5FF99774-60CF-4DAD-A893-FA96D84D31B7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5FF99774-60CF-4DAD-A893-FA96D84D31B7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{020C3056-E13E-411F-9099-F9CDCDF25D96}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{020C3056-E13E-411F-9099-F9CDCDF25D96}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{020C3056-E13E-411F-9099-F9CDCDF25D96}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{020C3056-E13E-411F-9099-F9CDCDF25D96}.Release|Any CPU.Build.0 = Release|Any CPU
+		{51869084-EA05-4F0E-A5E2-733705B23351}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{51869084-EA05-4F0E-A5E2-733705B23351}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{51869084-EA05-4F0E-A5E2-733705B23351}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{51869084-EA05-4F0E-A5E2-733705B23351}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

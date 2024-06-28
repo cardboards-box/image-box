@@ -1,4 +1,4 @@
-﻿namespace ImageBox.Elements.Elements.Directives;
+﻿namespace ImageBox.Rendering.Directives;
 
 /// <summary>
 /// Represents a for directive
@@ -29,4 +29,14 @@ public class RangeDir : DirectiveElement
     /// </summary>
     [AstAttribute("let")]
     public AstValue<double> Let { get; set; } = new();
+
+    /// <summary>
+    /// Applies the element to the render context
+    /// </summary>
+    /// <param name="context">The rendering context</param>
+    /// <returns></returns>
+    public override Task Render(RenderContext context)
+    {
+        return Task.CompletedTask;
+    }
 }

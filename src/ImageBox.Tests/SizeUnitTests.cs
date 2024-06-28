@@ -83,8 +83,8 @@ public class SizeUnitTests : TestSetup
 
         foreach (var (test, output, isWidth) in tests)
         {
-            var card = SizeUnit.Parse(test);
-            var px = card.Pixels(context, isWidth);
+            var size = SizeUnit.Parse(test);
+            var px = size.Pixels(context, isWidth);
             Assert.AreEqual(output, px, $"Pixel Test: {test}");
         }
     }
@@ -108,13 +108,13 @@ public class SizeUnitTests : TestSetup
             "1.2px"
         }.Select(SizeUnit.Parse);
 
-        foreach (var card in values)
+        foreach (var size in values)
         {
-            var testObj = new JsonSizeUnitTest { Size = card };
+            var testObj = new JsonSizeUnitTest { Size = size };
             var json = JsonSerializer.Serialize(testObj);
             var obj = JsonSerializer.Deserialize<JsonSizeUnitTest>(json);
 
-            Assert.AreEqual(card.ToString(), obj?.Size?.Serialize(), $"Json Test: {card}");
+            Assert.AreEqual(size.ToString(), obj?.Size?.Serialize(), $"Json Test: {size}");
         }
     }
 

@@ -1,4 +1,4 @@
-﻿namespace ImageBox.Elements.Elements.Other;
+﻿namespace ImageBox.Elements;
 
 /// <summary>
 /// Represents a script that can be executed to calculate contexts
@@ -7,7 +7,7 @@
 public class ScriptElem : Element, IValueElement
 {
     /// <summary>
-    /// Whether or not the script is the entry point to the card
+    /// Whether or not the script is the entry point to the image
     /// </summary>
     [AstAttribute("setup")]
     public bool Setup { get; set; }

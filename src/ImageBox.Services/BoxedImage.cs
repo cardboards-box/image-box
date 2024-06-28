@@ -1,7 +1,6 @@
-﻿namespace ImageBox;
+﻿namespace ImageBox.Services;
 
 using Ast;
-using Elements.Base;
 
 /// <summary>
 /// Represents the boxed image data loaded from a file

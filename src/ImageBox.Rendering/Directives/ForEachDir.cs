@@ -1,4 +1,4 @@
-﻿namespace ImageBox.Elements.Elements.Directives;
+﻿namespace ImageBox.Rendering.Directives;
 
 /// <summary>
 /// Represents a for-each directive
@@ -17,4 +17,14 @@ public class ForEachDir : DirectiveElement
     /// </summary>
     [AstAttribute("let")]
     public AstValue<string> Let { get; set; } = new();
+
+    /// <summary>
+    /// Applies the element to the render context
+    /// </summary>
+    /// <param name="context">The rendering context</param>
+    /// <returns></returns>
+    public override Task Render(RenderContext context)
+    {
+        return Task.CompletedTask;
+    }
 }

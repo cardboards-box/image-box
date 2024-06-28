@@ -57,9 +57,6 @@ public static class DiExtensions
             .AddCore()
             .AddAst()
             .AddDrawing()
-
-            .AddTransient<IContextGeneratorService, ContextGeneratorService>()
-            .AddTransient<IElementReflectionService, ElementReflectionService>()
-            .AddTransient<ITemplateLoaderService, TemplateLoaderService>();
+            .AddServices();
     }
 }

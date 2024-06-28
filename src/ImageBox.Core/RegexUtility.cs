@@ -1,4 +1,4 @@
-﻿namespace TradingCardMaker.Core;
+﻿namespace ImageBox.Core;
 
 /// <summary>
 /// A utility class for working with regular expressions

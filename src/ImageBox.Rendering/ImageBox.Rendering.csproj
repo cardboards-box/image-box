@@ -8,11 +8,12 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<Compile Include="./../global.cs" />
+		<ProjectReference Include="..\ImageBox.Drawing\ImageBox.Drawing.csproj" />
+		<ProjectReference Include="..\ImageBox.Services\ImageBox.Services.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\ImageBox.Rendering\ImageBox.Rendering.csproj" />
+		<Compile Include="./../global.cs" />
 	</ItemGroup>
 
 </Project>

@@ -1,4 +1,4 @@
-﻿namespace ImageBox;
+﻿namespace ImageBox.Services;
 
 using Ast;
 
@@ -21,7 +21,7 @@ public class RenderContextException(
     /// <param name="message">The exception message</param>
     /// <param name="image">The image that caused the exception</param>
     /// <param name="Context">The AST element context</param>
-    public RenderContextException(string message, BoxedImage image, params AstElement?[] Context) 
+    public RenderContextException(string message, BoxedImage image, params AstElement?[] Context)
         : this(message, image, null, Context) { }
 
     /// <summary>

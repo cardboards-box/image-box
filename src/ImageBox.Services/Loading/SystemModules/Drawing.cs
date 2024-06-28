@@ -1,4 +1,4 @@
-﻿namespace ImageBox.SystemModules;
+﻿namespace ImageBox.Services.Loading.SystemModules;
 
 [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = JUSTIFICATION)]
 internal class Drawing(

@@ -39,6 +39,11 @@ public interface IBoxedImageConfig
     /// The default font size for rendered images
     /// </summary>
     SizeUnit FontSize { get; }
+
+    /// <summary>
+    /// The default FPS for the animations
+    /// </summary>
+    double AnimateFps { get; }
 }
 
 /// <summary>
@@ -54,6 +59,7 @@ public class BoxedImageConfig(
     private int? _scriptRecursionLimit;
     private double? _scriptMemoryLimitMb;
     private SizeUnit? _fontSize;
+    private double? _fps;
 
     /// <summary>
     /// The default section for the configuration
@@ -90,6 +96,11 @@ public class BoxedImageConfig(
     /// The default font size for the images
     /// </summary>
     public static SizeUnit DefaultFontSize { get; set; } = SizeUnit.Parse("16px");
+    
+    /// <summary>
+    /// The default FPS for the animations
+    /// </summary>
+    public static double DefaultAnimateFps { get; set; } = 15;
     #endregion
 
     /// <summary>
@@ -130,6 +141,13 @@ public class BoxedImageConfig(
     /// The default font size for rendered images
     /// </summary>
     public SizeUnit FontSize => _fontSize ??= Section["FontSize"] ?? DefaultFontSize;
+
+    /// <summary>
+    /// The default FPS for the animations
+    /// </summary>
+    public double AnimateFps => _fps ??=
+        double.TryParse(Section["AnimateFps"], out var value)
+        ? value : DefaultAnimateFps;
 
     /// <summary>
     /// Configure the default http request for file caching

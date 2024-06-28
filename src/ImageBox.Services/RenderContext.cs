@@ -1,6 +1,6 @@
-﻿namespace ImageBox;
+﻿namespace ImageBox.Services;
 
-using Elements.Elements.Other;
+using Jint.Native;
 using Scripting;
 
 /// <summary>
@@ -9,6 +9,7 @@ using Scripting;
 public class RenderContext
 {
     private readonly List<RenderScope> _scopes = [];
+    private RenderScope? _globalScope;
 
     /// <summary>
     /// The boxed image to render
@@ -36,9 +37,29 @@ public class RenderContext
     public ScriptRunner? Runner { get; init; }
 
     /// <summary>
+    /// The total number of frames in the image
+    /// </summary>
+    public int TotalFrames { get; init; }
+
+    /// <summary>
+    /// The delay between frames in milliseconds
+    /// </summary>
+    public int FrameDelay { get; init; }
+
+    /// <summary>
+    /// Whether or not animation is enabled
+    /// </summary>
+    public bool Animate => TotalFrames > 1;
+
+    /// <summary>
+    /// The current scope of the context
+    /// </summary>
+    public RenderScope CurrentScope => Stack.Last();
+
+    /// <summary>
     /// The stack of render scopes
     /// </summary>
-    public RenderScope[] Stack => [GlobalScope(), .._scopes];
+    public RenderScope[] Stack => [GlobalScope(), .. _scopes];
 
     /// <summary>
     /// Whether or not the global scope of the image has been set
@@ -71,8 +92,9 @@ public class RenderContext
     /// <returns></returns>
     public RenderScope GlobalScope()
     {
-        return new RenderScope
+        return _globalScope ??= new RenderScope
         {
+            Size = Size,
             Element = Template,
             Variables = new()
             {
@@ -87,13 +109,31 @@ public class RenderContext
     }
 
     /// <summary>
+    /// Adds a cope and returns it's instance for modification
+    /// </summary>
+    /// <param name="element">The element to attach the scope to</param>
+    /// <param name="context">The size context for the scope</param>
+    /// <param name="value">The value of the current scope to attach</param>
+    /// <returns>The added scope for modification</returns>
+    public RenderScope AddScope(IElement element, SizeContext? context = null, JsValue? value = null)
+    {
+        var scope = new RenderScope
+        {
+            Element = element,
+            Variables = [],
+            Size = context ?? Size
+        };
+        if (value is not null)
+            scope.Set(value);
+        AddScope(scope);
+        return scope;
+    }
+
+    /// <summary>
     /// Adds a scope to the stack
     /// </summary>
     /// <param name="scope">The render scope to add</param>
-    public void AddScope(RenderScope scope)
-    {
-        _scopes.Add(scope);
-    }
+    public void AddScope(RenderScope scope) => _scopes.Add(scope);
 
     /// <summary>
     /// Adds or sets the variables for the root scope
@@ -110,7 +150,8 @@ public class RenderContext
         AddScope(new RenderScope
         {
             Element = Template,
-            Variables = variables
+            Variables = variables,
+            Size = Size
         });
     }
 
