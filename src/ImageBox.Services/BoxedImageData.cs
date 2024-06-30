@@ -5,7 +5,7 @@ using Ast;
 /// <summary>
 /// Represents the boxed image data loaded from a file
 /// </summary>
-public class BoxedImage
+public class BoxedImageData
 {
     /// <summary>
     /// The directory the file was loaded from

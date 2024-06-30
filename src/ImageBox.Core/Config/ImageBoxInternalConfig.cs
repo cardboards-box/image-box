@@ -1,57 +1,12 @@
-﻿namespace ImageBox.Core;
+﻿namespace ImageBox.Core.Config;
 
-/// <summary>
-/// The configuration for any boxed image services
-/// </summary>
-public interface IBoxedImageConfig
-{
-    /// <summary>
-    /// The default cache directory for the file requests
-    /// </summary>
-    string CacheDirectory { get; }
-
-    /// <summary>
-    /// The default user agent to use for the file requests
-    /// </summary>
-    string UserAgent { get; }
-
-    /// <summary>
-    /// Configure the default http request for file caching
-    /// </summary>
-    Action<HttpRequestMessage>? CacheRequestConfig { get; set; }
-
-    /// <summary>
-    /// The timeout for script executions
-    /// </summary>
-    TimeUnit ScriptTimeout { get; }
-
-    /// <summary>
-    /// The maximum recursion limit for scripts
-    /// </summary>
-    int ScriptRecursionLimit { get; }
-
-    /// <summary>
-    /// The memory limit for scripts (in megabytes)
-    /// </summary>
-    double ScriptMemoryLimitMb { get; }
-
-    /// <summary>
-    /// The default font size for rendered images
-    /// </summary>
-    SizeUnit FontSize { get; }
-
-    /// <summary>
-    /// The default FPS for the animations
-    /// </summary>
-    double AnimateFps { get; }
-}
 
 /// <summary>
 /// The default configuration for any boxed image services
 /// </summary>
 /// <param name="_config"></param>
-public class BoxedImageConfig(
-    IConfiguration _config) : IBoxedImageConfig
+public class ImageBoxInternalConfig(
+    IConfiguration _config) : IImageBoxConfig
 {
     private string? _cacheDir;
     private string? _userAgent;
@@ -60,6 +15,7 @@ public class BoxedImageConfig(
     private double? _scriptMemoryLimitMb;
     private SizeUnit? _fontSize;
     private double? _fps;
+    private ushort? _repeat;
 
     /// <summary>
     /// The default section for the configuration
@@ -96,11 +52,17 @@ public class BoxedImageConfig(
     /// The default font size for the images
     /// </summary>
     public static SizeUnit DefaultFontSize { get; set; } = SizeUnit.Parse("16px");
-    
+
     /// <summary>
     /// The default FPS for the animations
     /// </summary>
     public static double DefaultAnimateFps { get; set; } = 15;
+
+    /// <summary>
+    /// The default number of times to repeat the gif
+    /// </summary>
+    /// <remarks>0 is repeat forever, x is repeat number of times</remarks>
+    public static ushort DefaultAnimateRepeat { get; set; } = 1;
     #endregion
 
     /// <summary>
@@ -126,14 +88,14 @@ public class BoxedImageConfig(
     /// <summary>
     /// The maximum recursion limit for scripts
     /// </summary>
-    public int ScriptRecursionLimit => _scriptRecursionLimit ??= 
-        int.TryParse(Section["ScriptRecursionLimit"], out var value) 
+    public int ScriptRecursionLimit => _scriptRecursionLimit ??=
+        int.TryParse(Section["ScriptRecursionLimit"], out var value)
         ? value : DefaultScriptRecursionLimit;
 
     /// <summary>
     /// The memory limit for scripts (in megabytes)
     /// </summary>
-    public double ScriptMemoryLimitMb => _scriptMemoryLimitMb ??= 
+    public double ScriptMemoryLimitMb => _scriptMemoryLimitMb ??=
         double.TryParse(Section["ScriptMemoryLimit"], out var value)
         ? value : DefaultScriptMemoryLimitMb;
 
@@ -148,6 +110,14 @@ public class BoxedImageConfig(
     public double AnimateFps => _fps ??=
         double.TryParse(Section["AnimateFps"], out var value)
         ? value : DefaultAnimateFps;
+
+    /// <summary>
+    /// How many times to repeat the gif
+    /// </summary>
+    /// <remarks>0 is repeat forever, x is repeat number of times</remarks>
+    public ushort AnimateRepeat => _repeat ??=
+        ushort.TryParse(Section["AnimateRepeat"], out var value)
+        ? value : DefaultAnimateRepeat;
 
     /// <summary>
     /// Configure the default http request for file caching

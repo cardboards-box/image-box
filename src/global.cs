@@ -5,6 +5,7 @@ global using CardboardBox.Json.InterfaceDeserializing;
 global using CardboardBox.Setup;
 
 global using ImageBox.Core;
+global using ImageBox.Core.Config;
 global using ImageBox.Core.FileCache;
 global using ImageBox.Core.IOPath;
 global using ImageBox.Core.SizeUnits;

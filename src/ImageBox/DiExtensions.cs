@@ -13,11 +13,12 @@ public static class DiExtensions
     /// Adds all of the image box services to the service collection
     /// </summary>
     /// <param name="services">The service collection to add to</param>
+    /// <param name="onlyInternal">Whether to only register internal IB services or include 3rd party ones as well</param>
     /// <returns>The service collection for chaining</returns>
-    public static IServiceCollection AddImageBox(this IServiceCollection services)
+    public static IServiceCollection AddImageBox(this IServiceCollection services, bool onlyInternal = false)
     {
         return services
-            .AddBaseImageBox()
+            .AddBaseImageBox(onlyInternal)
             .AddImageBoxConfig();
     }
 
@@ -27,12 +28,13 @@ public static class DiExtensions
     /// <typeparam name="T">The image box configuration type</typeparam>
     /// <param name="services">The service collection to add to</param>
     /// <param name="config">The instance of the configuration</param>
+    /// <param name="onlyInternal">Whether to only register internal IB services or include 3rd party ones as well</param>
     /// <returns>The service collection for chaining</returns>
-    public static IServiceCollection AddImageBox<T>(this IServiceCollection services, T config)
-        where T : class, IBoxedImageConfig
+    public static IServiceCollection AddImageBox<T>(this IServiceCollection services, T config, bool onlyInternal = false)
+        where T : class, IImageBoxConfig
     {
         return services
-            .AddBaseImageBox()
+            .AddBaseImageBox(onlyInternal)
             .AddImageBoxConfig(config);
     }
 
@@ -42,23 +44,28 @@ public static class DiExtensions
     /// <typeparam name="T">The image box configuration type</typeparam>
     /// <param name="services">The service collection to add to</param>
     /// <param name="singleton">Whether or not to register the service as a singleton</param>
+    /// <param name="onlyInternal">Whether to only register internal IB services or include 3rd party ones as well</param>
     /// <returns>The service collection for chaining</returns>
-    public static IServiceCollection AddImageBox<T>(this IServiceCollection services, bool singleton)
-        where T : class, IBoxedImageConfig
+    public static IServiceCollection AddImageBox<T>(this IServiceCollection services, bool singleton, bool onlyInternal = false)
+        where T : class, IImageBoxConfig
     {
         return services
-            .AddBaseImageBox()
+            .AddBaseImageBox(onlyInternal)
             .AddImageBoxConfig<T>(singleton);
     }
 
-    internal static IServiceCollection AddBaseImageBox(this IServiceCollection services)
+    internal static IServiceCollection AddBaseImageBox(this IServiceCollection services, bool onlyInternal)
     {
+        if (!onlyInternal)
+            services
+                .AddJson()
+                .AddCardboardHttp();
+
         return services
-            .AddJson()
-            .AddCardboardHttp()
             .AddCore()
             .AddAst()
             .AddDrawing()
-            .AddServices();
+            .AddServices()
+            .AddTransient<IImageBoxService, ImageBoxService>();
     }
 }

@@ -25,12 +25,12 @@ public interface IContextGeneratorService
     /// <exception cref="RenderContextException">Thrown if no setup script is listed in the template and there are other scripts</exception>
     /// <exception cref="RenderContextException">Thrown if there are no template elements</exception>
     /// <exception cref="RenderContextException">Thrown if there are more than one template elements</exception>
-    Task<RenderContext> Generate(BoxedImage image);
+    Task<RenderContext> Generate(BoxedImageData image);
 }
 
 internal class ContextGeneratorService(
     IFileResolverService _resolver,
-    IBoxedImageConfig _config,
+    IImageBoxConfig _config,
     ILogger<ContextGeneratorService> _logger) : IContextGeneratorService
 {
     /// <summary>
@@ -38,7 +38,7 @@ internal class ContextGeneratorService(
     /// </summary>
     /// <param name="image">The boxed image to create the context for</param>
     /// <returns>The render context</returns>
-    public async Task<RenderContext> Generate(BoxedImage image)
+    public async Task<RenderContext> Generate(BoxedImageData image)
     {
         //Get the template element from the boxed image
         var template = GetTemplate(image);
@@ -50,6 +50,7 @@ internal class ContextGeneratorService(
         var fontFamilies = image.Elements.OfType<FontFamilyElem>().ToArray();
         //Determine animation stuff
         int totalFrames = 1, frameDelay = 0;
+        ushort frameRepeat = _config.AnimateRepeat;
         int? currentFrame = null;
         if (template.Animate)
         {
@@ -61,6 +62,7 @@ internal class ContextGeneratorService(
             var fps = template.AnimateFps ?? _config.AnimateFps;
             totalFrames = (int)Math.Round(duration * fps, 0);
             frameDelay = (int)Math.Round(duration / totalFrames, 0);
+            frameRepeat = template.AnimateRepeat ?? _config.AnimateRepeat;
             currentFrame = 1;
         }
         //Return the created render context
@@ -73,7 +75,8 @@ internal class ContextGeneratorService(
             FontFamilies = fontFamilies,
             TotalFrames = totalFrames,
             FrameDelay = frameDelay,
-            Frame = currentFrame
+            Frame = currentFrame,
+            FrameRepeat = frameRepeat
         };
     }
 
@@ -84,7 +87,7 @@ internal class ContextGeneratorService(
     /// <param name="image">The image the template is from</param>
     /// <returns>The size context of the image</returns>
     /// <exception cref="RenderContextException">Thrown if a required property is missing</exception>
-    public SizeContext GetContext(TemplateElem template, BoxedImage image)
+    public SizeContext GetContext(TemplateElem template, BoxedImageData image)
     {
         //Validate width and height
         if (template.Width is null)
@@ -105,7 +108,7 @@ internal class ContextGeneratorService(
     /// <param name="image">The boxed image</param>
     /// <returns>The script runner</returns>
     /// <exception cref="RenderContextException">Thrown if any exception occurs during preparation</exception>
-    public async Task<ScriptRunner?> GetRunner(BoxedImage image)
+    public async Task<ScriptRunner?> GetRunner(BoxedImageData image)
     {
         try
         {
@@ -157,7 +160,7 @@ export function main(args) {
     /// <param name="scripts">The script elements to prepare</param>
     /// <param name="image">The image that is loading the elements</param>
     /// <returns>All of the prepared script modules</returns>
-    public async IAsyncEnumerable<RenderModule> Modules(ScriptElem[] scripts, BoxedImage image)
+    public async IAsyncEnumerable<RenderModule> Modules(ScriptElem[] scripts, BoxedImageData image)
     {
         //Iterate over the scripts and resolve and prepare them
         foreach (var script in scripts)
@@ -177,7 +180,7 @@ export function main(args) {
     /// <returns>The prepared script</returns>
     /// <exception cref="RenderContextException">Thrown if a remote script failed to resolve</exception>
     /// <exception cref="RenderContextException">Thrown if the script body is empty</exception>
-    public async Task<Prepared<Module>> GetScript(ScriptElem script, BoxedImage image)
+    public async Task<Prepared<Module>> GetScript(ScriptElem script, BoxedImageData image)
     {
         //Get the script body from the element
         var value = script.Value;
@@ -230,7 +233,7 @@ export function main(args) {
     /// <exception cref="RenderContextException">Thrown if multiple setup scripts listed in the template</exception>
     /// <exception cref="RenderContextException">Thrown if a script module name is not set</exception>
     /// <exception cref="RenderContextException">Thrown if no setup script is listed in the template and there are other scripts</exception>
-    public static ScriptElem[] GetScripts(BoxedImage image, out ScriptElem? setup)
+    public static ScriptElem[] GetScripts(BoxedImageData image, out ScriptElem? setup)
     {
         setup = null;
         var scripts = new List<ScriptElem>();
@@ -277,7 +280,7 @@ export function main(args) {
     /// <returns>The template element</returns>
     /// <exception cref="RenderContextException">Thrown if there are no template elements</exception>
     /// <exception cref="RenderContextException">Thrown if there are more than one template elements</exception>
-    public static TemplateElem GetTemplate(BoxedImage image)
+    public static TemplateElem GetTemplate(BoxedImageData image)
     {
         //Get all of the template elements from the image
         var template = image.Elements

@@ -49,6 +49,13 @@ public class TemplateElem : Element, IParentElement
     public double? AnimateFps { get; set; }
 
     /// <summary>
+    /// How many times to repeat the gif
+    /// </summary>
+    /// <remarks>0 is repeat forever, x is repeat number of times</remarks>
+    [AstAttribute("animate-repeat")]
+    public ushort? AnimateRepeat { get; set; }
+
+    /// <summary>
     /// The children elements of the directive
     /// </summary>
     public IElement[] Children { get; set; } = [];

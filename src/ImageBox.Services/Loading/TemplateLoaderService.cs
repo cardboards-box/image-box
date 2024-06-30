@@ -5,23 +5,23 @@ namespace ImageBox.Services.Loading;
 using Ast;
 
 /// <summary>
-/// Service for loading <see cref="BoxedImage"/> from a file
+/// Service for loading <see cref="BoxedImageData"/> from a file
 /// </summary>
 public interface ITemplateLoaderService
 {
     /// <summary>
-    /// Loads the <see cref="BoxedImage"/> from the given path
+    /// Loads the <see cref="BoxedImageData"/> from the given path
     /// </summary>
     /// <param name="path">The path to load</param>
     /// <param name="config">The config for the AST parser</param>
-    /// <returns>The loaded <see cref="BoxedImage"/></returns>
+    /// <returns>The loaded <see cref="BoxedImageData"/></returns>
     /// <exception cref="FileNotFoundException">Thrown if the file could not be found</exception>
     /// <exception cref="InvalidOperationException">Thrown if the loaded boxed image is null</exception>
     /// <exception cref="InvalidOperationException">Thrown if the file does not exist after downloading</exception>
     /// <exception cref="InvalidOperationException">Thrown if the zip file contains another zip file</exception>
     /// <exception cref="InvalidOperationException">Thrown if a module with the same name is already loaded</exception>
     /// <exception cref="RenderContextException">Thrown if there is a top-level bind or spread</exception>
-    Task<BoxedImage> Load(IOPath path, AstConfig? config = null);
+    Task<BoxedImageData> Load(IOPath path, AstConfig? config = null);
 }
 
 internal class TemplateLoaderService(
@@ -31,18 +31,18 @@ internal class TemplateLoaderService(
     ILogger<TemplateLoaderService> _logger) : ITemplateLoaderService
 {
     /// <summary>
-    /// Loads the <see cref="BoxedImage"/> from the given path
+    /// Loads the <see cref="BoxedImageData"/> from the given path
     /// </summary>
     /// <param name="path">The path to load</param>
     /// <param name="config">The config for the AST parser</param>
-    /// <returns>The loaded <see cref="BoxedImage"/></returns>
+    /// <returns>The loaded <see cref="BoxedImageData"/></returns>
     /// <exception cref="FileNotFoundException">Thrown if the file could not be found</exception>
     /// <exception cref="InvalidOperationException">Thrown if the loaded boxed image is null</exception>
     /// <exception cref="InvalidOperationException">Thrown if the file does not exist after downloading</exception>
     /// <exception cref="InvalidOperationException">Thrown if the zip file contains another zip file</exception>
     /// <exception cref="InvalidOperationException">Thrown if a module with the same name is already loaded</exception>
     /// <exception cref="RenderContextException">Thrown if there is a top-level bind or spread</exception>
-    public Task<BoxedImage> Load(IOPath path, AstConfig? config = null)
+    public Task<BoxedImageData> Load(IOPath path, AstConfig? config = null)
     {
         config ??= AstConfig.Default;
         return path.Local
@@ -56,7 +56,7 @@ internal class TemplateLoaderService(
     /// <param name="path">The path to load from</param>
     /// <param name="config">The config for the AST parser</param>
     /// <returns>The loaded boxed image</returns>
-    public async Task<BoxedImage> Local(IOPath path, AstConfig config)
+    public async Task<BoxedImageData> Local(IOPath path, AstConfig config)
     {
         //Determine the entry point of the file
         var (filePath, type) = DetermineEntryPoint(path.OSSafe);
@@ -74,7 +74,7 @@ internal class TemplateLoaderService(
         //Load all of the templates from the elements
         var templates = _elements.BindTemplates(elements, config.ThrowErrorsOnBind).ToArray();
         //Create the boxed image instance
-        return new BoxedImage
+        return new BoxedImageData
         {
             WorkingDirectory = wrkDir,
             FileName = entryName,
@@ -90,7 +90,7 @@ internal class TemplateLoaderService(
     /// <param name="config">The config for the AST parser</param>
     /// <returns>The loaded boxed image</returns>
     /// <exception cref="InvalidOperationException">Thrown if the file does not exist after downloading</exception>
-    public async Task<BoxedImage> Remote(IOPath path, AstConfig config)
+    public async Task<BoxedImageData> Remote(IOPath path, AstConfig config)
     {
         //Load the file from the end point
         var (stream, file, type) = await _resolver.Fetch(path);
@@ -136,7 +136,7 @@ internal class TemplateLoaderService(
     /// <param name="config">The config for the AST parser</param>
     /// <returns>The loaded boxed image</returns>
     /// <exception cref="InvalidOperationException">Thrown if the zip file contains another zip file</exception>
-    public async Task<BoxedImage> Zip(IOPath path, AstConfig config)
+    public async Task<BoxedImageData> Zip(IOPath path, AstConfig config)
     {
         //Create a random directory to store the extracted files
         var dir = IOPathHelper.RandomDirectory();

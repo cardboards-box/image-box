@@ -6,7 +6,7 @@ namespace ImageBox.Services;
 using Scripting;
 
 /// <summary>
-/// Represents a cached instance of a <see cref="BoxedImage"/> for rendering
+/// Represents a cached instance of a <see cref="BoxedImageData"/> for rendering
 /// </summary>
 public class RenderContext : IDisposable
 {
@@ -17,7 +17,7 @@ public class RenderContext : IDisposable
     /// <summary>
     /// The boxed image to render
     /// </summary>
-    public required BoxedImage Context { get; init; }
+    public required BoxedImageData Context { get; init; }
 
     /// <summary>
     /// The template for the image render
@@ -50,9 +50,15 @@ public class RenderContext : IDisposable
     public int FrameDelay { get; init; }
 
     /// <summary>
+    /// How many times to repeat the gif
+    /// </summary>
+    /// <remarks>0 is repeat forever, x is repeat number of times</remarks>
+    public ushort FrameRepeat { get; init; }
+
+    /// <summary>
     /// The renderer for the image
     /// </summary>
-    public Image? Image
+    public Image Image
     {
         get => ValidateImage();
         set => _image = value;
@@ -219,6 +225,14 @@ public class RenderContext : IDisposable
         }
         //If the variable does not exist in any scope, return null
         return null;
+    }
+
+    /// <summary>
+    /// Clear the global scope of the context
+    /// </summary>
+    public void ClearGlobalScope()
+    {
+        _globalScope = null;
     }
 
     /// <summary>

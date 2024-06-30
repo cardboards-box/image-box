@@ -3,9 +3,25 @@
 using Ast;
 using Scripting;
 
+/// <summary>
+/// Handles executing and binding attributes in templates and scripts
+/// </summary>
 public interface IScriptExecutionService
 {
+    /// <summary>
+    /// Executes the script and binds all of the top-level elements
+    /// </summary>
+    /// <param name="context">The render context to attach to</param>
+    /// <returns></returns>
+    /// <exception cref="RenderContextException">Thrown if something goes wrong during execution</exception>
+    Task Execute(RenderContext context);
 
+    /// <summary>
+    /// Traverse through all of the elements in the context and handle binds or spreads
+    /// </summary>
+    /// <param name="context">The render context</param>
+    /// <param name="elements">The elements to traverse through</param>
+    void HandleAttributes(RenderContext context, IEnumerable<IElement>? elements = null);
 }
 
 internal class ScriptExecutionService(
@@ -15,16 +31,24 @@ internal class ScriptExecutionService(
     public const string VALUE_PROP = nameof(AstValue<string>.Value);
     public const string BIND_PROP = nameof(AstValue<string>.Bind);
 
+    /// <summary>
+    /// Executes the script and binds all of the top-level elements
+    /// </summary>
+    /// <param name="context">The render context to attach to</param>
+    /// <returns></returns>
+    /// <exception cref="RenderContextException">Thrown if something goes wrong during execution</exception>
     public async Task Execute(RenderContext context)
     {
         try
         {
-            //Not runner? Skip it
+            //No runner? Skip it
             if (context.Runner is null) return;
             //Execute the script and get the result
             var result = await context.Runner.Execute(context);
             //Set the result to the root scope
             context.SetRootScope(result);
+            //Find and bind all of the elements in the template root.
+            HandleAttributes(context);
         }
         catch (RenderContextException)
         {
@@ -81,8 +105,49 @@ internal class ScriptExecutionService(
         }
     }
 
+    /// <summary>
+    /// Handles any bind attributes on the element
+    /// </summary>
+    /// <param name="context">The context to bind</param>
+    /// <param name="instance">The element to bind to</param>
+    /// <param name="ast">The AST attribute that is being bound</param>
+    /// <exception cref="RenderContextException">Thrown if the reflection requests fail</exception>
     public void HandleBind(RenderContext context, IElement instance, AstAttribute ast)
     {
+        //Get the property type and reflection data
+        var property = GetProperty(context, instance, ast.Name);
+        if (property is null) return;
+        //Validate the property
+        if (!property.IsBindable)
+            throw new RenderContextException(
+                $"AST attribute is marked as bind, but the C# property isn't bindable: {ast.Name}",
+                context.Context,
+                instance.Context);
+        //Get the AstValue<> instance on the element
+        var astValue = property.Type.GetValue(instance) 
+            ?? throw new RenderContextException(
+                $"AST attribute is marked as bind, but the C# property is null: {ast.Name}",
+                context.Context,
+                instance.Context);
+        //Get the expression value from the AstValue<>
+        var bindValue = astValue.GetType()
+            .GetProperty(BIND_PROP)?
+            .GetValue(astValue);
+        //Get the value property from the AstValue<>
+        var valueProp = astValue.GetType()
+            .GetProperty(VALUE_PROP);
+        //Validate the expression and value properties
+        if (bindValue is not ExpressionEvaluator expression || valueProp is null)
+            throw new RenderContextException(
+                $"AST attribute is marked as bind, but the C# property is missing bind property: {ast.Name}",
+                context.Context,
+                instance.Context);
+        //Set the context for the expression
+        context.BindTo(expression);
+        //Get the value of the expression
+        var value = expression.Evaluate();
+        //Set the value of the expression 
+        _elements.TypeCastBind(valueProp, astValue, value);
     }
 
     /// <summary>
@@ -138,7 +203,7 @@ internal class ScriptExecutionService(
     /// </summary>
     /// <param name="context">The render context</param>
     /// <param name="elements">The elements to traverse through</param>
-    public void TraverseSpread(RenderContext context, IEnumerable<IElement>? elements)
+    public void HandleAttributes(RenderContext context, IEnumerable<IElement>? elements = null)
     {
         //Get the current element list to iterate (mostly for recursion)
         elements ??= context.Template.Children;

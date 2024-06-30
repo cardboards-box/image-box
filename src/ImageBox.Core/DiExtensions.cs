@@ -21,10 +21,10 @@ public static class DiExtensions
     /// <param name="config">The instance of the configuration</param>
     /// <returns>The service collection for chaining</returns>
     public static IServiceCollection AddImageBoxConfig<T>(this IServiceCollection services, T config)
-        where T: class, IBoxedImageConfig
+        where T: class, IImageBoxConfig
     {
         return services
-            .AddSingleton<IBoxedImageConfig>(config);
+            .AddSingleton<IImageBoxConfig>(config);
     }
 
     /// <summary>
@@ -35,14 +35,14 @@ public static class DiExtensions
     /// <param name="singleton">Whether or not to register the service as a singleton</param>
     /// <returns>The service collection for chaining</returns>
     public static IServiceCollection AddImageBoxConfig<T>(this IServiceCollection services, bool singleton)
-        where T: class, IBoxedImageConfig
+        where T: class, IImageBoxConfig
     {
         if (singleton)
             return services
-                .AddSingleton<IBoxedImageConfig, T>();
+                .AddSingleton<IImageBoxConfig, T>();
        
         return services
-            .AddTransient<IBoxedImageConfig, T>();
+            .AddTransient<IImageBoxConfig, T>();
     }
 
     /// <summary>
@@ -53,6 +53,6 @@ public static class DiExtensions
     public static IServiceCollection AddImageBoxConfig(this IServiceCollection services)
     {
         return services
-            .AddImageBoxConfig<BoxedImageConfig>(true);
+            .AddImageBoxConfig<ImageBoxInternalConfig>(true);
     }
 }

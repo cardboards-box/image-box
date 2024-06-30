@@ -1,4 +1,6 @@
-﻿namespace ImageBox.Core.FileCache;
+﻿using ImageBox.Core.Config;
+
+namespace ImageBox.Core.FileCache;
 
 /// <summary>
 /// A service for downloading and caching files from remote sources
@@ -21,7 +23,7 @@ public interface IFileCacheService
 internal class FileCacheService(
     IApiService _api,
     IJsonService _json,
-    IBoxedImageConfig _config) : IFileCacheService
+    IImageBoxConfig _config) : IFileCacheService
 {
     /// <summary>
     /// Requests a network resource from the given url
