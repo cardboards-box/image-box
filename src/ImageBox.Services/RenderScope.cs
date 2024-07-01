@@ -23,7 +23,7 @@ public class RenderScope
     /// <summary>
     /// The render size in the current scope
     /// </summary>
-    public required SizeContext Size { get; init; }
+    public required SizeContext Size { get; set; }
 
     /// <summary>
     /// The AST element that owns this scope

@@ -1,6 +1,5 @@
 ﻿namespace ImageBox.Core.Config;
 
-
 /// <summary>
 /// The default configuration for any boxed image services
 /// </summary>

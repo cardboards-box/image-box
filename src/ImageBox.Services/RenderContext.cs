@@ -1,5 +1,6 @@
 ﻿using Jint.Native;
 using SixLabors.ImageSharp;
+using SixLabors.Fonts;
 
 namespace ImageBox.Services;
 
@@ -25,9 +26,9 @@ public class RenderContext : IDisposable
     public required TemplateElem Template { get; init; }
 
     /// <summary>
-    /// The font families from the template
+    /// The fonts loaded from the template
     /// </summary>
-    public required FontFamilyElem[] FontFamilies { get; init; }
+    public required ContextFonts Fonts { get; init; }
 
     /// <summary>
     /// The context of the image size from unit conversion
@@ -122,7 +123,7 @@ public class RenderContext : IDisposable
             Variables = new()
             {
                 ["animate"] = Animate,
-                ["fonts"] = FontFamilies,
+                ["fonts"] = Fonts,
                 ["fontSize"] = FontSize,
                 ["frame"] = Frame,
                 ["frameTotal"] = TotalFrames,

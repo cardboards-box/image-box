@@ -3,14 +3,15 @@
 /// <summary>
 /// Represents a for directive
 /// </summary>
+/// <param name="_execution">The script execution service</param>
 [AstElement("range")]
-public class RangeDir : DirectiveElement
+public class RangeDir(IScriptExecutionService _execution) : DirectiveElement
 {
     /// <summary>
     /// The start of value
     /// </summary>
     [AstAttribute("start")]
-    public AstValue<double> Start { get; set; } = new();
+    public AstValue<double?> Start { get; set; } = new();
 
     /// <summary>
     /// The end value of the loop
@@ -22,21 +23,35 @@ public class RangeDir : DirectiveElement
     /// The step to increment each iteration by
     /// </summary>
     [AstAttribute("step")]
-    public AstValue<double> Step { get; set; } = new();
+    public AstValue<double?> Step { get; set; } = new();
 
     /// <summary>
     /// What to name the value in the children template contexts
     /// </summary>
     [AstAttribute("let")]
-    public AstValue<double> Let { get; set; } = new();
+    public string? Let { get; set; }
 
     /// <summary>
-    /// Applies the element to the render context
+    /// Iterate through each of the values and render the children for each iteration
     /// </summary>
     /// <param name="context">The rendering context</param>
     /// <returns></returns>
-    public override Task Render(RenderContext context)
+    public override async Task Render(RenderContext context)
     {
-        return Task.CompletedTask;
+        var start = Start.Value ?? 0;
+        var step = Step.Value ?? 1;
+        var end = End.Value;
+
+        for(var i = start; i < end; i += step)
+        {
+            using var scope = _execution.Scope(context, this, c =>
+            {
+                if (!string.IsNullOrWhiteSpace(Let))
+                    c.SetVar(Let, i);
+            });
+            foreach (var child in Children)
+                if (child is RenderElement render)
+                    await render.Render(context);
+        }
     }
 }

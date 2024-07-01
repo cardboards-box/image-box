@@ -2,6 +2,7 @@
 
 using Ast;
 using Drawing;
+using Rendering;
 using Services;
 
 /// <summary>
@@ -66,6 +67,7 @@ public static class DiExtensions
             .AddAst()
             .AddDrawing()
             .AddServices()
+            .AddCustomElements()
             .AddTransient<IImageBoxService, ImageBoxService>();
     }
 }

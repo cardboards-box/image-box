@@ -3,8 +3,9 @@
 /// <summary>
 /// If directive for templates
 /// </summary>
+/// <param name="_execution">The script execution service</param>
 [AstElement("if")]
-public class IfDir : DirectiveElement
+public class IfDir(IScriptExecutionService _execution) : DirectiveElement
 {
     /// <summary>
     /// The condition for the if statement
@@ -13,12 +14,17 @@ public class IfDir : DirectiveElement
     public AstValue<bool> Condition { get; set; } = new();
 
     /// <summary>
-    /// Applies the element to the render context
+    /// Checks if the <see cref="Condition"/> is true and renders the children
     /// </summary>
     /// <param name="context">The rendering context</param>
     /// <returns></returns>
-    public override Task Render(RenderContext context)
+    public override async Task Render(RenderContext context)
     {
-        return Task.CompletedTask;
+        if (!Condition.Value) return;
+
+        using var scope = _execution.Scope(context, this);
+        foreach (var child in Children)
+            if (child is RenderElement render)
+                await render.Render(context);
     }
 }

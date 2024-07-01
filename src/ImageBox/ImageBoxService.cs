@@ -29,6 +29,20 @@ public interface IImageBoxService
     IImageBox Create(IOPath path);
 
     /// <summary>
+    /// Get the (cached) data from the file path
+    /// </summary>
+    /// <param name="box">The box cache</param>
+    /// <returns>The image data</returns>
+    Task<BoxedImageData> LoadData(IImageBox box);
+
+    /// <summary>
+    /// Get the (cached) render context from the image data
+    /// </summary>
+    /// <param name="box">The box cache</param>
+    /// <returns>The render context</returns>
+    Task<RenderContext> LoadContext(IImageBox box);
+
+    /// <summary>
     /// Render an image from the image box
     /// </summary>
     /// <param name="box">The image to render</param>
@@ -171,7 +185,7 @@ internal class ImageBoxService(
         meta.RepeatCount = context.FrameRepeat;
         //Get the root frame to set the frame delay
         var frame = gif.Frames.RootFrame.Metadata.GetGifMetadata();
-        frame.FrameDelay = context.FrameDelay;
+        frame.FrameDelay = 0;
         //Render each frame and add it to the gif
         for(var i = 0; i < context.TotalFrames; i++)
         {

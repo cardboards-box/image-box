@@ -40,9 +40,10 @@ public record class SizeContext(
     /// <param name="yOffset">The y offset to start the new context at</param>
     /// <param name="width">The optional width of the new context</param>
     /// <param name="height">The optional height of the new context</param>
+    /// <param name="fontSize">The font size for the new context</param>
     /// <returns>The new context</returns>
     /// <remarks>If <paramref name="width"/> or <paramref name="height"/> are not given, the parameter will be calculated from the given offsets</remarks>
-    public SizeContext GetContext(int xOffset, int yOffset, int? width = null, int? height = null)
+    public SizeContext GetContext(int xOffset, int yOffset, int? width = null, int? height = null, int? fontSize = null)
     {
         var parents = Parents.Append(this).ToArray();
 
@@ -50,7 +51,7 @@ public record class SizeContext(
         var y = Y + yOffset;
         var w = width ?? Width - xOffset;
         var h = height ?? Height - yOffset;
-        return new SizeContext(x, y, w, h, FontSize, parents);
+        return new SizeContext(x, y, w, h, fontSize ?? FontSize, parents);
     }
 
     /// <summary>

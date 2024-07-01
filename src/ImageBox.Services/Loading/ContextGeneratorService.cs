@@ -1,5 +1,6 @@
 ﻿using Module = Esprima.Ast.Module;
 using Jint;
+using SixLabors.Fonts;
 
 namespace ImageBox.Services.Loading;
 
@@ -48,6 +49,7 @@ internal class ContextGeneratorService(
         var context = GetContext(template, image);
         //Get all of the font families from the image
         var fontFamilies = image.Elements.OfType<FontFamilyElem>().ToArray();
+        var fonts = await GetFonts(fontFamilies, image.WorkingDirectory);
         //Determine animation stuff
         int totalFrames = 1, frameDelay = 0;
         ushort frameRepeat = _config.AnimateRepeat;
@@ -57,7 +59,7 @@ internal class ContextGeneratorService(
             if (template.AnimateDuration is null)
                 throw new RenderContextException("Template animation is enabled but animation duration is not set", image, template.Context);
             //Total number of seconds for the animation
-            var duration = template.AnimateDuration.Value.Milliseconds * 1000;
+            var duration = template.AnimateDuration.Value.Milliseconds / 1000;
             //Total number of frames
             var fps = template.AnimateFps ?? _config.AnimateFps;
             totalFrames = (int)Math.Round(duration * fps, 0);
@@ -72,11 +74,47 @@ internal class ContextGeneratorService(
             Template = template,
             Runner = runner,
             Size = context,
-            FontFamilies = fontFamilies,
+            Fonts = fonts,
             TotalFrames = totalFrames,
             FrameDelay = frameDelay,
             Frame = currentFrame,
             FrameRepeat = frameRepeat
+        };
+    }
+
+    /// <summary>
+    /// Gets all of the fonts from the element templates
+    /// </summary>
+    /// <param name="families">The font families to load</param>
+    /// <param name="wrkDir">The working directory</param>
+    /// <returns>The loaded font families</returns>
+    public async Task<ContextFonts> GetFonts(FontFamilyElem[] families, string wrkDir)
+    {
+        var collection = new FontCollection();
+        var fonts = new Dictionary<string, LoadedFont>();
+
+        foreach(var family in families)
+        {
+            if (family.Source is null) continue;
+
+            var path = family.Source.Value.GetAbsolute(wrkDir);
+            var (stream, _, _) = await _resolver.Fetch(path);
+            var ff = collection.Add(stream);
+
+            var loaded = new LoadedFont
+            { 
+                Element = family,
+                Family = ff,
+            };
+            
+            if (!fonts.TryAdd(loaded.Name, loaded))
+                throw new RenderContextException($"Font family with the name '{loaded.Name}' has already been loaded", family.Context);
+        }
+
+        return new ContextFonts
+        {
+            Collection = collection,
+            Families = fonts
         };
     }
 

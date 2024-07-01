@@ -232,7 +232,7 @@ public class ScriptRunner(
         //Create the engine instance
         using var engine = new Engine(c => c
             .LimitRecursion(recursion)
-            .TimeoutInterval(TimeSpan.FromSeconds(timeoutSec))
+            //.TimeoutInterval(TimeSpan.FromSeconds(timeoutSec))
             .CancellationToken(token)
             .LimitMemory((long)(memoryLimitMb * 1024 * 1024))
         );

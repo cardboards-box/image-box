@@ -22,6 +22,15 @@ public interface IScriptExecutionService
     /// <param name="context">The render context</param>
     /// <param name="elements">The elements to traverse through</param>
     void HandleAttributes(RenderContext context, IEnumerable<IElement>? elements = null);
+
+    /// <summary>
+    /// Generates a render scope context
+    /// </summary>
+    /// <param name="context">The full render context</param>
+    /// <param name="parent">The target element</param>
+    /// <param name="config">A method for configuring the scope</param>
+    /// <returns>The context as a disposable object</returns>
+    ScopeContext Scope(RenderContext context, IElement parent, Action<ScopeContext>? config = null);
 }
 
 internal class ScriptExecutionService(
@@ -59,6 +68,20 @@ internal class ScriptExecutionService(
             _logger.LogError(ex, "Error occurred while executing element script");
             throw new RenderContextException("Error occurred while executing element script", ex, context.Context);
         }
+    }
+
+    /// <summary>
+    /// Generates a render scope context and binds it to the parent
+    /// </summary>
+    /// <param name="context">The full render context</param>
+    /// <param name="parent">The target element</param>
+    /// <param name="config">A method for configuring the scope</param>
+    /// <returns>The context as a disposable object</returns>
+    public ScopeContext Scope(RenderContext context, IElement parent, Action<ScopeContext>? config = null)
+    {
+        var output = new ScopeContext(context, this, parent);
+        config?.Invoke(output);
+        return output.Bind();
     }
 
     /// <summary>

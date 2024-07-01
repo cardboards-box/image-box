@@ -3,8 +3,14 @@
 /// <summary>
 /// Represents an image that can be drawn to the image
 /// </summary>
+/// <param name="_execution">The script execution service</param>
+/// <param name="_resolver">The file resolution service</param>
+/// <param name="_svg">The SVG renderer service</param>
 [AstElement("image")]
-public class ImageElem : PositionalElement
+public class ImageElem(
+    IScriptExecutionService _execution,
+    IFileResolverService _resolver,
+    ISvgService _svg) : PositionalElement(_execution)
 {
     /// <summary>
     /// The images source
@@ -19,12 +25,39 @@ public class ImageElem : PositionalElement
     public AstValue<string> Position { get; set; } = new();
 
     /// <summary>
+    /// Gets the image stream from the path
+    /// </summary>
+    /// <param name="context">The scoped context</param>
+    /// <param name="path">The path to fetch the image from</param>
+    /// <returns>The stream for the image</returns>
+    public async Task<Stream> HandleImage(ScopeContext context, IOPath path)
+    {
+        var wrkDir = context.Context.Context.WorkingDirectory;
+        var imgPath = path.GetAbsolute(wrkDir);
+        var (stream, _, type) = await _resolver.Fetch(imgPath);
+        if (type == "image/svg+xml")
+            return _svg.GetStream(stream, new RenderOptions
+            {
+                Width = context.Size.Width,
+                Height = context.Size.Height
+            });
+
+        return stream;
+    }
+
+    /// <summary>
     /// Applies the element to the render context
     /// </summary>
     /// <param name="context">The rendering context</param>
     /// <returns></returns>
-    public override Task Render(RenderContext context)
+    public override async Task Render(RenderContext context)
     {
-        return Task.CompletedTask;
+        using var scope = Scoped(context);
+
+        var rect = scope.Size.GetRectangle();
+        using var imageStream = await HandleImage(scope, Source.Value);
+        using var image = Image.Load(imageStream);
+        image.Mutate(i => i.Resize(rect.Width, rect.Height));
+        context.Image.Mutate(i => i.DrawImage(image, new Point(rect.X, rect.Y), 1));
     }
 }

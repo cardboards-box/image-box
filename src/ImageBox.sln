@@ -7,19 +7,28 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ImageBox", "ImageBox\ImageB
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ImageBox.Core", "ImageBox.Core\ImageBox.Core.csproj", "{A3AC4E01-5072-4E0D-BA6E-74155A36D1DA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImageBox.Ast", "ImageBox.Ast\ImageBox.Ast.csproj", "{D19671F6-2C2D-4D60-8A35-D56C438CAE23}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ImageBox.Ast", "ImageBox.Ast\ImageBox.Ast.csproj", "{D19671F6-2C2D-4D60-8A35-D56C438CAE23}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImageBox.Scripting", "ImageBox.Scripting\ImageBox.Scripting.csproj", "{9F948980-954F-4435-98E2-E1C6D39E2F9E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ImageBox.Scripting", "ImageBox.Scripting\ImageBox.Scripting.csproj", "{9F948980-954F-4435-98E2-E1C6D39E2F9E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImageBox.Elements", "ImageBox.Elements\ImageBox.Elements.csproj", "{72268E29-77C8-4563-AAEB-1F20DE3975C2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ImageBox.Elements", "ImageBox.Elements\ImageBox.Elements.csproj", "{72268E29-77C8-4563-AAEB-1F20DE3975C2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImageBox.Drawing", "ImageBox.Drawing\ImageBox.Drawing.csproj", "{07C6D860-A62A-4761-900F-C73A7B29226D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ImageBox.Drawing", "ImageBox.Drawing\ImageBox.Drawing.csproj", "{07C6D860-A62A-4761-900F-C73A7B29226D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImageBox.Tests", "ImageBox.Tests\ImageBox.Tests.csproj", "{5FF99774-60CF-4DAD-A893-FA96D84D31B7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ImageBox.Tests", "ImageBox.Tests\ImageBox.Tests.csproj", "{5FF99774-60CF-4DAD-A893-FA96D84D31B7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImageBox.Rendering", "ImageBox.Rendering\ImageBox.Rendering.csproj", "{020C3056-E13E-411F-9099-F9CDCDF25D96}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ImageBox.Rendering", "ImageBox.Rendering\ImageBox.Rendering.csproj", "{020C3056-E13E-411F-9099-F9CDCDF25D96}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImageBox.Services", "ImageBox.Services\ImageBox.Services.csproj", "{51869084-EA05-4F0E-A5E2-733705B23351}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ImageBox.Services", "ImageBox.Services\ImageBox.Services.csproj", "{51869084-EA05-4F0E-A5E2-733705B23351}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImageBox.Cli", "ImageBox.Cli\ImageBox.Cli.csproj", "{B0ECCE76-703E-4700-86B1-E8EC03F58A88}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{97904D2C-3F32-4C1B-8B5D-9F3CD86E05E4}"
+	ProjectSection(SolutionItems) = preProject
+		..\.gitignore = ..\.gitignore
+		..\LICENSE = ..\LICENSE
+		..\README.md = ..\README.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -63,6 +72,10 @@ Global
 		{51869084-EA05-4F0E-A5E2-733705B23351}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{51869084-EA05-4F0E-A5E2-733705B23351}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{51869084-EA05-4F0E-A5E2-733705B23351}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B0ECCE76-703E-4700-86B1-E8EC03F58A88}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B0ECCE76-703E-4700-86B1-E8EC03F58A88}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B0ECCE76-703E-4700-86B1-E8EC03F58A88}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B0ECCE76-703E-4700-86B1-E8EC03F58A88}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

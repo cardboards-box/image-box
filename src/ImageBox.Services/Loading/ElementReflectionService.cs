@@ -35,6 +35,55 @@ internal class ElementReflectionService(
     private static ReflectedElement[]? _elements;
 
     /// <summary>
+    /// This method is purely here because C#'s type system is annoying
+    /// </summary>
+    /// <returns>Gets all of the assemblies in the current domain</returns>
+    public static IEnumerable<Assembly> GetAllAssemblies()
+    {
+        //Create a collection to store all of the loaded assemblies
+        var list = new HashSet<string>();
+        //Create a stack of the assemblies to iterate through
+        var stack = new Stack<Assembly>();
+        //Add known assemblies to the stack
+        var entry = Assembly.GetEntryAssembly();
+        if (entry is not null)
+            stack.Push(entry);
+        entry = Assembly.GetCallingAssembly();
+        if (entry is not null)
+            stack.Push(entry);
+        entry = Assembly.GetExecutingAssembly();
+        if (entry is not null)
+            stack.Push(entry);
+        //Add all of the assemblies in the current domain to the stack
+        foreach(var asm in AppDomain.CurrentDomain.GetAssemblies())
+            stack.Push(asm);
+        //Iterate through the stack
+        do
+        {
+            //Get the current assembly
+            var asm = stack.Pop();
+            var name = asm.FullName;
+            //Skip the assembly if it's already been loaded
+            if (string.IsNullOrEmpty(name) ||
+                list.Contains(name)) 
+                continue;
+            //Return the assembly out
+            yield return asm;
+            //Add the assembly to the list
+            list.Add(name);
+            //Iterate through all of the referenced assemblies
+            foreach (var reference in asm.GetReferencedAssemblies())
+            {
+                //If the assembly has already been processed, skip it
+                if (list.Contains(reference.FullName)) continue;
+                //Add the assembly to the stack
+                stack.Push(Assembly.Load(reference));
+            }
+        }
+        while (stack.Count > 0);
+    }
+
+    /// <summary>
     /// Get all of the possible instances of <see cref="IElement"/>
     /// </summary>
     /// <returns>The possible instances of <see cref="IElement"/></returns>
@@ -49,7 +98,7 @@ internal class ElementReflectionService(
         var valueType = typeof(IValueElement);
         var astValueType = typeof(AstValue<>);
         //Get all of the concrete types matching IElement
-        var types = AppDomain.CurrentDomain.GetAssemblies()
+        var types = GetAllAssemblies()
             .SelectMany(t => t.GetTypes())
             .Where(elementType.IsAssignableFrom)
             .Where(t => t.IsClass && !t.IsInterface && !t.IsAbstract);
@@ -163,6 +212,8 @@ internal class ElementReflectionService(
         //Check if the property is nullable
         var notNullType = Nullable.GetUnderlyingType(property.PropertyType);
         var isNullable = notNullType is not null;
+        //Get the non-nullable type for conversion
+        var nonNullable = notNullType ?? property.PropertyType;
         //Null value? Ignore it and continue
         if (value is null)
         {
@@ -172,34 +223,35 @@ internal class ElementReflectionService(
         }
         var valueType = value.GetType();
         //If the property types match, just set the value
-        if (property.PropertyType == valueType)
+        if (property.PropertyType == valueType ||
+            nonNullable == valueType)
         {
             Set(value);
             return;
         }
-        if (property.PropertyType == typeof(object))
+        if (nonNullable == typeof(object))
         {
             Set(value);
             return;
         }
         //Check the properties and set the value if there's a match
-        if (property.PropertyType == typeof(SizeUnit))
+        if (nonNullable == typeof(SizeUnit))
         {
             Set(SizeUnit.Parse(value.ToString() ?? string.Empty));
             return;
         }
-        if (property.PropertyType == typeof(TimeUnit))
+        if (nonNullable == typeof(TimeUnit))
         {
             Set(TimeUnit.Parse(value.ToString() ?? string.Empty));
             return;
         }
-        if (property.PropertyType == typeof(IOPath))
+        if (nonNullable == typeof(IOPath))
         {
             Set(new IOPath(value.ToString() ?? string.Empty));
             return;
         }
         //Try bind object arrays (specifically for arrays)
-        if (property.PropertyType == typeof(object?[]))
+        if (nonNullable == typeof(object?[]))
         {
             //If the value is an array, enumerate it and set the values
             if (typeof(IEnumerable).IsAssignableFrom(valueType))
@@ -216,21 +268,21 @@ internal class ElementReflectionService(
             Set(new object?[] { value });
             return;
         }
-        //Get the non-nullable type for conversion
-        var nonNullable = notNullType ?? property.PropertyType;
         object? converted;
         try
         {
             //Try to convert the raw value
             converted = Convert.ChangeType(value, nonNullable);
+            //set the converted value
+            Set(converted);
         }
         catch
         {
+            //If the type is already a string, throw an exception
+            if (value is string) throw;
             //If it fails, try to convert the string version of the value
-            converted = Convert.ChangeType(value.ToString(), nonNullable);
+            TypeCastBind(property, instance, value.ToString() ?? string.Empty);
         }
-        //set the converted value
-        Set(converted);
     }
 
     /// <summary>
