@@ -7,8 +7,6 @@
 [AstElement("animation-bezier")]
 public class BezierAnimationElem(IScriptExecutionService _execution) : PositionalElement(_execution), IParentElement
 {
-
-
     /// <summary>
     /// The points of the curve to animate between
     /// </summary>

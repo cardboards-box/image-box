@@ -65,49 +65,44 @@ public class ImageBoxInternalConfig(
     #endregion
 
     /// <summary>
-    /// The section of the configuration file for boxed image services
-    /// </summary>
-    public IConfigurationSection Section => _config.GetSection(SECTION);
-
-    /// <summary>
     /// The cache directory for the file requests
     /// </summary>
-    public string CacheDirectory => _cacheDir ??= Section["CacheDirectory"] ?? DefaultCacheDir;
+    public string CacheDirectory => _cacheDir ??= GetVar("CacheDirectory") ?? DefaultCacheDir;
 
     /// <summary>
     /// The user agent to use for the file requests
     /// </summary>
-    public string UserAgent => _userAgent ??= Section["UserAgent"] ?? DefaultUserAgent;
+    public string UserAgent => _userAgent ??= GetVar("UserAgent") ?? DefaultUserAgent;
 
     /// <summary>
     /// The timeout for script executions
     /// </summary>
-    public TimeUnit ScriptTimeout => _scriptTimeout ??= Section["ScriptTimeout"] ?? DefaultScriptTimeout;
+    public TimeUnit ScriptTimeout => _scriptTimeout ??= GetVar("ScriptTimeout") ?? DefaultScriptTimeout;
 
     /// <summary>
     /// The maximum recursion limit for scripts
     /// </summary>
     public int ScriptRecursionLimit => _scriptRecursionLimit ??=
-        int.TryParse(Section["ScriptRecursionLimit"], out var value)
+        int.TryParse(GetVar("ScriptRecursionLimit"), out var value)
         ? value : DefaultScriptRecursionLimit;
 
     /// <summary>
     /// The memory limit for scripts (in megabytes)
     /// </summary>
     public double ScriptMemoryLimitMb => _scriptMemoryLimitMb ??=
-        double.TryParse(Section["ScriptMemoryLimit"], out var value)
+        double.TryParse(GetVar("ScriptMemoryLimit"), out var value)
         ? value : DefaultScriptMemoryLimitMb;
 
     /// <summary>
     /// The default font size for rendered images
     /// </summary>
-    public SizeUnit FontSize => _fontSize ??= Section["FontSize"] ?? DefaultFontSize;
+    public SizeUnit FontSize => _fontSize ??= GetVar("FontSize") ?? DefaultFontSize;
 
     /// <summary>
     /// The default FPS for the animations
     /// </summary>
     public double AnimateFps => _fps ??=
-        double.TryParse(Section["AnimateFps"], out var value)
+        double.TryParse(GetVar("AnimateFps"), out var value)
         ? value : DefaultAnimateFps;
 
     /// <summary>
@@ -115,11 +110,21 @@ public class ImageBoxInternalConfig(
     /// </summary>
     /// <remarks>0 is repeat forever, x is repeat number of times</remarks>
     public ushort AnimateRepeat => _repeat ??=
-        ushort.TryParse(Section["AnimateRepeat"], out var value)
+        ushort.TryParse(GetVar("AnimateRepeat"), out var value)
         ? value : DefaultAnimateRepeat;
 
     /// <summary>
     /// Configure the default http request for file caching
     /// </summary>
     public Action<HttpRequestMessage>? CacheRequestConfig { get; set; }
+
+    /// <summary>
+    /// Get the variable from the configuration
+    /// </summary>
+    /// <param name="key">The key to get from the section</param>
+    /// <returns>The value of the config variable</returns>
+    public string? GetVar(string key)
+    {
+        return _config[$"{SECTION}:{key}"];
+    }
 }

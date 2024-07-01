@@ -4,7 +4,11 @@ using ImageBox.Cli.Verbs;
 return await new ServiceCollection()
     .AddImageBox()
     .AddSerilog()
-    .AddAppSettings()
+    .AddConfig(c =>
+    {
+        c.AddEnvironmentVariables()
+         .AddFile("appsettings.json");
+    })
     .Cli(c => c
         .Add<GenerateVerb>()
         .Add<WatchVerb>());

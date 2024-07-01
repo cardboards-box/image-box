@@ -1,6 +1,4 @@
-﻿using ImageBox.Core.Config;
-
-namespace ImageBox.Core.FileCache;
+﻿namespace ImageBox.Core.FileCache;
 
 /// <summary>
 /// A service for downloading and caching files from remote sources
