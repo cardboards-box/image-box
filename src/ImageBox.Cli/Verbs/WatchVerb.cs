@@ -1,7 +1,6 @@
-﻿
-using ImageBox.Drawing;
+﻿namespace ImageBox.Cli.Verbs;
 
-namespace ImageBox.Cli.Verbs;
+using Drawing;
 
 [Verb("watch", HelpText = "Watches a file for changes and regenerates the image")]
 public class WatchVerbOptions

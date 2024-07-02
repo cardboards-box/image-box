@@ -138,8 +138,9 @@ internal class ImageBoxService(
     /// <param name="context">The context to render</param>
     /// <param name="variables">The variables to use for the root scope</param>
     /// <param name="frame">The current image frame (if it's a GIF, if not it's null)</param>
+    /// <param name="image">The image to render to (mostly for first gif frames)</param>
     /// <returns>The rendered image</returns>
-    public async Task<Image> RenderSingle(RenderContext context, Variables variables, int? frame)
+    public async Task<Image> RenderSingle(RenderContext context, Variables variables, int? frame, Image? image = null)
     {
         //Set the global scope of the context
         context.Frame = frame;
@@ -150,7 +151,7 @@ internal class ImageBoxService(
         //Execute the script and bind the properties
         await _execution.Execute(context);
         //Create the image for the context
-        var image = new Image<Rgba32>(context.Width, context.Height);
+        image ??= new Image<Rgba32>(context.Width, context.Height);
         //Set the context for the image
         context.Image = image;
         //Iterate through each element in the template
@@ -189,13 +190,17 @@ internal class ImageBoxService(
         //Render each frame and add it to the gif
         for(var i = 0; i < context.TotalFrames; i++)
         {
+            //Use the base gif for the first frame
+            var baseImage = i == 0 ? gif : null;
             //Get the frame
-            using var image = await RenderSingle(context, variables, i + 1);
+            var image = await RenderSingle(context, variables, i + 1, baseImage);
+            if (i == 0) continue;
             //Set the frame delay
             frame = image.Frames.RootFrame.Metadata.GetGifMetadata();
             frame.FrameDelay = context.FrameDelay;
             //Add the frame to the gif
             gif.Frames.AddFrame(image.Frames.RootFrame);
+            image.Dispose();
         }
         //Return the gif
         return (gif, true);
