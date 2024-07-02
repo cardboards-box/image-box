@@ -1,4 +1,6 @@
-﻿namespace ImageBox.Rendering.Renderers;
+﻿using System.Numerics;
+
+namespace ImageBox.Rendering.Renderers;
 
 /// <summary>
 /// Represents an image that can be drawn to the image
@@ -23,6 +25,24 @@ public class ImageElem(
     /// </summary>
     [AstAttribute("position")]
     public AstValue<string> Position { get; set; } = new();
+
+    /// <summary>
+    /// The number of degrees to rotate the image before rendering
+    /// </summary>
+    [AstAttribute("rotate")]
+    public AstValue<double?> Rotate { get; set; } = new();
+
+    /// <summary>
+    /// Whether to flip the image vertically or not
+    /// </summary>
+    [AstAttribute("flip-vertical")]
+    public AstValue<bool> FlipVertical { get; set; } = new();
+
+    /// <summary>
+    /// Whether to flip the image horizontally or not
+    /// </summary>
+    [AstAttribute("flip-horizontal")]
+    public AstValue<bool> FlipHorizontal { get; set; } = new();
 
     /// <summary>
     /// Gets the image stream from the path
@@ -58,6 +78,21 @@ public class ImageElem(
         using var imageStream = await HandleImage(scope, Source.Value);
         using var image = Image.Load(imageStream);
         image.Mutate(i => i.Resize(rect.Width, rect.Height));
-        context.Image.Mutate(i => i.DrawImage(image, new Point(rect.X, rect.Y), 1));
+
+        if (FlipVertical.Value)
+            image.Mutate(i => i.Flip(FlipMode.Vertical));
+        if (FlipHorizontal.Value)
+            image.Mutate(i => i.Flip(FlipMode.Horizontal));
+
+        var output = new Vector2();
+        if (Rotate.Value.HasValue)
+        {
+            var centerPoint = new Point(rect.X + rect.Width / 2, rect.Y + rect.Height / 2);
+            image.Mutate(i => i.Rotate((float)Rotate.Value.Value));
+            var rotated = new Point(rect.X + image.Width / 2, rect.Y + image.Height / 2);
+            output = new Vector2(rotated.X - centerPoint.X, rotated.Y - centerPoint.Y);
+        }
+
+        context.Image.Mutate(i => i.DrawImage(image, new Point(rect.X - (int)output.X, rect.Y - (int)output.Y), 1));
     }
 }

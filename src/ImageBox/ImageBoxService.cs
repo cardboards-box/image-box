@@ -1,4 +1,5 @@
 ﻿using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Formats.Gif;
 using SixLabors.ImageSharp.PixelFormats;
 
 using Variables = System.Collections.Generic.Dictionary<string, object?>;
@@ -150,7 +151,7 @@ internal class ImageBoxService(
         context.SetRootScope(variables);
         //Execute the script and bind the properties
         await _execution.Execute(context);
-        //Create the image for the context
+        //Create the image for the context if necessary
         image ??= new Image<Rgba32>(context.Width, context.Height);
         //Set the context for the image
         context.Image = image;
@@ -202,7 +203,9 @@ internal class ImageBoxService(
             using var image = await RenderSingle(context, variables, i + 1);
             //Set the frame delay
             frame = image.Frames.RootFrame.Metadata.GetGifMetadata();
-            frame.FrameDelay = context.FrameDelay;
+            frame.FrameDelay = context.FrameDelay / 10;
+            //Set the disposal method to avoid ghosting when transitioning
+            frame.DisposalMethod = GifDisposalMethod.RestoreToBackground;
             //Add the frame to the gif
             gif.Frames.AddFrame(image.Frames.RootFrame);
             image.Dispose();
