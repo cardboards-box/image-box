@@ -63,4 +63,25 @@ public static class Extensions
         };
     }
 
+    /// <summary>
+    /// Debounce an action
+    /// </summary>
+    /// <typeparam name="T">The type of argument</typeparam>
+    /// <param name="func">The function to debounce</param>
+    /// <param name="milliseconds">The number of milliseconds to wait before running</param>
+    /// <returns>The action to execute</returns>
+    public static Action<T> Debounce<T>(this Action<T> func, int milliseconds = 300)
+    {
+        var last = 0;
+        return (arg) =>
+        {
+            var current = Interlocked.Increment(ref last);
+            Task.Delay(milliseconds).ContinueWith(task =>
+            {
+                if (current == last) func(arg);
+                task.Dispose();
+            });
+        };
+    }
+
 }

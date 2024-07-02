@@ -11,4 +11,5 @@ return await new ServiceCollection()
     })
     .Cli(c => c
         .Add<GenerateVerb>()
-        .Add<WatchVerb>());
+        .Add<WatchVerb>()
+        .Add<WatchDirVerb>());
