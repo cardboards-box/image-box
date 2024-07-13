@@ -17,7 +17,7 @@ public class ClearElem : RenderElement
     /// </summary>
     /// <param name="context">The rendering context</param>
     /// <returns></returns>
-    public override Task Render(RenderContext context)
+    public override Task Render(ContextFrame context)
     {
         context.Image.Mutate(i => i.Clear(Color.Value.ParseColor()));
         return Task.CompletedTask;

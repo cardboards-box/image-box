@@ -7,8 +7,8 @@
 /// <param name="Value">The value of the measurement</param>
 [JsonConverter(typeof(SizeUnitSerializer))]
 public record struct SizeUnit(
-    [property: JsonPropertyName("type")] SizeUnitType Type,
-    [property: JsonPropertyName("value")] double Value)
+    SizeUnitType Type,
+    double Value)
 {
     /// <summary>
     /// A size of zero

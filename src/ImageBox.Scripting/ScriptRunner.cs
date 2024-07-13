@@ -228,7 +228,8 @@ public class ScriptRunner(
     {
         if (_main is null)
             throw new InvalidOperationException("Main script not set");
-
+        if (timeoutSec <= 0)
+            timeoutSec = 10;
         //Create the engine instance
         using var engine = new Engine(c => c
             .LimitRecursion(recursion)
@@ -236,13 +237,11 @@ public class ScriptRunner(
             .CancellationToken(token)
             .LimitMemory((long)(memoryLimitMb * 1024 * 1024))
         );
-
         //Include all of our modules
         foreach (var (name, value) in _modules)
             engine.Modules.Add(name, x => x.AddModule(value));
         foreach (var (name, builder) in _moduleBuilders)
             engine.Modules.Add(name, builder);
-
         //Get the name of the main module
         var mainName = _mainName ?? GenerateMainName();
         //Include the main module

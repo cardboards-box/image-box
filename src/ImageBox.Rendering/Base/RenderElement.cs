@@ -12,5 +12,5 @@ public abstract class RenderElement : Element
     /// </summary>
     /// <param name="context">The rendering context</param>
     /// <returns></returns>
-    public abstract Task Render(RenderContext context);
+    public abstract Task Render(ContextFrame context);
 }

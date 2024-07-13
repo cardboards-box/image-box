@@ -59,7 +59,7 @@ public class SizeUnitTests : TestSetup
     [TestMethod]
     public void CalculatePixelTests()
     {
-        var root = new SizeContext(0, 0, 200, 100, 15);
+        var root = new SizeContext(0, 0, 200, 100, 15, string.Empty);
 
         var context = root.GetContext(0, 0, 100, 50);
 

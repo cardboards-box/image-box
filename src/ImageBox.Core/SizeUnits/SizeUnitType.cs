@@ -38,7 +38,7 @@ public enum SizeUnitType
     /// </summary>
     Percentage = 7,
     /// <summary>
-    /// Pixel * FontSize
+    /// Pixel * FontSizeUnit
     /// </summary>
     Em = 8,
     /// <summary>

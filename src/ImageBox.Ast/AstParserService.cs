@@ -11,152 +11,133 @@ public interface IAstParserService
     /// Parse the given file and return the abstract syntax tree elements
     /// </summary>
     /// <param name="path">The file path to parse</param>
-    /// <param name="config">The AST configuration</param>
     /// <returns>The abstract syntax tree</returns>
-    IEnumerable<AstElement> ParseFile(string path, AstConfig config);
+    IEnumerable<AstElement> ParseFile(string path);
 
     /// <summary>
     /// Parse the given HTML and return the abstract syntax tree elements
     /// </summary>
     /// <param name="html">The HTML to parse</param>
-    /// <param name="config">The AST configuration</param>
     /// <returns>The abstract syntax tree</returns>
-    IEnumerable<AstElement> ParseString(string html, AstConfig config);
+    IEnumerable<AstElement> ParseString(string html);
 
     /// <summary>
     /// Parse the given stream and return the abstract syntax tree elements
     /// </summary>
     /// <param name="stream">The stream to parse</param>
-    /// <param name="config">The AST configuration</param>
     /// <returns>The abstract syntax tree</returns>
-    IEnumerable<AstElement> ParseStream(Stream stream, AstConfig config);
+    IEnumerable<AstElement> ParseStream(Stream stream);
 }
 
-internal class AstParserService : IAstParserService
+internal class AstParserService(
+    IServiceConfig _config) : IAstParserService
 {
-    public IEnumerable<AstElement> ParseFile(string path, AstConfig config)
+    public IEnumerable<AstElement> ParseFile(string path)
     {
         if (!File.Exists(path)) throw new FileNotFoundException("The file path does not exist", path);
 
         var doc = new HtmlDocument();
         doc.Load(path);
 
-        return Parse(doc.DocumentNode, config);
+        return Parse(doc.DocumentNode);
     }
 
-    public IEnumerable<AstElement> ParseString(string html, AstConfig config)
+    public IEnumerable<AstElement> ParseString(string html)
     {
         var doc = new HtmlDocument();
         doc.LoadHtml(html);
 
-        return Parse(doc.DocumentNode, config);
+        return Parse(doc.DocumentNode);
     }
 
-    public IEnumerable<AstElement> ParseStream(Stream stream, AstConfig config)
+    public IEnumerable<AstElement> ParseStream(Stream stream)
     {
         var doc = new HtmlDocument();
         doc.Load(stream);
 
-        return Parse(doc.DocumentNode, config);
+        return Parse(doc.DocumentNode);
     }
 
     public static (AstElementType type, string? text) DetermineType(HtmlNode node)
     {
+        //No children and no text - Empty element
         if (node.ChildNodes.Count == 0 ||
             string.IsNullOrWhiteSpace(node.InnerHtml))
             return (AstElementType.Empty, null);
-
+        //Only one node and it's just text - Text element
         if (node.ChildNodes.Count == 1 &&
             node.FirstChild.NodeType == HtmlNodeType.Text)
         {
+            //Get the inner text and validate the existence of it's value
+            //No value - Empty element
             var inner = node.InnerText;
             if (string.IsNullOrWhiteSpace(inner))
                 return (AstElementType.Empty, null);
-
+            //Inner text has value - Text element
             return (AstElementType.Text, inner);
         }
-
+        //Element has more than one child or the child is not text - Children element
         return (AstElementType.Children, null);
     }
 
-    public static IEnumerable<AstAttribute> GetAttributes(HtmlNode node, AstConfig config)
+    public IEnumerable<AstAttribute> GetAttributes(HtmlNode node)
     {
+        //Iterate through each of the attributes
         foreach (var attribute in node.Attributes)
         {
+            //Get the name of the tag
             var name = attribute.OriginalName.Trim();
+            //Get the value of the tag (if it exists)
             var value = attribute.Value;
-
-            if (name.StartsWith(config.AttributeBind))
+            //If the name has a colon, it's a bind-attribute and should be handled via an expression
+            if (name.StartsWith(_config.Parser.Bind))
             {
-                yield return new AstAttribute
-                {
-                    Name = name[1..].Trim(),
-                    Type = AstAttributeType.Bind,
-                    Value = value
-                };
+                yield return AstAttribute.Bind(name[1..].Trim(), value);
                 continue;
             }
-
-            if (name.StartsWith(config.AttributeSpreadStart) &&
-                name.EndsWith(config.AttributeSpreadEnd))
+            //The name starts with the spread start and ends, so handle the name as an expression
+            if (name.StartsWith(_config.Parser.SpreadStart) &&
+                name.EndsWith(_config.Parser.SpreadEnd))
             {
-                yield return new AstAttribute
-                {
-                    Name = name[1..^1].Trim(),
-                    Type = AstAttributeType.Spread
-                };
+                yield return AstAttribute.Spread(name[1..^1].Trim());
                 continue;
             }
-
-            var hasEqual = attribute.GetPrivateFieldValue<HtmlAttribute, bool>("_hasEqual");
-
+            //Check if the attribute has an equal sign and no value
+            var hasEqual = attribute.QuoteType == AttributeValueQuote.WithoutValue;
+            //If the attribute has no equal sign and no value, it's a boolean true attribute
             if (!hasEqual &&
                 string.IsNullOrEmpty(value))
             {
-                yield return new AstAttribute
-                {
-                    Name = name,
-                    Type = AstAttributeType.BooleanTrue
-                };
+                yield return AstAttribute.BooleanTrue(name);
                 continue;
             }
-
-            yield return new AstAttribute
-            {
-                Name = name,
-                Type = AstAttributeType.Value,
-                Value = value
-            };
+            //regular attribute with no bind or spreads
+            yield return AstAttribute.Text(name, value);
         }
     }
 
-    public static IEnumerable<AstElement> Parse(HtmlNode parent, AstConfig config)
+    public IEnumerable<AstElement> Parse(HtmlNode parent)
     {
+        //If the parent has no children or no text, skip children
         if (parent.ChildNodes.Count == 0 ||
             string.IsNullOrWhiteSpace(parent.InnerHtml)) yield break;
-
+        //Iterate through each of the children
         foreach (var node in parent.ChildNodes)
         {
+            //Skip just text nodes
             if (node.NodeType == HtmlNodeType.Text) continue;
-
+            //get the name of the element
             var name = node.OriginalName;
+            //Determine the type of the children of the element
             var (type, value) = DetermineType(node);
-
-            var element = new AstElement
-            {
-                StreamPosition = node.StreamPosition,
-                Line = node.Line,
-                Column = node.LinePosition,
-                Tag = name,
-                Type = type,
-                Value = value,
-                Attributes = GetAttributes(node, config).ToArray()
-            };
-
-            if (type == AstElementType.Children)
-                element.Children = Parse(node, config).ToArray();
-
-            yield return element;
+            var children = type == AstElementType.Children
+                ? Parse(node).ToArray()
+                : [];
+            var attributes = GetAttributes(node).ToArray();
+            //Create the element
+            yield return new AstElement(
+                node.StreamPosition, node.Line, node.LinePosition,
+                name, type, attributes, children, value);
         }
     }
 }

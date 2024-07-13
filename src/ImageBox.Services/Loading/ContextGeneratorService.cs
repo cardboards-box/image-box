@@ -1,6 +1,5 @@
 ﻿using Module = Esprima.Ast.Module;
 using Jint;
-using SixLabors.Fonts;
 
 namespace ImageBox.Services.Loading;
 
@@ -26,12 +25,13 @@ public interface IContextGeneratorService
     /// <exception cref="RenderContextException">Thrown if no setup script is listed in the template and there are other scripts</exception>
     /// <exception cref="RenderContextException">Thrown if there are no template elements</exception>
     /// <exception cref="RenderContextException">Thrown if there are more than one template elements</exception>
-    Task<RenderContext> Generate(BoxedImageData image);
+    Task<ContextBox> Generate(LoadedAst image);
 }
 
 internal class ContextGeneratorService(
+    IServiceConfig _config,
     IFileResolverService _resolver,
-    IImageBoxConfig _config,
+    IElementReflectionService _elements,
     ILogger<ContextGeneratorService> _logger) : IContextGeneratorService
 {
     /// <summary>
@@ -39,21 +39,21 @@ internal class ContextGeneratorService(
     /// </summary>
     /// <param name="image">The boxed image to create the context for</param>
     /// <returns>The render context</returns>
-    public async Task<RenderContext> Generate(BoxedImageData image)
+    public async Task<ContextBox> Generate(LoadedAst image)
     {
+        //Get all of the elements from box
+        var elements = _elements.BindTemplates(image.SyntaxTree, false).ToArray();
         //Get the template element from the boxed image
-        var template = GetTemplate(image);
+        var template = GetTemplate(image, elements);
         //Get the script runner from the script elements
-        var runner = await GetRunner(image);
+        var runner = await GetRunner(image, elements);
         //Get the size context from the template element's attributes
         var context = GetContext(template, image);
         //Get all of the font families from the image
-        var fontFamilies = image.Elements.OfType<FontFamilyElem>().ToArray();
-        var fonts = await GetFonts(fontFamilies, image.WorkingDirectory);
+        var (fonts, cache) = await GetResources(image, elements);
         //Determine animation stuff
-        int totalFrames = 1, frameDelay = 0;
-        ushort frameRepeat = _config.AnimateRepeat;
-        int? currentFrame = null;
+        uint totalFrames = 1, frameDelay = 0;
+        ushort frameRepeat = _config.Render.AnimateRepeat;
         if (template.Animate)
         {
             if (template.AnimateDuration is null)
@@ -61,24 +61,22 @@ internal class ContextGeneratorService(
             //Total number of seconds for the animation
             var duration = template.AnimateDuration.Value.Milliseconds / 1000;
             //Total number of frames
-            var fps = template.AnimateFps ?? _config.AnimateFps;
-            totalFrames = (int)Math.Round(duration * fps, 0);
-            frameDelay = (int)Math.Round(duration / totalFrames, 0);
-            frameRepeat = template.AnimateRepeat ?? _config.AnimateRepeat;
-            currentFrame = 1;
+            var fps = template.AnimateFps ?? _config.Render.AnimateFps;
+            totalFrames = (uint)Math.Round(duration * fps, 0);
+            frameDelay = (uint)(template.AnimateDuration.Value.Milliseconds / totalFrames);
+            frameRepeat = template.AnimateRepeat ?? _config.Render.AnimateRepeat;
         }
-        //Return the created render context
-        return new RenderContext
+
+        return new ContextBox 
         {
-            Context = image,
-            Template = template,
-            Runner = runner,
-            Size = context,
+            Ast = image,
+            Template = template.Context!,
             Fonts = fonts,
+            Size = context,
+            Runner = runner,
             TotalFrames = totalFrames,
             FrameDelay = frameDelay,
-            Frame = currentFrame,
-            FrameRepeat = frameRepeat
+            FrameRepeat = frameRepeat,
         };
     }
 
@@ -88,10 +86,9 @@ internal class ContextGeneratorService(
     /// <param name="families">The font families to load</param>
     /// <param name="wrkDir">The working directory</param>
     /// <returns>The loaded font families</returns>
-    public async Task<ContextFonts> GetFonts(FontFamilyElem[] families, string wrkDir)
+    public async Task<ContextFonts> GetFonts(IEnumerable<FontFamilyElem> families, string wrkDir)
     {
-        var collection = new FontCollection();
-        var fonts = new Dictionary<string, LoadedFont>();
+        var fonts = new ContextFonts();
 
         foreach(var family in families)
         {
@@ -99,7 +96,7 @@ internal class ContextGeneratorService(
 
             var path = family.Source.Value.GetAbsolute(wrkDir);
             var (stream, _, _) = await _resolver.Fetch(path);
-            var ff = collection.Add(stream);
+            var ff = fonts.Collection.Add(stream);
 
             var loaded = new LoadedFont
             { 
@@ -107,15 +104,11 @@ internal class ContextGeneratorService(
                 Family = ff,
             };
             
-            if (!fonts.TryAdd(loaded.Name, loaded))
+            if (!fonts.Families.TryAdd(loaded.Name, loaded))
                 throw new RenderContextException($"Font family with the name '{loaded.Name}' has already been loaded", family.Context);
         }
 
-        return new ContextFonts
-        {
-            Collection = collection,
-            Families = fonts
-        };
+        return fonts;
     }
 
     /// <summary>
@@ -125,43 +118,47 @@ internal class ContextGeneratorService(
     /// <param name="image">The image the template is from</param>
     /// <returns>The size context of the image</returns>
     /// <exception cref="RenderContextException">Thrown if a required property is missing</exception>
-    public SizeContext GetContext(TemplateElem template, BoxedImageData image)
+    public SizeContext GetContext(TemplateElem template, LoadedAst image)
     {
+        var widthUnit = template.Width ?? _config.Render.WidthUnit;
+        var heightUnit = template.Height ?? _config.Render.HeightUnit;
         //Validate width and height
-        if (template.Width is null)
+        if (widthUnit.Value <= 0)
             throw new RenderContextException("Template width could not be determined", image, template.Context);
-        if (template.Height is null)
+        if (heightUnit.Value <= 0)
             throw new RenderContextException("Template height could not be determined", image, template.Context);
         //Get the font size, width, and height
-        var fontSize = (template.FontSize ?? _config.FontSize).Pixels();
-        var width = template.Width.Value.Pixels(null, true);
-        var height = template.Height.Value.Pixels(null, false);
+        var fontSize = (template.FontSize ?? _config.Render.FontSizeUnit).Pixels();
+        var width = widthUnit.Pixels(null, true);
+        var height = heightUnit.Pixels(null, false);
+        var fontFamily = template.FontFamily ?? _config.Render.FontFamily ?? string.Empty;
         //Generate size context from sizing units
-        return SizeContext.ForRoot(width, height, fontSize);
+        return SizeContext.ForRoot(width, height, fontSize, fontFamily);
     }
 
     /// <summary>
     /// Gets the script runner for the boxed image
     /// </summary>
     /// <param name="image">The boxed image</param>
+    /// <param name="elements">The elements to get the script for</param>
     /// <returns>The script runner</returns>
     /// <exception cref="RenderContextException">Thrown if any exception occurs during preparation</exception>
-    public async Task<ScriptRunner?> GetRunner(BoxedImageData image)
+    public async Task<ScriptRunner?> GetRunner(LoadedAst image, IElement[] elements)
     {
         try
         {
             //Get all of the scripts for the context
-            var scripts = GetScripts(image, out var setupScript);
+            var scripts = GetScripts(image, elements, out var setupScript);
             //No setup script? don't bother processing
             if (setupScript is null) return null;
             //Setup the script runner
             var runner = new ScriptRunner(
-                _config.ScriptTimeout.Milliseconds * 1000,
-                _config.ScriptRecursionLimit,
-                _config.ScriptMemoryLimitMb);
+                _config.Scripts.TimeoutUnit.Milliseconds * 1000,
+                _config.Scripts.RecursionLimit,
+                _config.Scripts.MemoryLimitMb);
             //Add the standard context to the runner
             //This adds the `system` module with drawing and context classes
-            AddStandardContext(runner);
+            AddStandardContext(runner, image);
             //Prepare the setup script
             var setup = await GetScript(setupScript, image);
             //Add the setup script to the runner
@@ -198,7 +195,7 @@ export function main(args) {
     /// <param name="scripts">The script elements to prepare</param>
     /// <param name="image">The image that is loading the elements</param>
     /// <returns>All of the prepared script modules</returns>
-    public async IAsyncEnumerable<RenderModule> Modules(ScriptElem[] scripts, BoxedImageData image)
+    public async IAsyncEnumerable<RenderModule> Modules(ScriptElem[] scripts, LoadedAst image)
     {
         //Iterate over the scripts and resolve and prepare them
         foreach (var script in scripts)
@@ -218,7 +215,7 @@ export function main(args) {
     /// <returns>The prepared script</returns>
     /// <exception cref="RenderContextException">Thrown if a remote script failed to resolve</exception>
     /// <exception cref="RenderContextException">Thrown if the script body is empty</exception>
-    public async Task<Prepared<Module>> GetScript(ScriptElem script, BoxedImageData image)
+    public async Task<Prepared<Module>> GetScript(ScriptElem script, LoadedAst image)
     {
         //Get the script body from the element
         var value = script.Value;
@@ -266,17 +263,18 @@ export function main(args) {
     /// Gets all of the scripts from the template
     /// </summary>
     /// <param name="image">The image to get the template from</param>
+    /// <param name="elements">The elements to get the scripts from</param>
     /// <param name="setup">The setup script (if one is included)</param>
     /// <returns>All of the script elements</returns>
     /// <exception cref="RenderContextException">Thrown if multiple setup scripts listed in the template</exception>
     /// <exception cref="RenderContextException">Thrown if a script module name is not set</exception>
     /// <exception cref="RenderContextException">Thrown if no setup script is listed in the template and there are other scripts</exception>
-    public static ScriptElem[] GetScripts(BoxedImageData image, out ScriptElem? setup)
+    public static ScriptElem[] GetScripts(LoadedAst image, IElement[] elements, out ScriptElem? setup)
     {
         setup = null;
         var scripts = new List<ScriptElem>();
         //Iterate through all of the script elements in the root context of the template
-        foreach (var script in image.Elements.OfType<ScriptElem>())
+        foreach (var script in elements.OfType<ScriptElem>())
         {
             //If the script is setup, treat it differently
             if (script.Setup)
@@ -315,13 +313,14 @@ export function main(args) {
     /// Gets the template element from the given image
     /// </summary>
     /// <param name="image">The image to get the template for</param>
+    /// <param name="elements">The element to render for</param>
     /// <returns>The template element</returns>
     /// <exception cref="RenderContextException">Thrown if there are no template elements</exception>
     /// <exception cref="RenderContextException">Thrown if there are more than one template elements</exception>
-    public static TemplateElem GetTemplate(BoxedImageData image)
+    public static TemplateElem GetTemplate(LoadedAst image, IElement[] elements)
     {
         //Get all of the template elements from the image
-        var template = image.Elements
+        var template = elements
             .OfType<TemplateElem>()
             .ToArray();
         //Ensure there is at least one template element
@@ -333,18 +332,36 @@ export function main(args) {
                 image,
                 template.Select(t => t.Context).ToArray());
         //Get the template element
-        return template.First();
+        var temp = template.First();
+        if (temp is null || temp.Context is null)
+            throw new RenderContextException("Template element is null", image);
+
+        return temp;
+    }
+
+    public async Task<(ContextFonts, string)> GetResources(LoadedAst image, IElement[] elements)
+    {
+        var resources = elements
+            .OfType<ResourcesElem>()
+            .ToArray();
+
+        var fonts = resources.SelectMany(t => t.Children).OfType<FontFamilyElem>();
+        var context = await GetFonts(fonts, image.WorkingDirectory);
+
+        return (context, string.Empty);
     }
 
     /// <summary>
     /// Adds the standard system modules to the given script runner
     /// </summary>
     /// <param name="runner">The script runner to add to</param>
-    public static void AddStandardContext(ScriptRunner runner)
+    /// <param name="ast">The loaded image</param>
+    public void AddStandardContext(ScriptRunner runner, LoadedAst ast)
     {
         runner.AddModule("system", t => t
             .ExportType<Drawing>()
-            .ExportType<Context>());
+            .ExportType<Context>()
+            .ExportObject("logger", new Logger(_logger, ast)));
     }
 
     /// <summary>

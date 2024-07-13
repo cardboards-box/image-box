@@ -3,9 +3,8 @@
 /// <summary>
 /// Represents a rectangle that can be filled or bordered
 /// </summary>
-/// <param name="_execution">The script execution service</param>
 [AstElement("rectangle")]
-public class RectangleElem(IScriptExecutionService _execution) : PositionalElement(_execution), IParentElement
+public class RectangleElem : PositionalElement, IParentElement
 {
     /// <summary>
     /// The radius of the curved corners
@@ -41,9 +40,9 @@ public class RectangleElem(IScriptExecutionService _execution) : PositionalEleme
     /// </summary>
     /// <param name="context">The rendering context</param>
     /// <returns></returns>
-    public override async Task Render(RenderContext context)
+    public override async Task Render(ContextFrame context)
     {
-        var scope = context.CurrentScope;
+        var scope = context.LastScope;
         var current = BoundContext(scope.Size);
         var radius = (Radius.Value ?? SizeUnit.Zero).Pixels(current);
         var rect = current.GetRectangle().Rounded(radius);
@@ -63,7 +62,7 @@ public class RectangleElem(IScriptExecutionService _execution) : PositionalEleme
 
         if (Children.Length == 0) return;
 
-        using var childScope = Executor.Scope(context, this, c => c.SetSize(current));
+        using var childScope = context.Scope(this, current);
         foreach (var child in Children)
             if (child is RenderElement render)
                 await render.Render(context);

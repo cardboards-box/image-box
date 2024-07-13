@@ -3,9 +3,8 @@
 /// <summary>
 /// Represents a for directive
 /// </summary>
-/// <param name="_execution">The script execution service</param>
 [AstElement("range")]
-public class RangeDir(IScriptExecutionService _execution) : DirectiveElement
+public class RangeDir : DirectiveElement
 {
     /// <summary>
     /// The start of value
@@ -36,7 +35,7 @@ public class RangeDir(IScriptExecutionService _execution) : DirectiveElement
     /// </summary>
     /// <param name="context">The rendering context</param>
     /// <returns></returns>
-    public override async Task Render(RenderContext context)
+    public override async Task Render(ContextFrame context)
     {
         var start = Start.Value ?? 0;
         var step = Step.Value ?? 1;
@@ -44,11 +43,10 @@ public class RangeDir(IScriptExecutionService _execution) : DirectiveElement
 
         for(var i = start; i < end; i += step)
         {
-            using var scope = _execution.Scope(context, this, c =>
-            {
-                if (!string.IsNullOrWhiteSpace(Let))
-                    c.SetVar(Let, i);
-            });
+            var vars = new Dictionary<string, object?>();
+            if (!string.IsNullOrWhiteSpace(Let))
+                vars.Add(Let, i);
+            using var scope = context.Scope(this, null, vars);
             foreach (var child in Children)
                 if (child is RenderElement render)
                     await render.Render(context);

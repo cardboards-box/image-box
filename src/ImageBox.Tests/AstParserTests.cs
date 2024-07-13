@@ -13,7 +13,7 @@ public class AstParserTests : TestSetup
         const string TEMPLATE = @"<template>
     <clear color=""transparent"" do />
     <rectangle 
-        x=""0"" y=""0"" width=""100vw"" height=""100vh"" 
+        X=""0"" Y=""0"" width=""100vw"" height=""100vh"" 
         radius=""10px"" fill=""#000"" 
         border-color=""#f50"" border-width=""5px"" />
     <image {primaryLogo} src=""./assets/logos/primary.png"" position=""cover"" />
@@ -37,27 +37,27 @@ export default () => {
     const primaryLogo =  {
         width: logoSize,
         height: logoSize,
-        x: logoSize / 2,
-        y: (fullHeight / 2) - (logoSize / 2),
+        X: logoSize / 2,
+        Y: (fullHeight / 2) - (logoSize / 2),
     };
 
     const textPos = {
         height: uint('1.2em'),
         width: primaryLogo.width,
-        y: primaryLogo.y + primaryLogo.height + unit('10px'),
-        x: primaryLogo.x,
+        Y: primaryLogo.Y + primaryLogo.height + unit('10px'),
+        X: primaryLogo.X,
     };
 
     const bottomLeft = {
-        x: right('5vw'),
-        y: bottom('5vw'),
+        X: right('5vw'),
+        Y: bottom('5vw'),
         width: fcSize,
         height: fcSize,
     };
 
     const bottomRight = {
-        x: left('5vw'),
-        y: bottom('5vw'),
+        X: left('5vw'),
+        Y: bottom('5vw'),
         width: fcSize,
         height: fcSize,
     }
@@ -72,7 +72,7 @@ export default () => {
 }
 </script>";
 
-        var elements = service.ParseString(TEMPLATE, AstConfig.Default).ToArray();
+        var elements = service.ParseString(TEMPLATE).ToArray();
 
         Assert.AreEqual(2, elements.Length, "Root Elements Count");
 

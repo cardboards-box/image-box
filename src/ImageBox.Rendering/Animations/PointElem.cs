@@ -7,14 +7,20 @@
 public class PointElem : Element
 {
     /// <summary>
+    /// The index of the point in the point list
+    /// </summary>
+    [AstAttribute("index"), AstAttribute("i")]
+    public AstValue<int?> Index { get; set; } = new();
+
+    /// <summary>
     /// The X offset
     /// </summary>
-    [AstAttribute("x")]
+    [AstAttribute("X")]
     public AstValue<SizeUnit?> X { get; set; } = new();
 
     /// <summary>
-    /// The y offset
+    /// The Y offset
     /// </summary>
-    [AstAttribute("y")]
+    [AstAttribute("Y")]
     public AstValue<SizeUnit?> Y { get; set; } = new();
 }

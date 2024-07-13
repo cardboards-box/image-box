@@ -5,24 +5,18 @@ namespace ImageBox.Rendering.Base;
 /// <summary>
 /// Represents a GDI element that can be drawn with positional data
 /// </summary>
-/// <param name="_execution">The script execution service</param>
-public abstract class PositionalElement(IScriptExecutionService _execution) : RenderElement
+public abstract class PositionalElement : RenderElement
 {
     /// <summary>
-    /// The script execution service
+    /// The X offset
     /// </summary>
-    public IScriptExecutionService Executor { get; } = _execution;
-
-    /// <summary>
-    /// The x offset
-    /// </summary>
-    [AstAttribute("x")]
+    [AstAttribute("X")]
     public AstValue<SizeUnit?> X { get; set; } = new();
 
     /// <summary>
-    /// The y offset
+    /// The Y offset
     /// </summary>
-    [AstAttribute("y")]
+    [AstAttribute("Y")]
     public AstValue<SizeUnit?> Y { get; set; } = new();
 
     /// <summary>
@@ -76,12 +70,12 @@ public abstract class PositionalElement(IScriptExecutionService _execution) : Re
     /// </summary>
     /// <param name="context"></param>
     /// <returns></returns>
-    public ScopeContext Scoped(RenderContext context)
+    public ContextScope Scoped(ContextFrame context)
     {
-        var previousScope = context.CurrentScope.Size;
+        var previousScope = context.LastScope.Size;
         var fontSize = FontSize.Value?.Pixels(previousScope) ?? previousScope.FontSize;
         var current = BoundContext(previousScope, fontSize);
-        return Executor.Scope(context, this, c => c.SetSize(current));
+        return context.Scope(this, current);
     }
 
     /// <summary>
@@ -89,19 +83,19 @@ public abstract class PositionalElement(IScriptExecutionService _execution) : Re
     /// </summary>
     /// <param name="context">The font context</param>
     /// <returns>The font</returns>
-    public Font GetFont(ScopeContext context)
+    public Font GetFont(ContextScope context)
     {
-        var fontName = FontFamily.Value;
+        var fontName = FontFamily.Value ?? context.Size.FontFamily;
         if (string.IsNullOrEmpty(fontName))
             throw new RenderContextException(
                 "Font family is required for this element", 
-                context.Context.Context, Context);
+                context.Frame.BoxContext.Ast, Context);
 
         var style = IFontStyle.Regular;
         if (!string.IsNullOrEmpty(FontStyle.Value) &&
             Enum.TryParse<IFontStyle>(FontStyle.Value, true, out var parsed))
             style = parsed;
 
-        return context.Context.Fonts.GetFont(fontName, context.Scope, style);
+        return context.Frame.BoxContext.Fonts.GetFont(fontName, context, style);
     }
 }

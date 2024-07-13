@@ -9,7 +9,7 @@ public abstract class TestSetup
         if (_services is not null) return _services;
 
         return _services = new ServiceCollection()
-            .AddImageBox()
+            .AddImageBox(new ServiceConfig())
             .BuildServiceProvider();
     }
 

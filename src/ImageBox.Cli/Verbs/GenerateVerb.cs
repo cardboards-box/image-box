@@ -42,7 +42,7 @@ public class GenerateVerb(
                 return false;
             }
 
-            using var ib = _image.Create(options.Path);
+            var ib = _image.Create(options.Path);
             var output = await GenerateOutputPath(options, ib);
             if (string.IsNullOrEmpty(output))
             {

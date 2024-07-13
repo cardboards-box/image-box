@@ -5,14 +5,12 @@ namespace ImageBox.Rendering.Renderers;
 /// <summary>
 /// Represents an image that can be drawn to the image
 /// </summary>
-/// <param name="_execution">The script execution service</param>
 /// <param name="_resolver">The file resolution service</param>
 /// <param name="_svg">The SVG renderer service</param>
 [AstElement("image")]
 public class ImageElem(
-    IScriptExecutionService _execution,
     IFileResolverService _resolver,
-    ISvgService _svg) : PositionalElement(_execution)
+    ISvgService _svg) : PositionalElement
 {
     /// <summary>
     /// The images source
@@ -50,9 +48,9 @@ public class ImageElem(
     /// <param name="context">The scoped context</param>
     /// <param name="path">The path to fetch the image from</param>
     /// <returns>The stream for the image</returns>
-    public async Task<Stream> HandleImage(ScopeContext context, IOPath path)
+    public async Task<Stream> HandleImage(ContextScope context, IOPath path)
     {
-        var wrkDir = context.Context.Context.WorkingDirectory;
+        var wrkDir = context.Frame.BoxContext.Ast.WorkingDirectory;
         var imgPath = path.GetAbsolute(wrkDir);
         var (stream, _, type) = await _resolver.Fetch(imgPath);
         if (type == "image/svg+xml")
@@ -70,7 +68,7 @@ public class ImageElem(
     /// </summary>
     /// <param name="context">The rendering context</param>
     /// <returns></returns>
-    public override async Task Render(RenderContext context)
+    public override async Task Render(ContextFrame context)
     {
         using var scope = Scoped(context);
 
@@ -79,10 +77,12 @@ public class ImageElem(
         using var image = Image.Load(imageStream);
         image.Mutate(i => i.Resize(rect.Width, rect.Height));
 
-        if (FlipVertical.Value)
-            image.Mutate(i => i.Flip(FlipMode.Vertical));
-        if (FlipHorizontal.Value)
-            image.Mutate(i => i.Flip(FlipMode.Horizontal));
+        if (FlipVertical.Value || FlipHorizontal.Value)
+            image.Mutate(i =>
+            {
+                if (FlipVertical.Value) i.Flip(FlipMode.Vertical);
+                if (FlipHorizontal.Value) i.Flip(FlipMode.Horizontal);
+            });
 
         var output = new Vector2();
         if (Rotate.Value.HasValue)

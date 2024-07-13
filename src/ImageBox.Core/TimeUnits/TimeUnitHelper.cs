@@ -79,17 +79,17 @@ public static class TimeUnitHelper
     /// <returns>The parsed value and unit</returns>
     public static TimeUnit ParseUnit(string input)
     {
-        if (string.IsNullOrEmpty(input)) throw new ArgumentNullException(nameof(input));
+        if (string.IsNullOrWhiteSpace(input)) throw new ArgumentNullException(nameof(input));
 
         input = input.Trim().ToLower();
 
         if (input == "0") return TimeUnit.Zero;
 
         input = RegexUtility.UnitFilter(input);
-        if (string.IsNullOrEmpty(input)) return TimeUnit.Zero;
+        if (string.IsNullOrWhiteSpace(input)) return TimeUnit.Zero;
 
         var (value, unit) = RegexUtility.UnitParse(input);
-        if (string.IsNullOrEmpty(unit)) return new TimeUnit(TimeUnitType.Millisecond, value);
+        if (string.IsNullOrWhiteSpace(unit)) return new TimeUnit(TimeUnitType.Millisecond, value);
 
         var unitMatch = Units().FirstOrDefault(u => u.Symbol == unit);
         if (unitMatch is null) return new TimeUnit(TimeUnitType.Millisecond, value);

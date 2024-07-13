@@ -28,7 +28,8 @@ public static partial class RegexUtility
         if (match.Groups.Count <= 1) throw UnitParserException.NoMatches();
 
         var strValue = match.Groups[1].Value;
-        if (string.IsNullOrEmpty(strValue)) throw UnitParserException.NoValue();
+        if (string.IsNullOrEmpty(strValue)) 
+            throw UnitParserException.NoValue();
 
         if (!double.TryParse(strValue, out var value)) throw UnitParserException.InvalidValue();
 

@@ -3,6 +3,7 @@
 namespace ImageBox.Services.Loading;
 
 using Ast;
+using Jint.Native;
 using Scripting;
 
 /// <summary>
@@ -14,10 +15,10 @@ public interface IElementReflectionService
     /// Iterates through all <see cref="AstElement"/>s and gets the associated <see cref="IElement"/>
     /// </summary>
     /// <param name="elements">The elements to iterate through</param>
-    /// <param name="throwErr">Whether or not to throw an error if a property or attribute is missing</param>
+    /// <param name="skipChildren">Whether or not to skip binding the children</param>
     /// <returns>All of the <see cref="IElement"/> instances</returns>
-    /// <exception cref="MissingMemberException">Thrown if <paramref name="throwErr"/> is true and an element instance or attribute instance is missing</exception>
-    IEnumerable<IElement> BindTemplates(IEnumerable<AstElement> elements, bool throwErr = true);
+    /// <exception cref="MissingMemberException">Thrown if the config is set to throw errors and an element instance or attribute instance is missing</exception>
+    IEnumerable<IElement> BindTemplates(IEnumerable<AstElement> elements, bool skipChildren);
 
     /// <summary>
     /// Converts the given string to the property type and sets it's value
@@ -30,9 +31,10 @@ public interface IElementReflectionService
 
 internal class ElementReflectionService(
     IServiceProvider _services,
+    IServiceConfig _config,
     ILogger<ElementReflectionService> _logger) : IElementReflectionService
 {
-    private static ReflectedElement[]? _elements;
+    private ReflectedElement[]? _elements;
 
     /// <summary>
     /// This method is purely here because C#'s type system is annoying
@@ -88,7 +90,7 @@ internal class ElementReflectionService(
     /// </summary>
     /// <returns>The possible instances of <see cref="IElement"/></returns>
     /// <exception cref="InvalidOperationException">Thrown if the type configuration is bad</exception>
-    public static ReflectedElement[] AllElementTypes()
+    public ReflectedElement[] AllElementTypes()
     {
         //Return from the cache if possible
         if (_elements is not null) return _elements;
@@ -129,8 +131,13 @@ internal class ElementReflectionService(
             {
                 //Cannot be both a parent element and value element
                 if (childType != AstElementType.Empty)
-                    throw new InvalidOperationException(
-                        $"{type.FullName} cannot implement both {nameof(IParentElement)} and {nameof(IValueElement)}");
+                {
+                    _logger.LogWarning("{type} cannot implement both {IParentElement} and {IValueElement}", type.FullName, nameof(IParentElement), nameof(IValueElement));
+                    if (_config.Parser.Errors.ElementInvalidChild)
+                        throw new InvalidOperationException(
+                            $"{type.FullName} cannot implement both {nameof(IParentElement)} and {nameof(IValueElement)}");
+                    continue;
+                }
                 childType = AstElementType.Text;
                 child = properties.First(t => t.Name == nameof(IValueElement.Value));
             }
@@ -305,12 +312,19 @@ internal class ElementReflectionService(
         if (!isBindable)
         {
             //Ast is bind but property isn't bindable - Error
-            if (ast.Type == AstAttributeType.Bind)
+            if (ast.Type != AstAttributeType.Bind)
+            {
+                //Set the property value out-right
+                TypeCastBind(type, element, actualValue);
+                return;
+            }
+            //Throw an error if it's configured to
+            _logger.LogWarning("Cannot bind value as the target property isn't an AstValue<T>: " +
+                    "{astName}={actualValue} >> {Context}", ast.Name, actualValue, element.Context?.ExceptionString());
+            if (_config.Parser.Errors.AttributeBindInvalid)
                 throw new InvalidOperationException(
                     "Cannot bind value as the target property isn't an AstValue<T>: " +
                     $"{ast.Name}={actualValue} >> {element.Context?.ExceptionString()}");
-            //Set the property value out-right
-            TypeCastBind(type, element, actualValue);
             return;
         }
         //Get an instance of the value 
@@ -350,10 +364,10 @@ internal class ElementReflectionService(
     /// </summary>
     /// <param name="type">The reflection target for the instance</param>
     /// <param name="element">The AST element to create the instance from</param>
-    /// <param name="throwErr">Whether to throw an error if an attribute is missing</param>
+    /// <param name="skipChildren">Whether or not to skip binding the children</param>
     /// <returns>The instance of the element</returns>
-    /// <exception cref="InvalidOperationException">Thrown if <paramref name="throwErr"/> is true and an element instance or attribute instance is missing</exception>
-    public IElement? BindInstance(ReflectedElement type, AstElement element, bool throwErr)
+    /// <exception cref="InvalidOperationException">Thrown if the config is set to throw errors and an element instance or attribute instance is missing</exception>
+    public IElement? BindInstance(ReflectedElement type, AstElement element, bool skipChildren)
     {
         //Generate the instance from the reflected type
         var instance = GenerateInstance(type);
@@ -363,9 +377,10 @@ internal class ElementReflectionService(
         instance.Context = element;
         //Find and set any child elements on this template
         if (type.ChildType == AstElementType.Children &&
-            element.Children.Length > 0)
+            element.Children.Length > 0 &&
+            !skipChildren)
         {
-            var children = BindTemplates(element.Children, throwErr).ToArray();
+            var children = BindTemplates(element.Children, skipChildren).ToArray();
             type.ChildProperty!.SetValue(instance, children);
         }
         //Find and set the template value
@@ -389,10 +404,8 @@ internal class ElementReflectionService(
             if (props.Length > 1)
             {
                 _logger.LogWarning("More than one properties match: {type}::{attr} >> {exStr}",
-                    type.Type.FullName,
-                    attr.Name,
-                    element.ExceptionString());
-                if (throwErr)
+                    type.Type.FullName, attr.Name, element.ExceptionString());
+                if (_config.Parser.Errors.AttributeMoreThanOne)
                     throw new InvalidOperationException(
                         $"More than one properties match: {type.Type.FullName}::" +
                         $"{attr.Name} >> {element.ExceptionString()}");
@@ -409,10 +422,10 @@ internal class ElementReflectionService(
     /// Iterates through all <see cref="AstElement"/>s and gets the associated <see cref="IElement"/>
     /// </summary>
     /// <param name="elements">The elements to iterate through</param>
-    /// <param name="throwErr">Whether or not to throw an error if a property or attribute is missing</param>
+    /// <param name="skipChildren">Whether or not to skip binding the children</param>
     /// <returns>All of the <see cref="IElement"/> instances</returns>
-    /// <exception cref="MissingMemberException">Thrown if <paramref name="throwErr"/> is true and an element instance or attribute instance is missing</exception>
-    public IEnumerable<IElement> BindTemplates(IEnumerable<AstElement> elements, bool throwErr = true)
+    /// <exception cref="MissingMemberException">Thrown if the config is set to throw errors and an element instance or attribute instance is missing</exception>
+    public IEnumerable<IElement> BindTemplates(IEnumerable<AstElement> elements, bool skipChildren)
     {
         //Get all of the possible instances of IElement
         var types = AllElementTypes();
@@ -430,7 +443,7 @@ internal class ElementReflectionService(
             if (foundTypes.Length == 0)
             {
                 _logger.LogWarning("Could not find element type for: {exStr}", exStr);
-                if (throwErr)
+                if (_config.Parser.Errors.ElementNotFound)
                     throw new MissingMemberException($"Could not find element type for: {exStr}");
                 continue;
             }
@@ -438,19 +451,19 @@ internal class ElementReflectionService(
             if (foundTypes.Length > 1)
             {
                 _logger.LogWarning("Multiple element types found for: {exStr}", exStr);
-                if (throwErr)
+                if (_config.Parser.Errors.ElementMoreThanOne)
                     throw new MissingMemberException($"Multiple element types found for: {exStr}");
                 continue;
             }
             //The correct match
             var type = foundTypes.First();
             //The instance of the IElement with all of it's properties bound
-            var instance = BindInstance(type, element, throwErr);
+            var instance = BindInstance(type, element, skipChildren);
             //Filter missing instances
             if (instance is null)
             {
                 _logger.LogWarning("Could not create instance of type: {type} >> {exStr}", type.Type.FullName, exStr);
-                if (throwErr)
+                if (_config.Parser.Errors.InvalidInstance)
                     throw new MissingMemberException($"Could not create instance of type: {type.Type.FullName} >> {exStr}");
                 continue;
             }

@@ -20,6 +20,9 @@ internal class FileResolverService(
 {
     public Task<FileResult> Fetch(IOPath path)
     {
+        if (path.Type.HasFlag(IOPathType.Cache))
+            throw new NotSupportedException("Cache paths are not supported via raw-file resolution as it requires the cache context");
+
         if (path.Type.HasFlag(IOPathType.Http))
             return GetHttp(path.OSSafe);
 

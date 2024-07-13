@@ -2,13 +2,13 @@
 
 [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = JUSTIFICATION)]
 internal class Drawing(
-    RenderContext _context)
+    ContextFrame _context)
 {
     private const string JUSTIFICATION = "Meant to be used within JavaScript modules where lowercase naming is the standard";
 
     public double UnitContext(string value, SizeContext? context, bool? isWidth)
     {
-        context ??= _context.Size;
+        context ??= _context.LastScope.Size;
         return SizeUnit.Parse(value).Pixels(context, isWidth);
     }
 
@@ -16,7 +16,7 @@ internal class Drawing(
 
     public double right(string value)
     {
-        var ctx = _context.Size;
+        var ctx = _context.LastScope.Size;
         var size = UnitContext(value, ctx, true);
         return ctx.Root.Width - size;
     }
@@ -27,7 +27,7 @@ internal class Drawing(
 
     public double bottom(string value)
     {
-        var ctx = _context.Size;
+        var ctx = _context.LastScope.Size;
         var size = UnitContext(value, ctx, false);
         return ctx.Root.Height - size;
     }

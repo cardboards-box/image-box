@@ -14,23 +14,14 @@ public interface IScriptExecutionService
     /// <param name="context">The render context to attach to</param>
     /// <returns></returns>
     /// <exception cref="RenderContextException">Thrown if something goes wrong during execution</exception>
-    Task Execute(RenderContext context);
+    Task Execute(ContextFrame context);
 
     /// <summary>
     /// Traverse through all of the elements in the context and handle binds or spreads
     /// </summary>
     /// <param name="context">The render context</param>
     /// <param name="elements">The elements to traverse through</param>
-    void HandleAttributes(RenderContext context, IEnumerable<IElement>? elements = null);
-
-    /// <summary>
-    /// Generates a render scope context
-    /// </summary>
-    /// <param name="context">The full render context</param>
-    /// <param name="parent">The target element</param>
-    /// <param name="config">A method for configuring the scope</param>
-    /// <returns>The context as a disposable object</returns>
-    ScopeContext Scope(RenderContext context, IElement parent, Action<ScopeContext>? config = null);
+    void HandleAttributes(ContextFrame context, IEnumerable<IElement>? elements = null);
 }
 
 internal class ScriptExecutionService(
@@ -46,16 +37,16 @@ internal class ScriptExecutionService(
     /// <param name="context">The render context to attach to</param>
     /// <returns></returns>
     /// <exception cref="RenderContextException">Thrown if something goes wrong during execution</exception>
-    public async Task Execute(RenderContext context)
+    public async Task Execute(ContextFrame context)
     {
         try
         {
             //No runner? Skip it
-            if (context.Runner is null) return;
+            if (context.BoxContext.Runner is null) return;
             //Execute the script and get the result
-            var result = await context.Runner.Execute(context);
+            var result = await context.BoxContext.Runner.Execute(context);
             //Set the result to the root scope
-            context.SetRootScope(result);
+            context.FrameScope.Set(result);
             //Find and bind all of the elements in the template root.
             HandleAttributes(context);
         }
@@ -66,22 +57,8 @@ internal class ScriptExecutionService(
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error occurred while executing element script");
-            throw new RenderContextException("Error occurred while executing element script", ex, context.Context);
+            throw new RenderContextException("Error occurred while executing element script", ex, context.BoxContext.Ast);
         }
-    }
-
-    /// <summary>
-    /// Generates a render scope context and binds it to the parent
-    /// </summary>
-    /// <param name="context">The full render context</param>
-    /// <param name="parent">The target element</param>
-    /// <param name="config">A method for configuring the scope</param>
-    /// <returns>The context as a disposable object</returns>
-    public ScopeContext Scope(RenderContext context, IElement parent, Action<ScopeContext>? config = null)
-    {
-        var output = new ScopeContext(context, this, parent);
-        config?.Invoke(output);
-        return output.Bind();
     }
 
     /// <summary>
@@ -90,16 +67,18 @@ internal class ScriptExecutionService(
     /// <param name="context">The context to bind</param>
     /// <param name="instance">The element to bind to</param>
     /// <param name="ast">The AST attribute that is being bound</param>
-    public void HandleSpread(RenderContext context, IElement instance, AstAttribute ast)
+    public void HandleSpread(ContextFrame context, IElement instance, AstAttribute ast)
     {
         //Ensure there is an evaluator
         ast.Cache ??= new ExpressionEvaluator(ast.Name);
         //Get the evaluator and ensure the type
         if (ast.Cache is not ExpressionEvaluator evaluator) return;
-        //Bind the evaluator with the current context
-        context.BindTo(evaluator);
-        //Evaluate the expression
-        var value = evaluator.Evaluate();
+        //Bind and Evaluate the expression
+        var value = evaluator.Evaluate(c =>
+        {
+            foreach (var scope in context.Stack)
+                c.Set(scope.Variables);
+        });
         //If the value is null, skip it
         if (value is null) return;
         //Iterate through all the properties
@@ -123,8 +102,19 @@ internal class ScriptExecutionService(
                 //This shouldn't be happening, but ok.
                 if (property is null || target is null) continue;
             }
-            //Bind the value of the property
-            _elements.TypeCastBind(property, target, val);
+            try
+            { 
+                //Bind the value of the property
+                _elements.TypeCastBind(property, target, val);
+            }
+            catch (RenderContextException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                throw new RenderContextException($"Error occurred while binding spread attribute: {ast.Name}", ex, context.BoxContext.Ast, instance.Context);
+            }
         }
     }
 
@@ -135,7 +125,7 @@ internal class ScriptExecutionService(
     /// <param name="instance">The element to bind to</param>
     /// <param name="ast">The AST attribute that is being bound</param>
     /// <exception cref="RenderContextException">Thrown if the reflection requests fail</exception>
-    public void HandleBind(RenderContext context, IElement instance, AstAttribute ast)
+    public void HandleBind(ContextFrame context, IElement instance, AstAttribute ast)
     {
         //Get the property type and reflection data
         var property = GetProperty(context, instance, ast.Name);
@@ -144,13 +134,13 @@ internal class ScriptExecutionService(
         if (!property.IsBindable)
             throw new RenderContextException(
                 $"AST attribute is marked as bind, but the C# property isn't bindable: {ast.Name}",
-                context.Context,
+                context.BoxContext.Ast,
                 instance.Context);
         //Get the AstValue<> instance on the element
         var astValue = property.Type.GetValue(instance) 
             ?? throw new RenderContextException(
                 $"AST attribute is marked as bind, but the C# property is null: {ast.Name}",
-                context.Context,
+                context.BoxContext.Ast,
                 instance.Context);
         //Get the expression value from the AstValue<>
         var bindValue = astValue.GetType()
@@ -163,14 +153,27 @@ internal class ScriptExecutionService(
         if (bindValue is not ExpressionEvaluator expression || valueProp is null)
             throw new RenderContextException(
                 $"AST attribute is marked as bind, but the C# property is missing bind property: {ast.Name}",
-                context.Context,
+                context.BoxContext.Ast,
                 instance.Context);
-        //Set the context for the expression
-        context.BindTo(expression);
-        //Get the value of the expression
-        var value = expression.Evaluate();
+        //Bind and Get the value of the expression
+        var value = expression.Evaluate(c =>
+        {
+            foreach (var scope in context.Stack)
+                c.Set(scope.Variables);
+        });
         //Set the value of the expression 
-        _elements.TypeCastBind(valueProp, astValue, value);
+        try
+        {
+            _elements.TypeCastBind(valueProp, astValue, value);
+        }
+        catch (RenderContextException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            throw new RenderContextException($"Error occurred while binding attribute: {ast.Name} >> {ast.Value}", ex, context.BoxContext.Ast, instance.Context);
+        }
     }
 
     /// <summary>
@@ -181,7 +184,7 @@ internal class ScriptExecutionService(
     /// <param name="name">The name of the attribute to fetch</param>
     /// <returns>The reflected property data</returns>
     /// <exception cref="RenderContextException">Thrown if multiple attribute properties exist</exception>
-    public static ReflectedAttribute? GetProperty(RenderContext context, IElement element, string name)
+    public static ReflectedAttribute? GetProperty(ContextFrame context, IElement element, string name)
     {
         var props = element.Reflected!.Props
             .Where(t => t.Attributes.Any(a => 
@@ -190,7 +193,7 @@ internal class ScriptExecutionService(
         if (props.Length > 1)
             throw new RenderContextException(
                 $"Ambiguous property '{name}' found in element", 
-                context.Context, element.Context);
+                context.BoxContext.Ast, element.Context);
         return props.FirstOrDefault();
     }
 
@@ -199,7 +202,7 @@ internal class ScriptExecutionService(
     /// </summary>
     /// <param name="context">The render context</param>
     /// <param name="instance">The element to handle the attributes of</param>
-    public void BindAttributes(RenderContext context, IElement instance)
+    public void BindAttributes(ContextFrame context, IElement instance)
     {
         //If there is no reflected context or AST context, skip it
         if (instance.Context is null || instance.Reflected is null) return;
@@ -226,10 +229,10 @@ internal class ScriptExecutionService(
     /// </summary>
     /// <param name="context">The render context</param>
     /// <param name="elements">The elements to traverse through</param>
-    public void HandleAttributes(RenderContext context, IEnumerable<IElement>? elements = null)
+    public void HandleAttributes(ContextFrame context, IEnumerable<IElement>? elements = null)
     {
         //Get the current element list to iterate (mostly for recursion)
-        elements ??= context.Template.Children;
+        elements ??= context.Elements;
         //Iterate through each element
         foreach (var element in elements)
         {

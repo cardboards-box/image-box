@@ -8,45 +8,73 @@ namespace ImageBox.Scripting;
 /// Evaluate JavaScript expressions within a certain scope
 /// </summary>
 /// <param name="Expression"></param>
-public class ExpressionEvaluator(
-    string Expression)
+public class ExpressionEvaluator(string Expression)
 {
-    private readonly Engine _engine = new();
-    private readonly Prepared<Script> _statement = Engine.PrepareScript(Expression);
-
     /// <summary>
-    /// Sets the context using the given value
+    /// The prepared statement for the expression
     /// </summary>
-    /// <param name="value">The value to read properties from</param>
-    /// <returns>The current expression evaluator for chaining</returns>
-    public ExpressionEvaluator SetContext(JsValue? value)
-    {
-        foreach(var (key, obj) in value.Enumerator())
-            _engine.SetValue(key, obj);
-        return this;
-    }
-
-    /// <summary>
-    /// Sets the context using the given dictionary
-    /// </summary>
-    /// <param name="value">The value to read properties of</param>
-    /// <returns>The current expression evaluator for chaining</returns>
-    public ExpressionEvaluator SetContext(Dictionary<string, object?> value)
-    {
-        foreach (var (key, obj) in value)
-            _engine.SetValue(key.ToString(), obj);
-
-        return this;
-    }
+    public Prepared<Script> Statement { get; } = Engine.PrepareScript(Expression);
 
     /// <summary>
     /// Evaluates the current expression
     /// </summary>
-    /// <param name="context">The context of the execution</param>
+    /// <param name="builder">The expression builder for setting variables</param>
     /// <returns>The value of the expression</returns>
-    public JsValue? Evaluate(JsValue? context = null)
+    public JsValue? Evaluate(Action<ExpressionBuilder>? builder = null)
     {
-        if (context is null) SetContext(context);
-        return _engine.Evaluate(_statement);
+        using var bob = new ExpressionBuilder(Statement);
+        builder?.Invoke(bob);
+        return bob.Run();
+    }
+
+    /// <summary>
+    /// The expression builder for setting variables
+    /// </summary>
+    /// <param name="Script">The script to be run</param>
+    public class ExpressionBuilder(Prepared<Script> Script) : IDisposable
+    {
+        private readonly Engine _engine = new();
+
+        /// <summary>
+        /// Set the scope from the given variables
+        /// </summary>
+        /// <param name="variables">The variables to set</param>
+        /// <returns>The builder for chaining</returns>
+        public ExpressionBuilder Set(JsValue? variables)
+        {
+            foreach (var (key, obj) in variables.Enumerator())
+                _engine.SetValue(key, obj);
+            return this;
+        }
+
+        /// <summary>
+        /// Set the scope from the given variables
+        /// </summary>
+        /// <param name="variables">The variables to set</param>
+        /// <returns>The builder for chaining</returns>
+        public ExpressionBuilder Set(Dictionary<string, object?> variables)
+        {
+            foreach (var (key, obj) in variables)
+                _engine.SetValue(key, obj);
+            return this;
+        }
+
+        /// <summary>
+        /// Executes the script with the given variables
+        /// </summary>
+        /// <returns></returns>
+        public JsValue? Run()
+        {
+            return _engine.Evaluate(Script);
+        }
+
+        /// <summary>
+        /// Disposes of the engine
+        /// </summary>
+        public void Dispose()
+        {
+            _engine.Dispose();
+            GC.SuppressFinalize(this);
+        }
     }
 }

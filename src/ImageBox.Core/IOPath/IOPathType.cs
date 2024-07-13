@@ -42,6 +42,10 @@ public enum IOPathType : ushort
     /// Indicates the path starts with a tilde
     /// </summary>
     Tilde = 64,
+    /// <summary>
+    /// Indicates the path is for a remote-source cache
+    /// </summary>
+    Cache = 128,
 
     /// <summary>
     /// Path resolves to a local file relative to the base URI
@@ -64,4 +68,8 @@ public enum IOPathType : ushort
     /// </summary>
     /// <remarks>Not implemented yet</remarks>
     REMOTE_FTP = Remote | Ftp | Absolute,
+    /// <summary>
+    /// Path resolves to a remote-source cache key
+    /// </summary>
+    CACHE = Cache | Absolute
 }

@@ -5,9 +5,10 @@
 /// </summary>
 /// <param name="Type">The type of unit of time</param>
 /// <param name="Value">The value of the time unit</param>
+[JsonConverter(typeof(TimeUnitSerializer))]
 public record struct TimeUnit(
-    [property: JsonPropertyName("type")] TimeUnitType Type,
-    [property: JsonPropertyName("value")] double Value)
+    TimeUnitType Type,
+    double Value)
 {
     /// <summary>
     /// A time of zero

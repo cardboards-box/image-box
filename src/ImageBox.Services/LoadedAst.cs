@@ -5,7 +5,7 @@ using Ast;
 /// <summary>
 /// Represents the boxed image data loaded from a file
 /// </summary>
-public class BoxedImageData
+public class LoadedAst
 {
     /// <summary>
     /// The directory the file was loaded from
@@ -16,11 +16,6 @@ public class BoxedImageData
     /// The name of the file in the <see cref="WorkingDirectory"/>
     /// </summary>
     public required string FileName { get; init; }
-
-    /// <summary>
-    /// All of the elements in the <see cref="SyntaxTree"/>
-    /// </summary>
-    public required IElement[] Elements { get; init; } = [];
 
     /// <summary>
     /// All of the AST elements in the template

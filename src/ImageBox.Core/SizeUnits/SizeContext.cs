@@ -8,6 +8,7 @@
 /// <param name="Width">The width of the context</param>
 /// <param name="Height">The height of the context</param>
 /// <param name="FontSize">The font size of the context</param>
+/// <param name="FontFamily">The font family of the context</param>
 /// <param name="Parents">Any parent contexts (first will be root)</param>
 public record class SizeContext(
     int X,
@@ -15,6 +16,7 @@ public record class SizeContext(
     int Width,
     int Height,
     int FontSize,
+    string FontFamily,
     params SizeContext[] Parents)
 {
     /// <summary>
@@ -41,9 +43,10 @@ public record class SizeContext(
     /// <param name="width">The optional width of the new context</param>
     /// <param name="height">The optional height of the new context</param>
     /// <param name="fontSize">The font size for the new context</param>
+    /// <param name="fontFamily">The font family for the new context</param>
     /// <returns>The new context</returns>
     /// <remarks>If <paramref name="width"/> or <paramref name="height"/> are not given, the parameter will be calculated from the given offsets</remarks>
-    public SizeContext GetContext(int xOffset, int yOffset, int? width = null, int? height = null, int? fontSize = null)
+    public SizeContext GetContext(int xOffset, int yOffset, int? width = null, int? height = null, int? fontSize = null, string? fontFamily = null)
     {
         var parents = Parents.Append(this).ToArray();
 
@@ -51,7 +54,7 @@ public record class SizeContext(
         var y = Y + yOffset;
         var w = width ?? Width - xOffset;
         var h = height ?? Height - yOffset;
-        return new SizeContext(x, y, w, h, fontSize ?? FontSize, parents);
+        return new SizeContext(x, y, w, h, fontSize ?? FontSize, fontFamily ?? FontFamily, parents);
     }
 
     /// <summary>
@@ -60,9 +63,10 @@ public record class SizeContext(
     /// <param name="width">The width of the context</param>
     /// <param name="height">The height of the context</param>
     /// <param name="fontSize">The size of the font for the context</param>
+    /// <param name="fontFamily">The font family of the font for the context</param>
     /// <returns>The root context size</returns>
-    public static SizeContext ForRoot(int width, int height, int fontSize)
+    public static SizeContext ForRoot(int width, int height, int fontSize, string fontFamily)
     {
-        return new SizeContext(0, 0, width, height, fontSize);
+        return new SizeContext(0, 0, width, height, fontSize, fontFamily);
     }
 }

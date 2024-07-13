@@ -14,45 +14,31 @@ public static class DiExtensions
     /// Adds all of the image box services to the service collection
     /// </summary>
     /// <param name="services">The service collection to add to</param>
-    /// <param name="onlyInternal">Whether to only register internal IB services or include 3rd party ones as well</param>
+    /// <param name="config">The configuration instance</param>
+    /// <param name="section">The root section for the configuration</param>
     /// <returns>The service collection for chaining</returns>
-    public static IServiceCollection AddImageBox(this IServiceCollection services, bool onlyInternal = false)
+    public static IServiceCollection AddImageBox(this IServiceCollection services, IConfiguration config, string section = "ImageBox")
     {
+        var data = new ServiceConfig();
+        config.GetSection(section).Bind(data);
+
         return services
-            .AddBaseImageBox(onlyInternal)
-            .AddImageBoxConfig();
+            .AddBaseImageBox(data.InternalServicesOnly)
+            .AddSingleton(config)
+            .AddSingleton<IServiceConfig>(data);
     }
 
     /// <summary>
     /// Adds all of the image box services to the service collection
     /// </summary>
-    /// <typeparam name="T">The image box configuration type</typeparam>
     /// <param name="services">The service collection to add to</param>
-    /// <param name="config">The instance of the configuration</param>
-    /// <param name="onlyInternal">Whether to only register internal IB services or include 3rd party ones as well</param>
+    /// <param name="config">The configuration for image box</param>
     /// <returns>The service collection for chaining</returns>
-    public static IServiceCollection AddImageBox<T>(this IServiceCollection services, T config, bool onlyInternal = false)
-        where T : class, IImageBoxConfig
+    public static IServiceCollection AddImageBox(this IServiceCollection services, IServiceConfig config)
     {
         return services
-            .AddBaseImageBox(onlyInternal)
-            .AddImageBoxConfig(config);
-    }
-
-    /// <summary>
-    /// Adds all of the image box services to the service collection
-    /// </summary>
-    /// <typeparam name="T">The image box configuration type</typeparam>
-    /// <param name="services">The service collection to add to</param>
-    /// <param name="singleton">Whether or not to register the service as a singleton</param>
-    /// <param name="onlyInternal">Whether to only register internal IB services or include 3rd party ones as well</param>
-    /// <returns>The service collection for chaining</returns>
-    public static IServiceCollection AddImageBox<T>(this IServiceCollection services, bool singleton, bool onlyInternal = false)
-        where T : class, IImageBoxConfig
-    {
-        return services
-            .AddBaseImageBox(onlyInternal)
-            .AddImageBoxConfig<T>(singleton);
+            .AddBaseImageBox(config.InternalServicesOnly)
+            .AddSingleton(config);
     }
 
     internal static IServiceCollection AddBaseImageBox(this IServiceCollection services, bool onlyInternal)

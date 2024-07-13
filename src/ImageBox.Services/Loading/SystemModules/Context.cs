@@ -2,7 +2,7 @@
 
 [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = JUSTIFICATION)]
 internal class Context(
-    RenderContext _context)
+    ContextFrame _context)
 {
     private const string JUSTIFICATION = "Meant to be used within JavaScript modules where lowercase naming is the standard";
 

@@ -40,17 +40,17 @@ public static class SizeUnitHelper
     /// <exception cref="UnitParserException">Thrown if the <paramref name="input"/> is not a valid unit of measurement</exception>
     public static SizeUnit ParseUnit(string input)
     {
-        if (string.IsNullOrEmpty(input)) throw new ArgumentNullException(nameof(input));
+        if (string.IsNullOrWhiteSpace(input)) throw new ArgumentNullException(nameof(input));
 
         input = input.Trim().ToLower();
 
         if (input == "0") return SizeUnit.Zero;
 
         input = RegexUtility.UnitFilter(input);
-        if (string.IsNullOrEmpty(input)) return SizeUnit.Zero;
+        if (string.IsNullOrWhiteSpace(input)) return SizeUnit.Zero;
 
         var (value, unit) = RegexUtility.UnitParse(input);
-        if (string.IsNullOrEmpty(unit)) return new SizeUnit(SizeUnitType.Pixel, value);
+        if (string.IsNullOrWhiteSpace(unit)) return new SizeUnit(SizeUnitType.Pixel, value);
 
         var unitMatch = Units().FirstOrDefault(u => u.Symbol == unit);
         if (unitMatch is null) return new SizeUnit(SizeUnitType.Pixel, value);

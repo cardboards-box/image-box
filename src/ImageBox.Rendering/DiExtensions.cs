@@ -1,5 +1,7 @@
 ﻿namespace ImageBox.Rendering;
 
+using Animations;
+using Animations.Bezier;
 using Directives;
 using Renderers;
 
@@ -25,6 +27,8 @@ public static class DiExtensions
             .AddSingleton<ClearElem>()
             .AddSingleton<ImageElem>()
             .AddSingleton<RectangleElem>()
-            .AddSingleton<TextElem>();
+            .AddSingleton<TextElem>()
+            .AddSingleton<BezierAnimationElem>()
+            .AddSingleton<PointElem>();
     }
 }

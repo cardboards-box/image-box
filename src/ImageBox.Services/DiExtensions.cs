@@ -11,9 +11,9 @@ public static class DiExtensions
     public static IServiceCollection AddServices(this IServiceCollection services)
     {
         return services
-            .AddTransient<ITemplateLoaderService, TemplateLoaderService>()
+            .AddTransient<IAstLoaderService, AstLoaderService>()
             .AddTransient<IScriptExecutionService, ScriptExecutionService>()
             .AddTransient<IContextGeneratorService, ContextGeneratorService>()
-            .AddTransient<IElementReflectionService, ElementReflectionService>();
+            .AddSingleton<IElementReflectionService, ElementReflectionService>();
     }
 }

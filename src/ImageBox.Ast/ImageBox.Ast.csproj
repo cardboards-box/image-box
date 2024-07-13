@@ -8,15 +8,15 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\ImageBox.Core\ImageBox.Core.csproj" />
-	</ItemGroup>
-
-	<ItemGroup>
 		<Compile Include="./../global.cs" />
 	</ItemGroup>
 
 	<ItemGroup>
 	  <PackageReference Include="HtmlAgilityPack" Version="1.11.61" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\ImageBox.Scripting\ImageBox.Scripting.csproj" />
 	</ItemGroup>
 
 </Project>

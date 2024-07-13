@@ -11,7 +11,7 @@ using Ast;
 /// <param name="Context">The AST element context</param>
 public class RenderContextException(
     string Message,
-    BoxedImageData? Image = null,
+    LoadedAst? Image = null,
     Exception? InnerException = null,
     AstElement?[]? Context = null) : Exception(Message, InnerException)
 {
@@ -21,7 +21,7 @@ public class RenderContextException(
     /// <param name="message">The exception message</param>
     /// <param name="image">The image that caused the exception</param>
     /// <param name="Context">The AST element context</param>
-    public RenderContextException(string message, BoxedImageData image, params AstElement?[] Context)
+    public RenderContextException(string message, LoadedAst image, params AstElement?[] Context)
         : this(message, image, null, Context) { }
 
     /// <summary>
@@ -31,7 +31,7 @@ public class RenderContextException(
     /// <param name="inner">The inner exception that caused all of this</param>
     /// <param name="image">The image that caused the exception</param>
     /// <param name="Context">The AST element context</param>
-    public RenderContextException(string message, Exception inner, BoxedImageData image, params AstElement?[] Context)
+    public RenderContextException(string message, Exception inner, LoadedAst image, params AstElement?[] Context)
         : this(message, image, inner, Context) { }
 
 
@@ -41,7 +41,7 @@ public class RenderContextException(
     /// <param name="message">The exception message</param>
     /// <param name="Context">The AST element context</param>
     public RenderContextException(string message, params AstElement?[] Context)
-        : this(message, (BoxedImageData?)null, null, Context) { }
+        : this(message, (LoadedAst?)null, null, Context) { }
 
     /// <summary>
     /// An exception thrown if there is an error rendering or loading the boxed image

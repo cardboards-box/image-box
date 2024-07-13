@@ -3,9 +3,8 @@
 /// <summary>
 /// Represents a for-each directive
 /// </summary>
-/// <param name="_execution">The script execution service</param>
 [AstElement("foreach")]
-public class ForEachDir(IScriptExecutionService _execution) : DirectiveElement
+public class ForEachDir : DirectiveElement
 {
     /// <summary>
     /// Iterate through each of the values
@@ -24,16 +23,16 @@ public class ForEachDir(IScriptExecutionService _execution) : DirectiveElement
     /// </summary>
     /// <param name="context">The rendering context</param>
     /// <returns></returns>
-    public override async Task Render(RenderContext context)
+    public override async Task Render(ContextFrame context)
     {
         if (string.IsNullOrWhiteSpace(Let)) 
             throw new RenderContextException(
                 "The 'let' attribute is required for the foreach directive", 
-                context.Context, Context);
+                context.BoxContext.Ast, Context);
 
         foreach(var value in Each.Value ?? [])
         {
-            using var scope = _execution.Scope(context, this, c => c.SetVar(Let, value));
+            using var scope = context.Scope(this, null, new Dictionary<string, object?> { [Let] = value });
             foreach (var child in Children)
                 if (child is RenderElement render)
                     await render.Render(context);

@@ -5,9 +5,8 @@ namespace ImageBox.Rendering.Renderers;
 /// <summary>
 /// Represents text to be drawn to the image
 /// </summary>
-/// <param name="_execution">The script execution service</param>
 [AstElement("text")]
-public class TextElem(IScriptExecutionService _execution) : PositionalElement(_execution)
+public class TextElem : PositionalElement
 {
     /// <summary>
     /// The value of the text to draw to the image
@@ -44,7 +43,7 @@ public class TextElem(IScriptExecutionService _execution) : PositionalElement(_e
     /// </summary>
     /// <param name="context">The rendering context</param>
     /// <returns></returns>
-    public override Task Render(RenderContext context)
+    public override Task Render(ContextFrame context)
     {
         if (string.IsNullOrWhiteSpace(Value.Value))
             return Task.CompletedTask;

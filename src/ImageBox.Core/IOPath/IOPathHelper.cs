@@ -24,7 +24,8 @@ public static class IOPathHelper
         { Uri.UriSchemeHttps, IOPathType.REMOTE_HTTP },
         { Uri.UriSchemeFtp, IOPathType.REMOTE_FTP },
         { Uri.UriSchemeFtps, IOPathType.REMOTE_FTP },
-        { Uri.UriSchemeFile, IOPathType.LOCAL_ABSOLUTE }
+        { Uri.UriSchemeFile, IOPathType.LOCAL_ABSOLUTE },
+        { "rsc", IOPathType.CACHE }
     };
 
     /// <summary>
@@ -64,6 +65,9 @@ public static class IOPathHelper
     public static IOPathType DetermineType(string? path)
     {
         if (string.IsNullOrWhiteSpace(path)) return IOPathType.Unknown;
+
+        if (path.StartsWith("rsc://", StringComparison.CurrentCultureIgnoreCase))
+            return IOPathType.CACHE;
 
         if (Uri.TryCreate(path, UriKind.Absolute, out var uri))
             return PathTypeMap.TryGetValue(uri.Scheme, out var type) ? type : IOPathType.Unknown;

@@ -9,40 +9,29 @@ public interface IFileCacheService
     /// Gets the file either from the cache or from the given URL
     /// </summary>
     /// <param name="url">The url to fetch</param>
-    /// <param name="config">The optional configuration action</param>
     /// <param name="cacheDir">The cache directory</param>
     /// <param name="userAgent">The user agent to use for the file download</param>
     /// <returns>A task representing the results of the cached file request</returns>
     Task<FileCacheResult> GetFile(
-        string url, Action<HttpRequestMessage>? config = null,
+        string url,
         string? cacheDir = null, string? userAgent = null);
 }
 
 internal class FileCacheService(
+    IServiceConfig _config,
     IApiService _api,
-    IJsonService _json,
-    IImageBoxConfig _config) : IFileCacheService
+    IJsonService _json) : IFileCacheService
 {
-    /// <summary>
-    /// Requests a network resource from the given url
-    /// </summary>
-    /// <param name="url">The URL resource to fetch</param>
-    /// <param name="config">Any optional configuration parameters</param>
-    /// <param name="userAgent">The user-agent to use for the request</param>
-    /// <returns>The stream, file length, filename, and MimeType from the network request</returns>
-    /// <exception cref="NullReferenceException">Thrown if the returned request is null upon attempting the read</exception>
     public async Task<FileCacheResult> GetData(string url,
-        Action<HttpRequestMessage>? config = null,
         string? userAgent = null)
     {
-        userAgent ??= _config.UserAgent;
-        config ??= _config.CacheRequestConfig;
+        userAgent ??= _config.Requests.UserAgent;
         var req = await _api.Create(url)
             .Accept("*/*")
             .With(c =>
             {
                 c.Headers.Add("user-agent", userAgent);
-                config?.Invoke(c);
+                _config.Requests.Configure?.Invoke(c);
             })
             .Result() ?? throw new NullReferenceException($"Request returned null for: {url}");
         req.EnsureSuccessStatusCode();
@@ -58,15 +47,14 @@ internal class FileCacheService(
     /// Gets the file either from the cache or from the given URL
     /// </summary>
     /// <param name="url">The url to fetch</param>
-    /// <param name="config">The optional configuration action</param>
     /// <param name="cacheDir">The cache directory</param>
     /// <param name="userAgent">The user agent to use for the file download</param>
     /// <returns>A task representing the results of the cached file request</returns>
     public async Task<FileCacheResult> GetFile(
-        string url, Action<HttpRequestMessage>? config = null, 
+        string url,
         string? cacheDir = null, string? userAgent = null)
     {
-        cacheDir ??= _config.CacheDirectory;
+        cacheDir ??= _config.Requests.CacheDirectory;
 
         if (!Directory.Exists(cacheDir))
             Directory.CreateDirectory(cacheDir);
@@ -78,7 +66,7 @@ internal class FileCacheService(
             return new(ReadFile(hash, cacheDir), cacheInfo.Name, cacheInfo.MimeType);
 
         var io = new MemoryStream();
-        var (stream, file, type) = await GetData(url, config, userAgent);
+        var (stream, file, type) = await GetData(url, userAgent);
         await stream.CopyToAsync(io);
         io.Position = 0;
         cacheInfo = new FileCacheItem(file, type, DateTime.Now);

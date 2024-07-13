@@ -1,12 +1,12 @@
-﻿using ImageBox.Services;
+﻿namespace ImageBox;
 
-namespace ImageBox;
+using Services;
 
 /// <summary>
 /// Represents a render-able image box
 /// </summary>
 /// <remarks>You should cache this and reuse if possible, then dispose when you don't need it anymore</remarks>
-public interface IImageBox : IDisposable
+public interface IImageBox
 {
     /// <summary>
     /// The path to the image box file
@@ -16,12 +16,12 @@ public interface IImageBox : IDisposable
     /// <summary>
     /// The data loaded from the image box file
     /// </summary>
-    BoxedImageData? Data { get; set; }
+    LoadedAst? Data { get; set; }
 
     /// <summary>
     /// The render box context for the image box
     /// </summary>
-    RenderContext? Context { get; set;  }
+    ContextBox? Context { get; set;  }
 }
 
 /// <summary>
@@ -37,21 +37,10 @@ public class ImageBox : IImageBox
     /// <summary>
     /// The data loaded from the image box file
     /// </summary>
-    public BoxedImageData? Data { get; set; }
+    public LoadedAst? Data { get; set; }
 
     /// <summary>
     /// The render box context for the image box
     /// </summary>
-    public RenderContext? Context { get; set; }
-
-    /// <summary>
-    /// Dispose of the render context and data
-    /// </summary>
-    public void Dispose()
-    {
-        Context?.Dispose();
-        Data = null;
-        Context = null;
-        GC.SuppressFinalize(this);
-    }
+    public ContextBox? Context { get; set; }
 }

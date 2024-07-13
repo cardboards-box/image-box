@@ -1,4 +1,5 @@
 ﻿using SixLabors.Fonts;
+using System.Collections.Concurrent;
 
 namespace ImageBox.Services;
 
@@ -10,12 +11,12 @@ public class ContextFonts
     /// <summary>
     /// The font collection for the context
     /// </summary>
-    public required FontCollection Collection { get; init; }
+    public FontCollection Collection { get; set; } = new();
 
     /// <summary>
     /// All of the font families in the collection
     /// </summary>
-    public Dictionary<string, LoadedFont> Families { get; init; } = [];
+    public ConcurrentDictionary<string, LoadedFont> Families { get; } = [];
 
     /// <summary>
     /// Get the font family with the specified name
@@ -25,7 +26,7 @@ public class ContextFonts
     /// <param name="style">The style of the font</param>
     /// <returns>The loaded font</returns>
     /// <exception cref="RenderContextException">Thrown if the font doesn't exist</exception>
-    public Font GetFont(string name, RenderScope scope, FontStyle style = FontStyle.Regular)
+    public Font GetFont(string name, ContextScope scope, FontStyle style = FontStyle.Regular)
     {
         if (!Families.TryGetValue(name, out var font))
             throw new RenderContextException($"Font family '{name}' not found in context", scope.AstElement);

@@ -4,6 +4,7 @@ using System.Diagnostics;
 namespace ImageBox.Cli.Verbs;
 
 using Drawing;
+using Services;
 
 [Verb("watch-directory", false, ["watch-dir", "wd"], HelpText = "Watches a directory for changes and regenerates the image")]
 public class WatchDirVerbOptions
@@ -44,7 +45,7 @@ internal class WatchDirVerb(
             var watch = Stopwatch.StartNew();
             _logger.LogInformation("File change detected, rendering image: {path}", path);
             //Get the image from the cache (or create a new one)
-            using var im = _image.Create(path);
+            var im = _image.Create(path);
             //Load the context from the image
             var ctx = await _image.LoadContext(im);
             //Get the full path of the file
@@ -71,6 +72,10 @@ internal class WatchDirVerb(
             _logger.LogInformation("Requeuing file for rendering: {path}", path);
             _requeue.TryTake(out _);
             await Render(path);
+        }
+        catch (RenderContextException ex)
+        {
+            _logger.LogError(ex, "Error occurred while rendering image: {path}", path);
         }
         catch (Exception ex)
         {
