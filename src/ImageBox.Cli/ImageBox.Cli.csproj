@@ -8,6 +8,13 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<ProjectReference Include="..\ImageBox.Ast\ImageBox.Ast.csproj" />
+		<ProjectReference Include="..\ImageBox.Core\ImageBox.Core.csproj" />
+		<ProjectReference Include="..\ImageBox.Drawing\ImageBox.Drawing.csproj" />
+		<ProjectReference Include="..\ImageBox.Elements\ImageBox.Elements.csproj" />
+		<ProjectReference Include="..\ImageBox.Rendering\ImageBox.Rendering.csproj" />
+		<ProjectReference Include="..\ImageBox.Scripting\ImageBox.Scripting.csproj" />
+		<ProjectReference Include="..\ImageBox.Services\ImageBox.Services.csproj" />
 		<ProjectReference Include="..\ImageBox\ImageBox.csproj" />
 	</ItemGroup>
 

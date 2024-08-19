@@ -1,7 +1,7 @@
 ﻿using Jint;
 using Jint.Native;
 using Jint.Runtime.Modules;
-using Module = Esprima.Ast.Module;
+using Module = Acornima.Ast.Module;
 
 namespace ImageBox.Scripting;
 

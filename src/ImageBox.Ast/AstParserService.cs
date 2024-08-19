@@ -103,7 +103,7 @@ internal class AstParserService(
                 continue;
             }
             //Check if the attribute has an equal sign and no value
-            var hasEqual = attribute.QuoteType == AttributeValueQuote.WithoutValue;
+            var hasEqual = attribute.QuoteType != AttributeValueQuote.WithoutValue;
             //If the attribute has no equal sign and no value, it's a boolean true attribute
             if (!hasEqual &&
                 string.IsNullOrEmpty(value))

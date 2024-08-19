@@ -1,4 +1,4 @@
-﻿using Module = Esprima.Ast.Module;
+﻿using Module = Acornima.Ast.Module;
 using Jint;
 
 namespace ImageBox.Services.Loading;
