@@ -168,7 +168,7 @@ internal class ImageRenderer(
     /// <summary>
     /// The percentage of frames that have been rendered (0-100)
     /// </summary>
-    public double Progress => (RenderedCount / (double)_box.TotalFrames) * 100;
+    public double Progress => RenderedCount / (double)_box.TotalFrames * 100;
 
     /// <summary>
     /// What directory to save the frames to

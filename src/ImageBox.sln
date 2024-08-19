@@ -21,12 +21,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ImageBox.Rendering", "Image
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ImageBox.Services", "ImageBox.Services\ImageBox.Services.csproj", "{51869084-EA05-4F0E-A5E2-733705B23351}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImageBox.Cli", "ImageBox.Cli\ImageBox.Cli.csproj", "{B0ECCE76-703E-4700-86B1-E8EC03F58A88}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ImageBox.Cli", "ImageBox.Cli\ImageBox.Cli.csproj", "{B0ECCE76-703E-4700-86B1-E8EC03F58A88}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{97904D2C-3F32-4C1B-8B5D-9F3CD86E05E4}"
 	ProjectSection(SolutionItems) = preProject
 		..\.gitignore = ..\.gitignore
 		..\LICENSE = ..\LICENSE
+		..\.github\workflows\main.yml = ..\.github\workflows\main.yml
 		..\README.md = ..\README.md
 	EndProjectSection
 EndProject

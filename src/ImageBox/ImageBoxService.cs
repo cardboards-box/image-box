@@ -1,10 +1,11 @@
 ﻿using SixLabors.ImageSharp;
+using System.Diagnostics;
 
 namespace ImageBox;
 
 using Services;
 using Services.Loading;
-using System.Diagnostics;
+
 using Configure = Action<IImageRendererEvents>;
 using Variables = Dictionary<string, object?>;
 
@@ -171,7 +172,10 @@ internal class ImageBoxService(
     public async Task RenderToStream(Stream stream, IImageBox box, Variables? variables = null, Configure? config = null)
     {
         var (image, gif) = await Render(box, variables, config);
-        if (gif) await image.SaveAsGifAsync(stream);
+        if (gif)
+        {
+            await image.SaveAsGifAsync(stream);
+        }
         else await image.SaveAsPngAsync(stream);
         image.Dispose();
     }

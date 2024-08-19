@@ -64,14 +64,6 @@ internal class WatchDirVerb(
             //Stop the stop-watch
             watch.Stop();
             _logger.LogInformation("Image rendered in {time}ms >> {output}", watch.ElapsedMilliseconds, output);
-            //Remove the file from the active files list
-            _activeFiles.TryTake(out _);
-            //Check to see if the file needs to be requeued
-            if (!_requeue.Contains(path)) return;
-            //Requeue the file for regeneration
-            _logger.LogInformation("Requeuing file for rendering: {path}", path);
-            _requeue.TryTake(out _);
-            await Render(path);
         }
         catch (RenderContextException ex)
         {
@@ -80,6 +72,19 @@ internal class WatchDirVerb(
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error occurred while rendering image: {path}", path);
+        }
+        finally
+        {
+            //Remove the file from the active files list
+            _activeFiles.TryTake(out _);
+            //Check to see if the file needs to be requeued
+            if (_requeue.Contains(path))
+            {
+                //Requeue the file for regeneration
+                _logger.LogInformation("Requeuing file for rendering: {path}", path);
+                _requeue.TryTake(out _);
+                await Render(path);
+            }
         }
     }
 
