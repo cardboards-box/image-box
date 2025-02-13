@@ -30,6 +30,29 @@ public static class Extensions
     public static Vector2 Center(this Rectangle rectangle) => new(rectangle.Left + rectangle.Width / 2, rectangle.Top + rectangle.Height / 2);
 
     /// <summary>
+    /// Gets the origin type of the rectangle
+    /// </summary>
+    /// <param name="rectangle">The rectangle in question</param>
+    /// <param name="type">The type of origin</param>
+    /// <returns>The origin point</returns>
+    public static Vector2 Origin(this Rectangle rectangle, OriginType type)
+    {
+        return type switch
+        {
+            OriginType.TopLeft => new(rectangle.Left, rectangle.Top),
+            OriginType.TopCenter => new(rectangle.Left + rectangle.Width / 2, rectangle.Top),
+            OriginType.TopRight => new(rectangle.Right, rectangle.Top),
+            OriginType.CenterLeft => new(rectangle.Left, rectangle.Top + rectangle.Height / 2),
+            OriginType.Center => new(rectangle.Left + rectangle.Width / 2, rectangle.Top + rectangle.Height / 2),
+            OriginType.CenterRight => new(rectangle.Right, rectangle.Top + rectangle.Height / 2),
+            OriginType.BottomLeft => new(rectangle.Left, rectangle.Bottom),
+            OriginType.BottomCenter => new(rectangle.Left + rectangle.Width / 2, rectangle.Bottom),
+            OriginType.BottomRight => new(rectangle.Right, rectangle.Bottom),
+            _ => throw new ArgumentOutOfRangeException(nameof(type), type, null),
+        };
+    }
+
+    /// <summary>
     /// Get the color from a string
     /// </summary>
     /// <param name="color">The color</param>

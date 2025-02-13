@@ -16,4 +16,8 @@
 		<Compile Include="./../global.cs" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <PackageReference Include="System.Formats.Asn1" Version="8.0.2" />
+	</ItemGroup>
+
 </Project>

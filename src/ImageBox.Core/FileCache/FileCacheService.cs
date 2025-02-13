@@ -26,13 +26,13 @@ internal class FileCacheService(
         string? userAgent = null)
     {
         userAgent ??= _config.Requests.UserAgent;
-        var req = await _api.Create(url)
+        var req = await ((IHttpBuilder)_api.Create(url, _json, "GET")
             .Accept("*/*")
-            .With(c =>
+            .Message(c =>
             {
                 c.Headers.Add("user-agent", userAgent);
                 _config.Requests.Configure?.Invoke(c);
-            })
+            }))
             .Result() ?? throw new NullReferenceException($"Request returned null for: {url}");
         req.EnsureSuccessStatusCode();
 

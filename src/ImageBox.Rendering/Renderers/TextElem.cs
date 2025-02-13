@@ -1,4 +1,5 @@
-﻿using IColor = SixLabors.ImageSharp.Color;
+﻿using System.Numerics;
+using IColor = SixLabors.ImageSharp.Color;
 
 namespace ImageBox.Rendering.Renderers;
 
@@ -37,6 +38,45 @@ public class TextElem : PositionalElement
     /// </summary>
     [AstAttribute("align-text")]
     public AstValue<string?> AlignText { get; set; } = new();
+    
+    /// <summary>
+    /// How to determine the origin point of the text within the current box
+    /// </summary>
+    [AstAttribute("origin-type")]
+    public AstValue<string?> OriginType { get; set; } = new();
+
+    /// <summary>
+    /// The x coordinate of the origin point
+    /// </summary>
+    [AstAttribute("origin-x")]
+    public AstValue<SizeUnit?> OriginX { get; set; } = new();
+
+    /// <summary>
+    /// The y coordinate of the origin point
+    /// </summary>
+    [AstAttribute("origin-y")]
+    public AstValue<SizeUnit?> OriginY { get; set; } = new();
+
+    /// <summary>
+    /// Determines the origin point of the text
+    /// </summary>
+    /// <param name="context">The current scope's context</param>
+    /// <param name="bounds">The parent's bounding rectangle</param>
+    /// <returns>The origin point based on the configuration</returns>
+    public Vector2 DetermineOrigin(ContextScope context, Rectangle bounds)
+    {
+        if (OriginX.Value is not null && OriginY.Value is not null)
+        {
+            var x = OriginX.Value.Value.Pixels(context.Size, true);
+            var y = OriginY.Value.Value.Pixels(context.Size, false);
+            return new(x, y);
+        }
+
+        if (!Enum.TryParse<OriginType>(OriginType.Value, true, out var type))
+            type = Drawing.OriginType.Center;
+
+        return bounds.Origin(type);
+    }
 
     /// <summary>
     /// Applies the element to the render context
@@ -67,7 +107,7 @@ public class TextElem : PositionalElement
             HorizontalAlignment = hAlign,
             VerticalAlignment = vAlign,
             TextAlignment = tAlign,
-            Origin = rect.Center(),
+            Origin = DetermineOrigin(scope, rect),
             WrappingLength = rect.Width,
         };
         context.Image.Mutate(i => i.DrawText(opts, Value.Value, color));
