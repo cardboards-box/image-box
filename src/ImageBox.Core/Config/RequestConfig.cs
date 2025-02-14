@@ -35,4 +35,21 @@ public class RequestConfig
     /// </summary>
     /// <value>Not bound to default configuration values</value>
     public Action<HttpRequestMessage>? Configure { get; set; }
+
+    /// <summary>
+    /// Whether or not to allow network requests
+    /// </summary>
+    /// <remarks>
+    /// If this is set to false, only local file requests will be allowed.
+    /// </remarks>
+    public bool AllowNetworkRequests { get; set; } = true;
+
+    /// <summary>
+    /// The domains that are allowed in network requests
+    /// </summary>
+    /// <remarks>
+    /// If there are no entries in this list, all domains are allowed.
+    /// Supports regular expressions
+    /// </remarks>
+    public string[] AllowedDomains { get; set; } = [];
 }

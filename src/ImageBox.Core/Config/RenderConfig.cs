@@ -58,6 +58,21 @@ public class RenderConfig
     public SizeUnit WidthUnit { get; set; } = "500px";
 
     /// <summary>
+    /// The configuration option bind for <see cref="MaxWidthUnit"/>
+    /// </summary>
+    public string? MaxWidth
+    {
+        get => MaxWidthUnit;
+        set => MaxWidthUnit = !string.IsNullOrEmpty(value) ? (SizeUnit)value : null!;
+    }
+
+    /// <summary>
+    /// The maximum width of the image
+    /// </summary>
+    /// <remarks>If null, there is no max</remarks>
+    public SizeUnit? MaxWidthUnit { get; set; } = null;
+
+    /// <summary>
     /// Configuration option bind for <see cref="HeightUnit"/>
     /// </summary>
     public string Height
@@ -71,6 +86,21 @@ public class RenderConfig
     /// </summary>
     /// <value>Default value is 500px, default config path is `ImageBox:Render:HeightUnit`.</value>
     public SizeUnit HeightUnit { get; set; } = "500px";
+
+    /// <summary>
+    /// The configuration option bind for <see cref="MaxHeightUnit"/>
+    /// </summary>
+    public string? MaxHeight
+    {
+        get => MaxHeightUnit;
+        set => MaxHeightUnit = !string.IsNullOrEmpty(value) ? (SizeUnit)value : null!;
+    }
+
+    /// <summary>
+    /// The maximum height of the image
+    /// </summary>
+    /// <remarks>If null, there is no max</remarks>
+    public SizeUnit? MaxHeightUnit { get; set; } = null;
 
     /// <summary>
     /// Whether or not to animate images by default
@@ -110,4 +140,12 @@ public class RenderConfig
     /// </summary>
     /// <value>Default value is 5, default config path is `ImageBox:Render:AnimateParallelism`.</value>
     public ushort AnimateParallelism { get; set; } = 5;
+
+    /// <summary>
+    /// The max number of total frames to render
+    /// </summary>
+    /// <remarks>
+    /// If null, 0, or negative, there is no max
+    /// </remarks>
+    public uint? MaxTotalFrames { get; set; }
 }

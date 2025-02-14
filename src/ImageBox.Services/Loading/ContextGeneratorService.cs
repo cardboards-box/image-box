@@ -3,6 +3,7 @@ using Jint;
 
 namespace ImageBox.Services.Loading;
 
+using Ast;
 using Scripting;
 using SystemModules;
 
@@ -50,7 +51,7 @@ internal class ContextGeneratorService(
         //Get the size context from the template element's attributes
         var context = GetContext(template, image);
         //Get all of the font families from the image
-        var (fonts, cache) = await GetResources(image, elements);
+        var (fonts, _) = await GetResources(image, elements);
         //Determine animation stuff
         uint totalFrames = 1, frameDelay = 0;
         ushort frameRepeat = _config.Render.AnimateRepeat;
@@ -65,6 +66,9 @@ internal class ContextGeneratorService(
             totalFrames = (uint)Math.Round(duration * fps, 0);
             frameDelay = (uint)(template.AnimateDuration.Value.Milliseconds / totalFrames);
             frameRepeat = template.AnimateRepeat ?? _config.Render.AnimateRepeat;
+            //Validate the total number of frames that can be rendered
+            if (_config.Render.MaxTotalFrames is not null && _config.Render.MaxTotalFrames > 0)
+                Validate(totalFrames, nameof(totalFrames), template.Context, image, _config.Render.MaxTotalFrames.Value);
         }
 
         return new ContextBox 
@@ -111,12 +115,48 @@ internal class ContextGeneratorService(
     }
 
     /// <summary>
+    /// Validates the value of a property
+    /// </summary>
+    /// <param name="value">The value being validated</param>
+    /// <param name="property">The name of the property being validated</param>
+    /// <param name="element">The element being validated</param>
+    /// <param name="image">The image being validated</param>
+    /// <param name="max">The maximum value allowed for the property</param>
+    /// <param name="min">The minimum value allowed for the property</param>
+    /// <exception cref="RenderContextException">Thrown if the property isn't valid</exception>
+    public static void Validate(double value, string property, AstElement? element, LoadedAst image, double max, double min = 1)
+    {
+        if (value < min)
+            throw new RenderContextException($"Invalid {property} - Current Value: {value}. Must be greater than {min}", image, element);
+
+        if (value > max)
+            throw new RenderContextException($"Invalid {property} - Current Value: {value}. Must be less than {max}", image, element);
+    }
+
+    /// <summary>
+    /// Validates the width and height of the image
+    /// </summary>
+    /// <param name="width">The width of the image in pixels</param>
+    /// <param name="height">The height of the image in pixels</param>
+    /// <param name="image">The image being validated</param>
+    /// <param name="element">The element being validated</param>
+    public void Validate(int width, int height, LoadedAst image, AstElement? element)
+    {
+        if (_config.Render.MaxHeightUnit is not null)
+            Validate(height, nameof(height), element, image, _config.Render.MaxHeightUnit.Value.Pixels(null, false));
+
+        if (_config.Render.MaxWidthUnit is not null)
+            Validate(width, nameof(width), element, image, _config.Render.MaxWidthUnit.Value.Pixels(null, true));
+    }
+
+    /// <summary>
     /// Determines the size of the image from the context
     /// </summary>
     /// <param name="template">The template to get the context from</param>
     /// <param name="image">The image the template is from</param>
     /// <returns>The size context of the image</returns>
     /// <exception cref="RenderContextException">Thrown if a required property is missing</exception>
+    /// <exception cref="RenderContextException">Thrown if a property is invalid</exception>
     public SizeContext GetContext(TemplateElem template, LoadedAst image)
     {
         var widthUnit = template.Width ?? _config.Render.WidthUnit;
@@ -131,6 +171,8 @@ internal class ContextGeneratorService(
         var width = widthUnit.Pixels(null, true);
         var height = heightUnit.Pixels(null, false);
         var fontFamily = template.FontFamily ?? _config.Render.FontFamily ?? string.Empty;
+        //Validate the width and height
+        Validate(width, height, image, template.Context);
         //Generate size context from sizing units
         return SizeContext.ForRoot(width, height, fontSize, fontFamily);
     }
@@ -301,7 +343,7 @@ export function main(args) {
         //Ensure there is a setup script if there are other scripts
         if (setup is null && scripts.Count > 0)
             throw new RenderContextException(
-                "Module scripts included in template but no setup script listed",
+                "Module scripts included in element but no setup script listed",
                 image,
                 scripts.Select(t => t.Context).ToArray());
         //Return the non-setup scripts
@@ -324,10 +366,10 @@ export function main(args) {
             .ToArray();
         //Ensure there is at least one template element
         if (template.Length == 0)
-            throw new RenderContextException("No template element found", image);
+            throw new RenderContextException("No element element found", image);
         //Ensure there is only one template element
         if (template.Length > 1)
-            throw new RenderContextException("Multiple template elements found",
+            throw new RenderContextException("Multiple element elements found",
                 image,
                 template.Select(t => t.Context).ToArray());
         //Get the template element
@@ -338,6 +380,12 @@ export function main(args) {
         return temp;
     }
 
+    /// <summary>
+    /// Loads all of the resources from the image
+    /// </summary>
+    /// <param name="image">The image to load the resources for</param>
+    /// <param name="elements">The elements that define the resources to load</param>
+    /// <returns>All of the loaded fonts</returns>
     public async Task<(ContextFonts, string)> GetResources(LoadedAst image, IElement[] elements)
     {
         var resources = elements

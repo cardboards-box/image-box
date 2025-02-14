@@ -8,7 +8,8 @@ internal class HttpFileSource(
 {
     public async Task<FileResult?> Fetch(FileFetchProperties properties)
     {
-        if (!properties.Source.Type.HasFlag(IOPathType.Http))
+        if (!properties.Source.Type.HasFlag(IOPathType.Http) ||
+            !ValidateRequest(properties.Source.OSSafe))
             return null;
 
         var url = properties.Source.OSSafe;
@@ -28,5 +29,21 @@ internal class HttpFileSource(
         var type = headers?.ContentType?.ToString() ?? "";
 
         return new(await req.Content.ReadAsStreamAsync(), path, type, properties.ShouldCache);
+    }
+
+    public bool ValidateRequest(string path)
+    {
+        if (!_config.Requests.AllowNetworkRequests) return false;
+
+        if (_config.Requests.AllowedDomains is null ||
+            _config.Requests.AllowedDomains.Length == 0) return true;
+        
+        foreach(var domain in _config.Requests.AllowedDomains)
+        {
+            var expression = new Regex(domain);
+            if (expression.IsMatch(path)) return true;
+        }
+
+        return false;
     }
 }
