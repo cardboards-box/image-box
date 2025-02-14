@@ -83,8 +83,9 @@ internal class AstLoaderService(
     /// <exception cref="InvalidOperationException">Thrown if the file does not exist after downloading</exception>
     public async Task<LoadedAst> Remote(IOPath path)
     {
+        var props = new FileFetchProperties(path);
         //Load the file from the end point
-        var (stream, file, type) = await _resolver.Fetch(path);
+        var (stream, file, type, _) = await _resolver.Fetch(props);
         //Get the extension from the mime-type
         var ext = IOPathHelper.DetermineExtension(type);
         //Get the file name or generate a random one

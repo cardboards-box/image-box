@@ -94,8 +94,7 @@ internal class ContextGeneratorService(
         {
             if (family.Source is null) continue;
 
-            var path = family.Source.Value.GetAbsolute(wrkDir);
-            var (stream, _, _) = await _resolver.Fetch(path);
+            var (stream, _, _, _) = await _resolver.Fetch(family.Source.Value, wrkDir);
             var ff = fonts.Collection.Add(stream);
 
             var loaded = new LoadedFont
@@ -222,11 +221,11 @@ export function main(args) {
         if (script.Source is not null)
         {
             //Get the absolute path of the script
-            var actualPath = script.Source.Value.GetAbsolute(image.WorkingDirectory);
+            var path = script.Source.Value;
             try
             {
                 //Resolve the script from the source
-                var (stream, _, _) = await _resolver.Fetch(actualPath);
+                var (stream, _, _, _) = await _resolver.Fetch(path, image.WorkingDirectory);
                 using var reader = new StreamReader(stream);
                 value = await reader.ReadToEndAsync();
                 await stream.DisposeAsync();
@@ -240,10 +239,10 @@ export function main(args) {
             {
                 _logger.LogError(ex,
                     "Error occurred while fetching script from source: {Path}. {Context}",
-                    actualPath, script.Context?.ExceptionString());
+                    path, script.Context?.ExceptionString());
                 //Script failed to resolve; box the exception and report it
                 throw new RenderContextException(
-                    $"Failed to fetch script from source: {actualPath.OSSafe}",
+                    $"Failed to fetch script from source: {path.OSSafe}",
                     ex,
                     image,
                     script.Context);

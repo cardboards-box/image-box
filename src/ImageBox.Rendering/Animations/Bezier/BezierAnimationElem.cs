@@ -9,13 +9,13 @@ public class BezierAnimationElem : PositionalElement, IParentElement
     /// <summary>
     /// The type of Bezier curve to use
     /// </summary>
-    [AstAttribute("type"), AstAttribute("interpolation")]
+    [AstAttribute("type", typeof(BezierType)), AstAttribute("interpolation", typeof(BezierType))]
     public AstValue<string?> Interpolation { get; set; } = new();
 
     /// <summary>
     /// The easing function to use
     /// </summary>
-    [AstAttribute("easing"), AstAttribute("timing")]
+    [AstAttribute("easing", typeof(EasingType)), AstAttribute("timing", typeof(EasingType))]
     public AstValue<string?> Timing { get; set; } = new();
 
     /// <summary>
@@ -100,7 +100,7 @@ public class BezierAnimationElem : PositionalElement, IParentElement
     /// <exception cref="NotImplementedException"></exception>
     public override async Task Render(ContextFrame context)
     {
-        using var fullScope = Scoped(context);
+        using var fullScope = this.Scoped(context);
 
         if (Points.Length < 2) return;
 

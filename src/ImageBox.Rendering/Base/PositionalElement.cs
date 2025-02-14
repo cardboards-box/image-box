@@ -5,18 +5,18 @@ namespace ImageBox.Rendering.Base;
 /// <summary>
 /// Represents a GDI element that can be drawn with positional data
 /// </summary>
-public abstract class PositionalElement : RenderElement
+public abstract class PositionalElement : RenderElement, IPositionElement
 {
     /// <summary>
     /// The X offset
     /// </summary>
-    [AstAttribute("X")]
+    [AstAttribute("x")]
     public AstValue<SizeUnit?> X { get; set; } = new();
 
     /// <summary>
     /// The Y offset
     /// </summary>
-    [AstAttribute("Y")]
+    [AstAttribute("y")]
     public AstValue<SizeUnit?> Y { get; set; } = new();
 
     /// <summary>
@@ -46,37 +46,8 @@ public abstract class PositionalElement : RenderElement
     /// <summary>
     /// The style of the font to use
     /// </summary>
-    [AstAttribute("font-style")]
+    [AstAttribute("font-style", typeof(IFontStyle))]
     public AstValue<string?> FontStyle { get; set; } = new();
-
-    /// <summary>
-    /// Gets the context from the positional data
-    /// </summary>
-    /// <param name="parent">The size context to bind from</param>
-    /// <param name="fontSize">The size of the font in the context</param>
-    /// <returns>The size context</returns>
-    public SizeContext BoundContext(SizeContext parent, int? fontSize = null)
-    {
-        var x = X.Value?.Pixels(parent, true) ?? 0;
-        var y = Y.Value?.Pixels(parent, false) ?? 0;
-        var width = Width.Value?.Pixels(parent, true);
-        var height = Height.Value?.Pixels(parent, false);
-
-        return parent.GetContext(x, y, width, height, fontSize);
-    }
-
-    /// <summary>
-    /// Gets the current scope from the context
-    /// </summary>
-    /// <param name="context"></param>
-    /// <returns></returns>
-    public ContextScope Scoped(ContextFrame context)
-    {
-        var previousScope = context.LastScope.Size;
-        var fontSize = FontSize.Value?.Pixels(previousScope) ?? previousScope.FontSize;
-        var current = BoundContext(previousScope, fontSize);
-        return context.Scope(this, current);
-    }
 
     /// <summary>
     /// Gets the font for the current element

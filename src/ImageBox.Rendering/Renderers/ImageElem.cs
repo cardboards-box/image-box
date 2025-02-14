@@ -6,23 +6,15 @@ namespace ImageBox.Rendering.Renderers;
 /// Represents an image that can be drawn to the image
 /// </summary>
 /// <param name="_resolver">The file resolution service</param>
-/// <param name="_svg">The SVG renderer service</param>
 [AstElement("image")]
 public class ImageElem(
-    IFileResolverService _resolver,
-    ISvgService _svg) : PositionalElement
+    IFileResolverService _resolver) : PositionalElement, IFileElement
 {
     /// <summary>
     /// The images source
     /// </summary>
-    [AstAttribute("src"), AstAttribute("source")]
+    [AstAttribute("src", true), AstAttribute("source", true)]
     public AstValue<IOPath> Source { get; set; } = new();
-
-    /// <summary>
-    /// The position of the image within the bounds of the rectangle
-    /// </summary>
-    [AstAttribute("position")]
-    public AstValue<string> Position { get; set; } = new();
 
     /// <summary>
     /// The number of degrees to rotate the image before rendering
@@ -43,6 +35,24 @@ public class ImageElem(
     public AstValue<bool> FlipHorizontal { get; set; } = new();
 
     /// <summary>
+    /// The optional User-Agent header for fetching the file
+    /// </summary>
+    [AstAttribute("user-agent")]
+    public AstValue<string?> UserAgent { get; set; } = new();
+
+    /// <summary>
+    /// The optional Accepts header for fetching the file
+    /// </summary>
+    [AstAttribute("accepts")]
+    public AstValue<string?> Accepts { get; set; } = new();
+
+    /// <summary>
+    /// Indicates whether or not the file should be cached locally
+    /// </summary>
+    [AstAttribute("should-cache")]
+    public AstValue<bool?> ShouldCache { get; set; } = new();
+
+    /// <summary>
     /// Gets the image stream from the path
     /// </summary>
     /// <param name="context">The scoped context</param>
@@ -51,15 +61,8 @@ public class ImageElem(
     public async Task<Stream> HandleImage(ContextScope context, IOPath path)
     {
         var wrkDir = context.Frame.BoxContext.Ast.WorkingDirectory;
-        var imgPath = path.GetAbsolute(wrkDir);
-        var (stream, _, type) = await _resolver.Fetch(imgPath);
-        if (type == "image/svg+xml")
-            return _svg.GetStream(stream, new RenderOptions
-            {
-                Width = context.Size.Width,
-                Height = context.Size.Height
-            });
-
+        var props = this.Properties(context.Size, wrkDir);
+        var (stream, _, _, _) = await _resolver.Fetch(props);
         return stream;
     }
 
@@ -70,7 +73,7 @@ public class ImageElem(
     /// <returns></returns>
     public override async Task Render(ContextFrame context)
     {
-        using var scope = Scoped(context);
+        using var scope = this.Scoped(context);
 
         var rect = scope.Size.GetRectangle();
         using var imageStream = await HandleImage(scope, Source.Value);

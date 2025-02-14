@@ -1,7 +1,7 @@
 ﻿namespace ImageBox.Core.IOPath;
 
 /// <summary>
-/// A utility class for working with file and URI paths
+/// A URI path - can be remote, local, or use fancy scheme (https, ftp, etc)
 /// </summary>
 /// <param name="Value">The path to attach to</param>
 [JsonConverter(typeof(IOPathSerializer))]

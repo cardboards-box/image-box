@@ -1,7 +1,7 @@
 ﻿namespace ImageBox.Core.SizeUnits;
 
 /// <summary>
-/// Represents a unit of measurement of something on an image
+/// Unit of measurement (ex: 100vw, 50vh, 10px, 40%, 1cm, 2in, 2pc, 43pt, 1em, 1mm, 1q, 3rp)
 /// </summary>
 /// <param name="Type">The type of unit of measurement</param>
 /// <param name="Value">The value of the measurement</param>

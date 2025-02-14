@@ -6,76 +6,59 @@
 public interface IFileCacheService
 {
     /// <summary>
-    /// Gets the file either from the cache or from the given URL
+    /// Attempts to get an item from the cache
     /// </summary>
-    /// <param name="url">The url to fetch</param>
-    /// <param name="cacheDir">The cache directory</param>
-    /// <param name="userAgent">The user agent to use for the file download</param>
-    /// <returns>A task representing the results of the cached file request</returns>
-    Task<FileCacheResult> GetFile(
-        string url,
-        string? cacheDir = null, string? userAgent = null);
+    /// <param name="uri">The URI of the cached item</param>
+    /// <returns>The cached file or null if the cache doesn't exist</returns>
+    Task<FileResult?> GetCache(string uri);
+
+    /// <summary>
+    /// Sets the value of the cache
+    /// </summary>
+    /// <param name="uri">The URI of the cached item</param>
+    /// <param name="result">The file to set as the result</param>
+    /// <returns>The cached file result</returns>
+    Task<FileResult> SetCache(string uri, FileResult result);
 }
 
 internal class FileCacheService(
     IServiceConfig _config,
-    IApiService _api,
     IJsonService _json) : IFileCacheService
 {
-    public async Task<FileCacheResult> GetData(string url,
-        string? userAgent = null)
+    public async Task<FileResult?> GetCache(string uri)
     {
-        userAgent ??= _config.Requests.UserAgent;
-        var req = await ((IHttpBuilder)_api.Create(url, _json, "GET")
-            .Accept("*/*")
-            .Message(c =>
-            {
-                c.Headers.Add("user-agent", userAgent);
-                _config.Requests.Configure?.Invoke(c);
-            }))
-            .Result() ?? throw new NullReferenceException($"Request returned null for: {url}");
-        req.EnsureSuccessStatusCode();
+        var dir = _config.Requests.CacheDirectory;
+        if (!Directory.Exists(dir))
+            Directory.CreateDirectory(dir);
 
-        var headers = req.Content.Headers;
-        var path = headers?.ContentDisposition?.FileName ?? headers?.ContentDisposition?.Parameters?.FirstOrDefault()?.Value ?? "";
-        var type = headers?.ContentType?.ToString() ?? "";
+        var hash = uri.MD5Hash();
+        var cacheInfo = await ReadCacheInfo(hash, dir);
+        if (cacheInfo == null) return null;
 
-        return new(await req.Content.ReadAsStreamAsync(), path, type);
+        return new(ReadFile(hash, dir), cacheInfo.Name, cacheInfo.MimeType, false);
     }
 
-    /// <summary>
-    /// Gets the file either from the cache or from the given URL
-    /// </summary>
-    /// <param name="url">The url to fetch</param>
-    /// <param name="cacheDir">The cache directory</param>
-    /// <param name="userAgent">The user agent to use for the file download</param>
-    /// <returns>A task representing the results of the cached file request</returns>
-    public async Task<FileCacheResult> GetFile(
-        string url,
-        string? cacheDir = null, string? userAgent = null)
+    public async Task<FileResult> SetCache(string uri, FileResult result)
     {
-        cacheDir ??= _config.Requests.CacheDirectory;
+        var dir = _config.Requests.CacheDirectory;
+        if (!Directory.Exists(dir))
+            Directory.CreateDirectory(dir);
 
-        if (!Directory.Exists(cacheDir))
-            Directory.CreateDirectory(cacheDir);
-
-        var hash = url.MD5Hash();
-
-        var cacheInfo = await ReadCacheInfo(hash, cacheDir);
-        if (cacheInfo != null)
-            return new(ReadFile(hash, cacheDir), cacheInfo.Name, cacheInfo.MimeType);
+        var hash = uri.MD5Hash();
 
         var io = new MemoryStream();
-        var (stream, file, type) = await GetData(url, userAgent);
-        await stream.CopyToAsync(io);
-        io.Position = 0;
-        cacheInfo = new FileCacheItem(file, type, DateTime.Now);
-        var worked = await WriteFile(io, hash, cacheDir);
-        if (worked)
-            await WriteCacheInfo(hash, cacheInfo, cacheDir);
-        io.Position = 0;
+        await result.Stream.CopyToAsync(io);
+        await result.Stream.FlushAsync();
+        await result.Stream.DisposeAsync();
 
-        return new(io, file, type);
+        io.Position = 0;
+        var cacheInfo = new FileCacheItem(result.FileName, result.MimeType, DateTime.Now);
+        var worked = await WriteFile(io, hash, dir);
+        if (worked)
+            await WriteCacheInfo(hash, cacheInfo, dir);
+
+        io.Position = 0;
+        return new(io, result.FileName, result.MimeType, false);
     }
 
     /// <summary>

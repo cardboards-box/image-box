@@ -8,62 +8,66 @@ using IOPath;
 public interface IFileResolverService
 {
     /// <summary>
-    /// Fetches a file from the given path
+    /// Fetches the file from the given properties
     /// </summary>
     /// <param name="path">The path to fetch the file from</param>
+    /// <param name="workDir">The working directory of the fetch</param>
     /// <returns>The file results</returns>
-    Task<FileResult> Fetch(IOPath path);
+    Task<FileResult> Fetch(IOPath path, string? workDir = null);
+
+    /// <summary>
+    /// Fetches the file from the given properties
+    /// </summary>
+    /// <param name="properties">The properties of the file fetch operation</param>
+    /// <returns>The file results</returns>
+    Task<FileResult> Fetch(FileFetchProperties properties);
 }
 
 internal class FileResolverService(
+    IEnumerable<IFileSourceService> _sources,
+    IEnumerable<IFileTransformerService> _transformers,
     IFileCacheService _cache) : IFileResolverService
 {
-    public Task<FileResult> Fetch(IOPath path)
+    public async Task<FileResult> Fetch(FileFetchProperties properties)
     {
-        if (path.Type.HasFlag(IOPathType.Cache))
-            throw new NotSupportedException("Cache paths are not supported via raw-file resolution as it requires the cache context");
+        var uri = properties.Source.OSSafe;
+        var cached = await _cache.GetCache(uri);
+        if (cached is not null) return cached;
 
-        if (path.Type.HasFlag(IOPathType.Http))
-            return GetHttp(path.OSSafe);
+        var result = await ResolveFile(properties);
+        result = await Transform(result, properties);
 
-        if (path.Type.HasFlag(IOPathType.Ftp))
-            return GetFtp(path.OSSafe);
+        if (result.Cacheable)
+            return await _cache.SetCache(uri, result);
 
-        if (path.Type.HasFlag(IOPathType.Local))
-            return GetLocal(path.OSSafe);
-
-        throw new NotSupportedException($"The path type {path.Type} is not supported");
+        return result;
     }
 
-    public async Task<FileResult> GetHttp(string url)
+    public async Task<FileResult> Transform(FileResult result, FileFetchProperties properties)
     {
-        var (stream, fileName, mimeType) = await _cache.GetFile(url);
-        return new(stream, fileName, mimeType);
+        foreach (var transformer in _transformers)
+            result = await transformer.Transform(result, properties);
+
+        return result;
     }
 
-    public static Task<FileResult> GetLocal(string path)
+    public async Task<FileResult> ResolveFile(FileFetchProperties properties)
     {
-        if (!File.Exists(path)) throw new FileNotFoundException("The file path does not exist", path);
+        var uri = properties.Source.OSSafe;
+        foreach (var source in _sources)
+        {
+            var result = await source.Fetch(properties);
+            if (result is not null) return result;
+        }
 
-        var mimeType = MimeTypes.GetMimeType(path);
-        var stream = File.OpenRead(path);
-        var name = Path.GetFileName(path);
-        return Task.FromResult(new FileResult(stream, name, mimeType));
+        throw new NotImplementedException($"No source was able to resolve the file: {uri}");
     }
 
-    public Task<FileResult> GetFtp(string url)
+    public Task<FileResult> Fetch(IOPath path, string? workDir = null)
     {
-        throw new NotImplementedException("FTP is not supported yet");
+        return Fetch(new FileFetchProperties(path)
+        {
+            WorkingDirectory = workDir
+        });
     }
 }
-
-/// <summary>
-/// Represents the result of a file request
-/// </summary>
-/// <param name="Stream">The stream to read the file contents from</param>
-/// <param name="FileName">The name of the file </param>
-/// <param name="MimeType"></param>
-public record class FileResult(
-    Stream Stream,
-    string FileName,
-    string MimeType);

@@ -1,5 +1,7 @@
 ﻿namespace ImageBox.Core;
 
+using FileCache.Sources;
+
 /// <summary></summary>
 public static class DiExtensions
 {
@@ -10,6 +12,9 @@ public static class DiExtensions
     {
         return services
             .AddTransient<IFileCacheService, FileCacheService>()
-            .AddTransient<IFileResolverService, FileResolverService>();
+            .AddTransient<IFileResolverService, FileResolverService>()
+            
+            .AddTransient<IFileSourceService, HttpFileSource>()
+            .AddTransient<IFileSourceService, LocalFileSource>();
     }
 }

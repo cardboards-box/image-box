@@ -105,7 +105,7 @@ internal class WatchDirVerb(
         }
         if (!Directory.Exists(options.Directory))
         {
-            _logger.LogError("Directory does not exist: {Directory}", options.Directory);
+            _logger.LogError("Output does not exist: {Output}", options.Directory);
             return false;
         }
         //Create a debounced version of the run function (to avoid multiple calls from the watcher)

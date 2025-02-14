@@ -43,7 +43,7 @@ public class RectangleElem : PositionalElement, IParentElement
     public override async Task Render(ContextFrame context)
     {
         var scope = context.LastScope;
-        var current = BoundContext(scope.Size);
+        var current = this.BoundContext(scope.Size);
         var radius = (Radius.Value ?? SizeUnit.Zero).Pixels(current);
         var rect = current.GetRectangle().Rounded(radius);
 

@@ -21,7 +21,7 @@ public class ContextFrame(
     ContextBox _context,
     Dictionary<string, object?> _variables,
     IScriptExecutionService _scripting,
-    CancellationToken _token) : IDisposable
+    CancellationToken _token) : IDisposable, IScriptItem
 {
     private readonly List<ContextScope> _scopes = [];
     private ContextScope? _frameScope;

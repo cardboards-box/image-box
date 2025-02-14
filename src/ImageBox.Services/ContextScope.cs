@@ -8,7 +8,7 @@ using Scripting;
 /// <summary>
 /// Represents the rendering scope for boxed images
 /// </summary>
-public class ContextScope(ContextFrame _frame) : IDisposable
+public class ContextScope(ContextFrame _frame) : IDisposable, IScriptItem
 {
     /// <summary>
     /// The render element that owns this scope

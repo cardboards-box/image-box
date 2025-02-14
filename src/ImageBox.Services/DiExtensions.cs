@@ -1,6 +1,7 @@
 ﻿namespace ImageBox.Services;
 
 using Loading;
+using Loading.SystemModules;
 
 /// <summary></summary>
 public static class DiExtensions

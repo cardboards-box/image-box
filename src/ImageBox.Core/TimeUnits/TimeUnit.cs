@@ -1,7 +1,7 @@
 ﻿namespace ImageBox.Core.TimeUnits;
 
 /// <summary>
-/// Represents a unit of time.
+/// Unit of time. (ex: 20ms, 3.2s, 1m, 2h)
 /// </summary>
 /// <param name="Type">The type of unit of time</param>
 /// <param name="Value">The value of the time unit</param>

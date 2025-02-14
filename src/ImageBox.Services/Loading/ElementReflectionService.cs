@@ -3,7 +3,6 @@
 namespace ImageBox.Services.Loading;
 
 using Ast;
-using Jint.Native;
 using Scripting;
 
 /// <summary>
@@ -27,6 +26,20 @@ public interface IElementReflectionService
     /// <param name="instance">The object to set the value on</param>
     /// <param name="value">The string to set the value to</param>
     void TypeCastBind(PropertyInfo property, object instance, object? value);
+
+    /// <summary>
+    /// Gets all concrete types that implement the given type
+    /// </summary>
+    /// <param name="type">The type that should be implemented</param>
+    /// <returns>All of the concrete types</returns>
+    IEnumerable<Type> GetAllOfType(Type type);
+
+    /// <summary>
+    /// Gets all concrete types that implement the given type
+    /// </summary>
+    /// <typeparam name="T">The type that should be implemented</typeparam>
+    /// <returns>All of the concrete types</returns>
+    IEnumerable<Type> GetAllOfType<T>();
 }
 
 internal class ElementReflectionService(
@@ -85,6 +98,16 @@ internal class ElementReflectionService(
         while (stack.Count > 0);
     }
 
+    public IEnumerable<Type> GetAllOfType<T>() => GetAllOfType(typeof(T));
+
+    public IEnumerable<Type> GetAllOfType(Type type)
+    {
+        return GetAllAssemblies()
+            .SelectMany(t => t.GetTypes())
+            .Where(type.IsAssignableFrom)
+            .Where(t => t.IsClass && !t.IsInterface && !t.IsAbstract);
+    }
+
     /// <summary>
     /// Get all of the possible instances of <see cref="IElement"/>
     /// </summary>
@@ -100,10 +123,7 @@ internal class ElementReflectionService(
         var valueType = typeof(IValueElement);
         var astValueType = typeof(AstValue<>);
         //Get all of the concrete types matching IElement
-        var types = GetAllAssemblies()
-            .SelectMany(t => t.GetTypes())
-            .Where(elementType.IsAssignableFrom)
-            .Where(t => t.IsClass && !t.IsInterface && !t.IsAbstract);
+        var types = GetAllOfType(elementType);
         //A collection of all of the reflected elements
         var output = new List<ReflectedElement>();
         //Iterate through all of the types

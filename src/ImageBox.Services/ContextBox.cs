@@ -6,7 +6,7 @@ using Scripting;
 /// <summary>
 /// Represents a context for rendering an entire image
 /// </summary>
-public class ContextBox
+public class ContextBox : IScriptItem
 {
     /// <summary>
     /// The entire abstract syntax tree for the template

@@ -24,25 +24,25 @@ public class TextElem : PositionalElement
     /// <summary>
     /// Where to align the text vertically in the rectangle
     /// </summary>
-    [AstAttribute("align-vertical")]
+    [AstAttribute("align-vertical", typeof(VerticalAlignment))]
     public AstValue<string?> AlignVertical { get; set; } = new();
 
     /// <summary>
     /// Where to align the text horizontally in the rectangle
     /// </summary>
-    [AstAttribute("align-horizontal")]
+    [AstAttribute("align-horizontal", typeof(HorizontalAlignment))]
     public AstValue<string?> AlignHorizontal { get; set; } = new();
 
     /// <summary>
     /// How to align the text within the rectangle
     /// </summary>
-    [AstAttribute("align-text")]
+    [AstAttribute("align-text", typeof(TextAlignment))]
     public AstValue<string?> AlignText { get; set; } = new();
     
     /// <summary>
     /// How to determine the origin point of the text within the current box
     /// </summary>
-    [AstAttribute("origin-type")]
+    [AstAttribute("origin-type", typeof(OriginType))]
     public AstValue<string?> OriginType { get; set; } = new();
 
     /// <summary>
@@ -88,7 +88,7 @@ public class TextElem : PositionalElement
         if (string.IsNullOrWhiteSpace(Value.Value))
             return Task.CompletedTask;
 
-        using var scope = Scoped(context);
+        using var scope = this.Scoped(context);
 
         var rect = scope.Size.GetRectangle();
         var color = Color.Value.ParseColor(IColor.Black);

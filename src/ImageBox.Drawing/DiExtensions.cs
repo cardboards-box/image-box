@@ -11,6 +11,7 @@ public static class DiExtensions
     public static IServiceCollection AddDrawing(this IServiceCollection services)
     {
         return services
-            .AddTransient<ISvgService, SvgService>();
+            .AddTransient<ISvgService, SvgService>()
+            .AddTransient<IFileTransformerService, SvgTransformerService>();
     }
 }

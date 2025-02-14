@@ -3,6 +3,7 @@
 using Animations;
 using Animations.Bezier;
 using Directives;
+using Elements;
 using Renderers;
 
 /// <summary>
@@ -17,18 +18,22 @@ public static class DiExtensions
     /// <returns>The service collection for chaining</returns>
     public static IServiceCollection AddCustomElements(this IServiceCollection services)
     {
-        //We don't actually need to do this, because they are never resolved via DI services
-        //However, C#'s type system will not include these classes in the assembly if they are not referenced
-        //So here we are, "using" them in some way...
+        //This isn't necessary for the application to use the elements,
+        //but it does allow the auto-documentation generator to see the elements
         return services
-            .AddSingleton<ForEachDir>()
-            .AddSingleton<IfDir>()
-            .AddSingleton<RangeDir>()
-            .AddSingleton<ClearElem>()
-            .AddSingleton<ImageElem>()
-            .AddSingleton<RectangleElem>()
-            .AddSingleton<TextElem>()
-            .AddSingleton<BezierAnimationElem>()
-            .AddSingleton<PointElem>();
+            .AddTransient<IElement, ForEachDir>()
+            .AddTransient<IElement, IfDir>()
+            .AddTransient<IElement, RangeDir>()
+            .AddTransient<IElement, ClearElem>()
+            .AddTransient<IElement, ImageElem>()
+            .AddTransient<IElement, RectangleElem>()
+            .AddTransient<IElement, TextElem>()
+            .AddTransient<IElement, BezierAnimationElem>()
+            .AddTransient<IElement, PointElem>()
+            .AddTransient<IElement, FontFamilyElem>()
+            .AddTransient<IElement, RemoteResourceElem>()
+            .AddTransient<IElement, ScriptElem>()
+            .AddTransient<IElement, TemplateElem>()
+            .AddTransient<IElement, ResourcesElem>();
     }
 }
