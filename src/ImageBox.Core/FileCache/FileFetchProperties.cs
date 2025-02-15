@@ -8,13 +8,10 @@ using IOPath;
 /// <param name="source">The URI of the file to fetch</param>
 public class FileFetchProperties(IOPath source)
 {
-    private IOPath? _source;
-    private string? _workingDir;
-
     /// <summary>
     /// The URI of the file to fetch
     /// </summary>
-    public IOPath Source => _source ??= source.GetAbsolute(WorkingDirectory);
+    public IOPath Source { get; } = source;
 
     /// <summary>
     /// The optional width of the file
@@ -44,13 +41,5 @@ public class FileFetchProperties(IOPath source)
     /// <summary>
     /// The working directory to use for loading files
     /// </summary>
-    public string? WorkingDirectory
-    {
-        get => _workingDir;
-        set 
-        {
-            _workingDir = value;
-            _source = null;
-        }
-    }
+    public string? WorkingDirectory { get; set; }
 }
