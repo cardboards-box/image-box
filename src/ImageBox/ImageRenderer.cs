@@ -383,9 +383,8 @@ internal class ImageRenderer(
     public async ValueTask DisposeAsync()
     {
         await Cancel();
-        RenderFrames
-            .Where(t => t.Key != 1)
-            .Each(t => t.Value.Dispose());
+        foreach(var frame in RenderFrames.Where(t => t.Key != 1))
+            frame.Value.Dispose();
         RenderFrames.Clear();
         _sources.ForEach(s => s.Dispose());
         _tokenSource.Dispose();

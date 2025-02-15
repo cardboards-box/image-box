@@ -125,7 +125,8 @@ internal class AstParserService(
         foreach (var node in parent.ChildNodes)
         {
             //Skip just text nodes
-            if (node.NodeType == HtmlNodeType.Text) continue;
+            if (node.NodeType == HtmlNodeType.Text ||
+                node.NodeType == HtmlNodeType.Comment) continue;
             //get the name of the element
             var name = node.OriginalName;
             //Determine the type of the children of the element
