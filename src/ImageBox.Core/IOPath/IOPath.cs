@@ -41,6 +41,8 @@ public record struct IOPath(string Value)
         if (!Type.HasFlag(IOPathType.Local)) return this;
 
         var path = OSSafe;
+        if (File.Exists(path)) return this;
+
         if (!string.IsNullOrWhiteSpace(relativeTo) &&
             Type.HasFlag(IOPathType.Relative))
             path = Path.Combine(relativeTo, path);
