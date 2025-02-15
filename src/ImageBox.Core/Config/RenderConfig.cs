@@ -8,6 +8,12 @@ using IOPath;
 public class RenderConfig
 {
     /// <summary>
+    /// The factory for finding all assemblies to load elements from
+    /// </summary>
+    /// <remarks>Will default to using reflection to load ALL assemblies possible if not set</remarks>
+    public static Func<IEnumerable<Assembly>>? DefaultAssemblyFactory { get; set; }
+
+    /// <summary>
     /// Configuration option bind for <see cref="FontSizeUnit"/>
     /// </summary>
     public string FontSize
@@ -148,4 +154,10 @@ public class RenderConfig
     /// If null, 0, or negative, there is no max
     /// </remarks>
     public uint? MaxTotalFrames { get; set; }
+
+    /// <summary>
+    /// The factory for finding all assemblies to load elements from 
+    /// </summary>
+    /// <remarks>Will default to <see cref="DefaultAssemblyFactory"/> if not set</remarks>
+    public Func<IEnumerable<Assembly>>? AssemblyFactory { get; set; }
 }

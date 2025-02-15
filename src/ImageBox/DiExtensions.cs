@@ -41,6 +41,23 @@ public static class DiExtensions
             .AddSingleton(config);
     }
 
+    /// <summary>
+    /// Gets all of the assemblies for the image-box library
+    /// </summary>
+    /// <returns>All of the assemblies for the image-box library</returns>
+    /// <remarks>This can be used as a target for <see cref="RenderConfig.AssemblyFactory"/> when rendering in asp.net core environments (cause it's silly)</remarks>
+    public static IEnumerable<Assembly> ImageBoxAssemblies()
+    {
+        yield return typeof(DiExtensions).Assembly;
+        yield return typeof(Ast.DiExtensions).Assembly;
+        yield return typeof(Core.DiExtensions).Assembly;
+        yield return typeof(Drawing.DiExtensions).Assembly;
+        yield return typeof(Elements.TemplateElem).Assembly;
+        yield return typeof(Rendering.DiExtensions).Assembly;
+        yield return typeof(Scripting.Extensions).Assembly;
+        yield return typeof(Services.DiExtensions).Assembly;
+    }
+
     internal static IServiceCollection AddBaseImageBox(this IServiceCollection services, bool onlyInternal)
     {
         if (!onlyInternal)

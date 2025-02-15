@@ -53,8 +53,18 @@ internal class ElementReflectionService(
     /// This method is purely here because C#'s type system is annoying
     /// </summary>
     /// <returns>Gets all of the assemblies in the current domain</returns>
-    public static IEnumerable<Assembly> GetAllAssemblies()
+    public IEnumerable<Assembly> GetAllAssemblies()
     {
+        var factory = _config.Render.AssemblyFactory ?? RenderConfig.DefaultAssemblyFactory;
+
+        if (factory is not null)
+        {
+            foreach (var asm in factory())
+                yield return asm;
+
+            yield break;
+        }
+
         //Create a collection to store all of the loaded assemblies
         var list = new HashSet<string>();
         //Create a stack of the assemblies to iterate through
@@ -91,19 +101,49 @@ internal class ElementReflectionService(
             {
                 //If the assembly has already been processed, skip it
                 if (list.Contains(reference.FullName)) continue;
-                //Add the assembly to the stack
-                stack.Push(Assembly.Load(reference));
+
+                try
+                {
+                    var assembly = Assembly.Load(reference);
+                    //Add the assembly to the stack
+                    stack.Push(assembly);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error occurred while loading assembly reference: {name}", reference.FullName);
+                }
             }
         }
         while (stack.Count > 0);
     }
 
+    /// <summary>
+    /// Gets all concrete types that implement the given type
+    /// </summary>
+    /// <typeparam name="T">The type that should be implemented</typeparam>
+    /// <returns>All of the concrete types</returns>
     public IEnumerable<Type> GetAllOfType<T>() => GetAllOfType(typeof(T));
 
+    /// <summary>
+    /// Gets all concrete types that implement the given type
+    /// </summary>
+    /// <param name="type">The type that should be implemented</param>
+    /// <returns>All of the concrete types</returns>
     public IEnumerable<Type> GetAllOfType(Type type)
     {
         return GetAllAssemblies()
-            .SelectMany(t => t.GetTypes())
+            .SelectMany(t => 
+            {
+                try
+                {
+                    return t.GetTypes();
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error occurred while trying to load types from: {asm}", t.FullName);
+                    return [];
+                }
+            })
             .Where(type.IsAssignableFrom)
             .Where(t => t.IsClass && !t.IsInterface && !t.IsAbstract);
     }
