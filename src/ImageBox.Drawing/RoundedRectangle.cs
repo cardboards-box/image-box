@@ -15,123 +15,50 @@ public static class RoundedRectangle
     /// <param name="rectangle">The original rectangle</param>
     /// <param name="cornerRadius">The corner radius</param>
     /// <returns>The path</returns>
-    public static IPath Rounded(this Rectangle rectangle, int cornerRadius)
+    public static IPath Rounded(this Rectangle rectangle, float cornerRadius)
     {
-        return new PathBuilder()
-            .AddEllipticalArc(rectangle.Left + cornerRadius, rectangle.Top + cornerRadius, cornerRadius, cornerRadius, 0, -90, -90)
-            .AddEllipticalArc(rectangle.Right - cornerRadius, rectangle.Top + cornerRadius, cornerRadius, cornerRadius, 0, 180, -90)
-            .AddEllipticalArc(rectangle.Right - cornerRadius, rectangle.Bottom - cornerRadius, cornerRadius, cornerRadius, 0, 90, -90)
-            .AddEllipticalArc(rectangle.Left + cornerRadius, rectangle.Bottom - cornerRadius, cornerRadius, cornerRadius, 0, 0, -90)
-            .CloseFigure()
-            .Build();
-    }
+        var pathBuilder = new PathBuilder();
+        float width = rectangle.Width;
+        float height = rectangle.Height;
 
-    private static PathBuilder AddEllipticalArc(this PathBuilder builder, float x, float y, float radiusX, float radiusY, float rotation, float startAngle, float sweepAngle) =>
-            builder.AddSegment(new EllipticalArcLineSegment(x, y, radiusX, radiusY, rotation, startAngle, sweepAngle, Matrix3x2.Identity));
+        width--;
+        height--;
 
-    // Copied from https://github.com/SixLabors/ImageSharp.Drawing/blob/7ffae70dfb9eaf8a7e03ed98d8c2e60e0aed2ed7/src/ImageSharp.Drawing/Shapes/EllipticalArcLineSegment.cs
-    private sealed class EllipticalArcLineSegment : ILineSegment
-    {
-        private const float MinimumSqrDistance = 1.75f;
-        private readonly PointF[] linePoints;
-        private readonly float x;
-        private readonly float y;
-        private readonly float radiusX;
-        private readonly float radiusY;
-        private readonly float rotation;
-        private readonly float startAngle;
-        private readonly float sweepAngle;
-        private readonly Matrix3x2 transformation;
+        var radius = 2 * cornerRadius;
 
-        public EllipticalArcLineSegment(float x, float y, float radiusX, float radiusY, float rotation, float startAngle, float sweepAngle, Matrix3x2 transformation)
-        {
-            this.x = x;
-            this.y = y;
-            this.radiusX = radiusX;
-            this.radiusY = radiusY;
-            this.rotation = rotation % 360;
-            this.startAngle = startAngle % 360;
-            this.transformation = transformation;
-            this.sweepAngle = sweepAngle;
-            if (sweepAngle > 360)
-                this.sweepAngle = 360;
+        // Make sure the rounded corners are no larger than half the size of the rectangle
+        cornerRadius = Math.Min(width * 0.5f, Math.Min(height * 0.5f, cornerRadius));
 
-            if (sweepAngle < -360)
-                this.sweepAngle = -360;
+        // Start drawing path
+        pathBuilder.StartFigure();
 
-            linePoints = GetDrawingPoints();
-            EndPoint = linePoints[linePoints.Length - 1];
-        }
+        // upperBorder
+        pathBuilder.AddLine(cornerRadius, 0, width - cornerRadius, 0);
 
-        public PointF EndPoint { get; }
+        // Upper right rounded corner
+        pathBuilder.AddArc(new RectangleF(width - radius, 0, radius, radius), 0, 270, 90);
 
-        public EllipticalArcLineSegment Transform(Matrix3x2 matrix) => matrix.IsIdentity
-            ? this
-            : new EllipticalArcLineSegment(x, y, radiusX, radiusY, rotation, startAngle, sweepAngle, Matrix3x2.Multiply(transformation, matrix));
+        // right line
+        pathBuilder.AddLine(width, cornerRadius, width, height - cornerRadius);
 
-        ILineSegment ILineSegment.Transform(Matrix3x2 matrix) => Transform(matrix);
+        // Lower right rounded corner
+        pathBuilder.AddArc(new RectangleF(width - radius, height - radius, radius, radius), 0, 0, 90);
 
-        private PointF[] GetDrawingPoints()
-        {
-            var points = new List<PointF>() { CalculatePoint(startAngle) };
+        // lower border
+        pathBuilder.AddLine(width - cornerRadius, height, cornerRadius, height);
 
-            if (sweepAngle < 0)
-            {
-                for (var i = startAngle; i > startAngle + sweepAngle; i--)
-                {
-                    var end = i - 1;
-                    if (end <= startAngle + sweepAngle)
-                        end = startAngle + sweepAngle;
+        // Lower left rounded corner
+        pathBuilder.AddArc(new RectangleF(0, height - radius, radius, radius), 0, 90, 90);
 
-                    points.AddRange(GetDrawingPoints(i, end, 0));
-                }
-            }
-            else
-            {
-                for (var i = startAngle; i < startAngle + sweepAngle; i++)
-                {
-                    var end = i + 1;
-                    if (end >= startAngle + sweepAngle)
-                        end = startAngle + sweepAngle;
+        // left line
+        pathBuilder.AddLine(0, height - cornerRadius, 0, cornerRadius);
 
-                    points.AddRange(GetDrawingPoints(i, end, 0));
-                }
-            }
+        // Upper left rounded corner
+        pathBuilder.AddArc(new RectangleF(0, 0, radius, radius), 0, 180, 90);
 
-            return points.ToArray();
-        }
+        // Close the path to form a complete rectangle
+        pathBuilder.CloseFigure();
 
-        private List<PointF> GetDrawingPoints(float start, float end, int depth)
-        {
-            if (depth > 1000)
-                return new List<PointF>();
-
-            var points = new List<PointF>();
-
-            var startP = CalculatePoint(start);
-            var endP = CalculatePoint(end);
-            if ((new Vector2(endP.X, endP.Y) - new Vector2(startP.X, startP.Y)).LengthSquared() < MinimumSqrDistance)
-                points.Add(endP);
-            else
-            {
-                float mid = start + (end - start) / 2;
-                points.AddRange(GetDrawingPoints(start, mid, depth + 1));
-                points.AddRange(GetDrawingPoints(mid, end, depth + 1));
-            }
-
-            return points;
-        }
-
-        private PointF CalculatePoint(float angle)
-        {
-            var x = radiusX * MathF.Sin(MathF.PI * angle / 180) * MathF.Cos(MathF.PI * rotation / 180) -
-                radiusY * MathF.Cos(MathF.PI * angle / 180) * MathF.Sin(MathF.PI * rotation / 180) + this.x;
-            var y = radiusX * MathF.Sin(MathF.PI * angle / 180) * MathF.Sin(MathF.PI * rotation / 180) +
-                radiusY * MathF.Cos(MathF.PI * angle / 180) * MathF.Cos(MathF.PI * rotation / 180) + this.y;
-
-            return PointF.Transform(new PointF(x, y), transformation);
-        }
-
-        public ReadOnlyMemory<PointF> Flatten() => linePoints;
+        return pathBuilder.Build().Transform(Matrix3x2.CreateTranslation(rectangle.X, rectangle.Y));
     }
 }
