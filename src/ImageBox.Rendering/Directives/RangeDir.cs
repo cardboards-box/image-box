@@ -3,7 +3,7 @@
 /// <summary>
 /// Represents a for directive
 /// </summary>
-[AstElement("range")]
+[AstElement("range", ScopeType.Template)]
 public class RangeDir : DirectiveElement
 {
     /// <summary>

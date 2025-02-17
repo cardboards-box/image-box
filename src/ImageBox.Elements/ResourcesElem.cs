@@ -3,7 +3,7 @@
 /// <summary>
 /// Element to allow for caching resources to use across multiple renders
 /// </summary>
-[AstElement("resources"), AstElement("cache")]
+[AstElement("cache", ScopeType.TopLevel), AstElement("resources", ScopeType.TopLevel)]
 public class ResourcesElem : Element, IParentElement
 {
     private FontFamilyElem[]? _fonts;

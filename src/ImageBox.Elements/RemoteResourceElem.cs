@@ -3,7 +3,8 @@
 /// <summary>
 /// Represents a remote resource that should be cached
 /// </summary>
-[AstElement("remote-resource")]
+/// <remarks>Not implemented yet</remarks>
+[AstElement("remote-resource", ScopeType.CustomParent, typeof(ResourcesElem))]
 public class RemoteResourceElem : Element
 {
     /// <summary>

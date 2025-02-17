@@ -3,7 +3,7 @@
 /// <summary>
 /// Represents the root of a template
 /// </summary>
-[AstElement("template")]
+[AstElement("template", ScopeType.TopLevel)]
 public class TemplateElem(IServiceConfig _config) : Element, IParentElement
 {
     /// <summary>

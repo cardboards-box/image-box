@@ -3,7 +3,7 @@
 /// <summary>
 /// The clear element
 /// </summary>
-[AstElement("clear")]
+[AstElement("clear", ScopeType.Template)]
 public class ClearElem : RenderElement
 {
     /// <summary>

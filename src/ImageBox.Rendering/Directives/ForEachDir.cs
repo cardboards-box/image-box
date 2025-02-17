@@ -3,7 +3,7 @@
 /// <summary>
 /// Represents a for-each directive
 /// </summary>
-[AstElement("foreach")]
+[AstElement("foreach", ScopeType.Template)]
 public class ForEachDir : DirectiveElement
 {
     /// <summary>

@@ -3,7 +3,7 @@
 /// <summary>
 /// Element to allow for importing of custom fonts
 /// </summary>
-[AstElement("font-family")]
+[AstElement("font-family", ScopeType.CustomParent, typeof(ResourcesElem))]
 public class FontFamilyElem : Element
 {
     /// <summary>
@@ -15,6 +15,6 @@ public class FontFamilyElem : Element
     /// <summary>
     /// Where to find the font file
     /// </summary>
-    [AstAttribute("source"), AstAttribute("src"), AstAttribute("path")]
+    [AstAttribute("src"), AstAttribute("source"), AstAttribute("path")]
     public IOPath? Source { get; set; }
 }

@@ -6,7 +6,7 @@ namespace ImageBox.Rendering.Renderers;
 /// <summary>
 /// Represents text to be drawn to the image
 /// </summary>
-[AstElement("text")]
+[AstElement("text", ScopeType.Template)]
 public class TextElem : PositionalElement
 {
     /// <summary>

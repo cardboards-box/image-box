@@ -3,7 +3,7 @@
 /// <summary>
 /// Represents a script that can be executed to calculate contexts
 /// </summary>
-[AstElement("script")]
+[AstElement("script", ScopeType.TopLevel)]
 public class ScriptElem : Element, IValueElement
 {
     /// <summary>
@@ -15,13 +15,13 @@ public class ScriptElem : Element, IValueElement
     /// <summary>
     /// The name of the module to use when injecting into other scripts
     /// </summary>
-    [AstAttribute("module"), AstAttribute("name")]
+    [AstAttribute("name"), AstAttribute("module")]
     public string? Module { get; set; }
 
     /// <summary>
     /// Where to look to populate this script
     /// </summary>
-    [AstAttribute("source"), AstAttribute("src"), AstAttribute("path")]
+    [AstAttribute("src"), AstAttribute("source"), AstAttribute("path")]
     public IOPath? Source { get; set; }
 
     /// <summary>

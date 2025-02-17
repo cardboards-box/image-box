@@ -3,7 +3,7 @@
 /// <summary>
 /// Represents a rectangle that can be filled or bordered
 /// </summary>
-[AstElement("rectangle")]
+[AstElement("rectangle", ScopeType.Template)]
 public class RectangleElem : PositionalElement, IParentElement
 {
     /// <summary>

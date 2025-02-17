@@ -6,7 +6,7 @@ using Services.Animation.Bezier;
 /// <summary>
 /// Renders the children of the element with a Bezier animation
 /// </summary>
-[AstElement("animation-bezier")]
+[AstElement("animation-bezier", ScopeType.Template)]
 public class BezierAnimationElem : PositionalElement, IParentElement
 {
     /// <summary>

@@ -3,7 +3,7 @@
 /// <summary>
 /// If directive for templates
 /// </summary>
-[AstElement("if")]
+[AstElement("if", ScopeType.Template)]
 public class IfDir : DirectiveElement
 {
     /// <summary>

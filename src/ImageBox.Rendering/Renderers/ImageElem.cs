@@ -6,9 +6,8 @@ namespace ImageBox.Rendering.Renderers;
 /// Represents an image that can be drawn to the image
 /// </summary>
 /// <param name="_resolver">The file resolution service</param>
-[AstElement("image")]
-public class ImageElem(
-    IFileResolverService _resolver) : PositionalElement, IFileElement
+[AstElement("image", ScopeType.Template), AstElement("img", ScopeType.Template)]
+public class ImageElem(IFileResolverService _resolver) : PositionalElement, IFileElement
 {
     /// <summary>
     /// The images source
