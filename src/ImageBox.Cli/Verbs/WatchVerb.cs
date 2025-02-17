@@ -53,7 +53,7 @@ internal class WatchVerb(
             }
 
             await _image.RenderToFile(output, ib);
-            _logger.LogInformation("Generated image at {Output}", output);
+            _logger.LogInformation("Generated image at {JsonOutput}", output);
             return true;
         }
         catch (Exception ex)

@@ -9,6 +9,7 @@ return await new ServiceCollection()
          .AddFile("appsettings.json"), out var config)
     .AddImageBox(config)
     .AddTransient<IDocReflectionService, DocReflectionService>()
+    .AddTransient<IMarkdownService, MarkdownService>()
     .Cli(c => c
         .Add<GenerateVerb>()
         .Add<WatchVerb>()

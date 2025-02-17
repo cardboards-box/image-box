@@ -12,4 +12,8 @@ public record class DocElement(
     [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     string[]? ValidParents,
     DocAttribute[] Attributes,
-    string Description);
+    string Description,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    string? Remarks,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    string? Example);

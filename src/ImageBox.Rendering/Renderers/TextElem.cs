@@ -48,36 +48,42 @@ public class TextElem : PositionalElement
     /// <summary>
     /// How to determine the origin point of the text rotation within the current box
     /// </summary>
+    /// <remarks>Ignored if both <see cref="RotateOriginX"/> and <see cref="RotateOriginY"/> are set</remarks>
     [AstAttribute("rotate-origin-type", typeof(OriginType))]
     public AstValue<string?> RotateOriginType { get; set; } = new();
 
     /// <summary>
     /// The x coordinate of the origin point of the text rotation
     /// </summary>
+    /// <remarks>Requires <see cref="RotateOriginY"/> to be set as well</remarks>
     [AstAttribute("rotate-origin-x")]
     public AstValue<SizeUnit?> RotateOriginX { get; set; } = new();
 
     /// <summary>
     /// The y coordinate of the origin point of the text rotation
     /// </summary>
+    /// <remarks>Requires <see cref="RotateOriginX"/> to be set as well</remarks>
     [AstAttribute("rotate-origin-y")]
     public AstValue<SizeUnit?> RotateOriginY { get; set; } = new();
 
     /// <summary>
     /// How to determine the origin point of the text within the current box
     /// </summary>
+    /// <remarks>Ignored if both <see cref="OriginX"/> and <see cref="OriginY"/> are set</remarks>
     [AstAttribute("origin-type", typeof(OriginType))]
     public AstValue<string?> OriginType { get; set; } = new();
 
     /// <summary>
     /// The x coordinate of the origin point
     /// </summary>
+    /// <remarks>Requires <see cref="OriginY"/> to be set as well</remarks>
     [AstAttribute("origin-x")]
     public AstValue<SizeUnit?> OriginX { get; set; } = new();
 
     /// <summary>
     /// The y coordinate of the origin point
     /// </summary>
+    /// <remarks>Requires <see cref="OriginX"/> to be set as well</remarks>
     [AstAttribute("origin-y")]
     public AstValue<SizeUnit?> OriginY { get; set; } = new();
 

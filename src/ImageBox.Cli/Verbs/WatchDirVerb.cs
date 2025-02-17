@@ -105,7 +105,7 @@ internal class WatchDirVerb(
         }
         if (!Directory.Exists(options.Directory))
         {
-            _logger.LogError("Output does not exist: {Output}", options.Directory);
+            _logger.LogError("JsonOutput does not exist: {JsonOutput}", options.Directory);
             return false;
         }
         //Create a debounced version of the run function (to avoid multiple calls from the watcher)

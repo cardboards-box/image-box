@@ -38,7 +38,7 @@ internal class DocReflectionService(
             .Select(t => new TypeOption(t.Name, t.Value, t.Summary))
             .ToArray();
 
-        return types[fullName] = new TypeData(type.Name, fullName, description.Summary, options);
+        return types[fullName] = new TypeData(type, type.Name, fullName, description.Summary, options);
     }
 
     public static IEnumerable<DocAttribute> GetAttributes(Type type, DocXmlReader reader, Dictionary<string, TypeData> types)
@@ -66,16 +66,19 @@ internal class DocReflectionService(
             if (first.EnumType is not null)
                 propType = first.EnumType;
 
-            var description = reader.GetMemberComment(prop);
+            var comments = reader.GetMemberComments(prop);
             var aliases = attributes.Skip(1).Select(t => t.Name).ToArray();
             var required = attributes.Any(t => t.Required);
             yield return new DocAttribute(
                 GetTypeData(propType, reader, types).FullName,
+                prop.Name,
                 first.Name,
                 aliases.Length == 0 ? null : aliases,
                 required,
                 bindable,
-                description);
+                comments.Summary,
+                comments.Remarks?.ForceNull(),
+                comments.Example?.ForceNull());
         }
     }
 
@@ -108,7 +111,9 @@ internal class DocReflectionService(
                 first.Scope,
                 validParents,
                 attributes,
-                description.Summary);
+                description.Summary,
+                description.Remarks?.ForceNull(),
+                description.Example?.ForceNull());
         }
     }
 

@@ -9,7 +9,7 @@ public class IfDir : DirectiveElement
     /// <summary>
     /// The condition for the if statement
     /// </summary>
-    [AstAttribute("con"), AstAttribute("condition")]
+    [AstAttribute("condition"), AstAttribute("con")]
     public AstValue<bool> Condition { get; set; } = new();
 
     /// <summary>
