@@ -123,6 +123,7 @@ export default (ctx) => {
 </script>
 ```
 This will generate the following GIF:
+
 ![test.gif](./test.gif)
 
 ### Element References
