@@ -1,4 +1,10 @@
-﻿namespace ImageBox.Services.Loading.SystemModules;
+﻿using Jint;
+using Jint.Native;
+using SixLabors.ImageSharp;
+
+namespace ImageBox.Services.Loading.SystemModules;
+
+using Services.Animation;
 
 /// <summary>
 /// Provides a set of functions related to image drawing and units
@@ -67,5 +73,64 @@ public class Drawing(
         var ctx = _context.LastScope.Size;
         var size = UnitContext(value, ctx, false);
         return ctx.Root.Height - size;
+    }
+
+    /// <summary>
+    /// Returns the given value as the unit value
+    /// </summary>
+    /// <param name="item">The item to process</param>
+    /// <param name="width">Whether or not the value represents a width or x axis value (null if you don't know)</param>
+    /// <returns>The number representation of the item</returns>
+    /// <exception cref="InvalidOperationException">Thrown if the value isn't valid</exception>
+    public double fromUnitString(JsValue item, bool? width = null)
+    {
+        if (item.Type == Jint.Runtime.Types.Number)
+            return item.AsNumber();
+        if (item.Type != Jint.Runtime.Types.String)
+            throw new InvalidOperationException("Input value needs to be a number or size unit");
+
+        return UnitContext(item.AsString(), null, width);
+    }
+
+    /// <summary>
+    /// Gets the rectangle bounds from the given coordinates
+    /// </summary>
+    /// <param name="x1">The X value of the first coordinate</param>
+    /// <param name="y1">The Y value of the first coordinate</param>
+    /// <param name="x2">The X value of the second coordinate</param>
+    /// <param name="y2">The Y value of the second coordinate</param>
+    /// <returns>The x, y, width, and height of the bounds calculated from the coordinates</returns>
+    /// <exception cref="InvalidOperationException">Thrown if any of the values aren't valid</exception>
+    public object bounds(JsValue x1, JsValue y1, JsValue x2, JsValue y2)
+    {
+        var a = point(x1, y1);
+        var b = point(x2, y2);
+        return bounds(a, b);
+    }
+
+    /// <summary>
+    /// Gets the rectangle bounds from the given coordinates
+    /// </summary>
+    /// <param name="a">The first coordinate</param>
+    /// <param name="b">The second coordinate</param>
+    /// <returns>The x, y, width, and height of the bounds calculated from the coordinates</returns>
+    public object bounds(PointF a, PointF b)
+    {
+        var width = b.X - a.X;
+        var height = b.Y - a.Y;
+        return new { x = a.X, y = a.Y, width, height };
+    }
+
+    /// <summary>
+    /// Gets the point from the given coordinates
+    /// </summary>
+    /// <param name="x">The point on the x axis</param>
+    /// <param name="y">The point on the y axis</param>
+    /// <returns>The point</returns>
+    public PointF point(JsValue x, JsValue y)
+    {
+        var xValue = fromUnitString(x, true);
+        var yValue = fromUnitString(y, false);
+        return new BoxPoint(xValue, yValue);
     }
 }

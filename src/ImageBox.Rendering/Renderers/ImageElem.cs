@@ -90,7 +90,7 @@ public class ImageElem(
         var output = new Vector2();
         if (Rotate.Value.HasValue)
         {
-            var centerPoint = new Point(rect.X + rect.Width / 2, rect.Y + rect.Height / 2);
+            var centerPoint = rect.Center();
             image.Mutate(i => i.Rotate((float)Rotate.Value.Value));
             var rotated = new Point(rect.X + image.Width / 2, rect.Y + image.Height / 2);
             output = new Vector2(rotated.X - centerPoint.X, rotated.Y - centerPoint.Y);

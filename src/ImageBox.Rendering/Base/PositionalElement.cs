@@ -50,23 +50,19 @@ public abstract class PositionalElement : RenderElement, IPositionElement
     public AstValue<string?> FontStyle { get; set; } = new();
 
     /// <summary>
-    /// Gets the font for the current element
+    /// Whether to automatically determine the font size based on the box size
     /// </summary>
-    /// <param name="context">The font context</param>
-    /// <returns>The font</returns>
-    public Font GetFont(ContextScope context)
-    {
-        var fontName = FontFamily.Value ?? context.Size.FontFamily;
-        if (string.IsNullOrEmpty(fontName))
-            throw new RenderContextException(
-                "Font family is required for this element", 
-                context.Frame.BoxContext.Ast, Context);
+    /// <remarks>
+    /// If true, <see cref="FontSize"/> will be ignored. 
+    /// This can be relatively expensive, so it should be avoided when possible.
+    /// </remarks>
+    [AstAttribute("auto-font-size")]
+    public AstValue<bool?> AutoFontSize { get; set; } = new();
 
-        var style = IFontStyle.Regular;
-        if (!string.IsNullOrEmpty(FontStyle.Value) &&
-            Enum.TryParse<IFontStyle>(FontStyle.Value, true, out var parsed))
-            style = parsed;
-
-        return context.Frame.BoxContext.Fonts.GetFont(fontName, context, style);
-    }
+    /// <summary>
+    /// Sets the padding to use when determining the font size
+    /// </summary>
+    /// <remarks>Only used when <see cref="AutoFontSize"/> is true</remarks>
+    [AstAttribute("auto-font-size-padding")]
+    public AstValue<int?> AutoFontSizePadding { get; set; } = new();
 }

@@ -1,4 +1,6 @@
-﻿namespace ImageBox.Services.Loading.SystemModules;
+﻿using Jint.Native;
+
+namespace ImageBox.Services.Loading.SystemModules;
 
 /// <summary>
 /// Providers a way of easily accessing variables in the current context
@@ -30,5 +32,54 @@ public class Context(
         }
         //If the variable does not exist in any scope, return null
         return null;
+    }
+
+    /// <summary>
+    /// The percentage representing the placement of this frame in the gif
+    /// </summary>
+    public double progress => _context.Frame / (double)_context.TotalFrames;
+
+    /// <summary>
+    /// Pulsates between the min and max values using the given progress
+    /// </summary>
+    /// <param name="min">The minimum value</param>
+    /// <param name="max">The maximum value</param>
+    /// <param name="progress">The progress value (will be fetched from context if null)</param>
+    /// <param name="width">Whether or not the value represents a width or x axis value</param>
+    /// <returns>The value between the given min and max</returns>
+    public double pulsate(JsValue min, JsValue max, bool? width = null, double? progress = null)
+    {
+        var drawing = new Drawing(_context);
+        var progressValue = progress ?? this.progress;
+
+        var minValue = drawing.fromUnitString(min, width);
+        var maxValue = drawing.fromUnitString(max, width);
+        var output = progressValue < 0.5 ? progressValue : 1 - progressValue;
+        return minValue + ((maxValue - minValue) * output);
+    }
+
+    /// <summary>
+    /// Executes the <see cref="pickOne(double, JsValue[])"/> method with the current progress
+    /// </summary>
+    /// <param name="items">The items to pick from</param>
+    /// <returns>The item that was chosen</returns>
+    public JsValue progressOne(params JsValue[] items)
+    {
+        return pickOne(progress, items);
+    }
+
+    /// <summary>
+    /// Returns the value from the <paramref name="items"/> array that matches the current progress
+    /// </summary>
+    /// <param name="progress">The progress indicator</param>
+    /// <param name="items">The items to choose from</param>
+    /// <returns>The item that was chosen</returns>
+    /// <remarks>If the index is invalid, the result will be capped to either the first or last item</remarks>
+    public JsValue pickOne(double progress, params JsValue[] items)
+    {
+        var index = (int)Math.Round((items.Length - 1) * progress, 0);
+        if (index < 0) return items.First();
+        if (index >= items.Length) return items.Last();
+        return items[index];
     }
 }

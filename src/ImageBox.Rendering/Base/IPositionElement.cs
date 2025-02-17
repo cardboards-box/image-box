@@ -39,4 +39,16 @@ public interface IPositionElement : IElement
     /// The style of the font to use
     /// </summary>
     AstValue<string?> FontStyle { get; }
+
+    /// <summary>
+    /// Whether to automatically determine the font size based on the box size
+    /// </summary>
+    /// <remarks>If true, <see cref="FontSize"/> will be ignored</remarks>
+    AstValue<bool?> AutoFontSize { get; }
+
+    /// <summary>
+    /// Sets the padding to use when determining the font size
+    /// </summary>
+    /// <remarks>Only used when <see cref="AutoFontSize"/> is true</remarks>
+    AstValue<int?> AutoFontSizePadding { get; }
 }

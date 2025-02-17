@@ -1,4 +1,6 @@
-﻿namespace ImageBox.Rendering;
+﻿using IFontStyle = SixLabors.Fonts.FontStyle;
+
+namespace ImageBox.Rendering;
 
 /// <summary>
 /// Extension methods for rendering the modules
@@ -54,5 +56,72 @@ public static class Extensions
             ShouldCache = element.ShouldCache.Value ?? true,
             WorkingDirectory = workDir
         };
+    }
+
+    /// <summary>
+    /// Gets the raw font from the context, using the <see cref="IPositionElement.FontSize"/> value
+    /// </summary>
+    /// <param name="element">The element to get the font from</param>
+    /// <param name="context">The font context</param>
+    /// <returns>The font</returns>
+    /// <exception cref="RenderContextException">Thrown if the font family is not present</exception>
+    internal static Font GetRawFontFromContext(this IPositionElement element, ContextScope context)
+    {
+        var fontName = element.FontFamily.Value ?? context.Size.FontFamily;
+        if (string.IsNullOrEmpty(fontName))
+            throw new RenderContextException(
+                "Font family is required for this element",
+                context.Frame.BoxContext.Ast, element.Context);
+
+        var style = IFontStyle.Regular;
+        if (!string.IsNullOrEmpty(element.FontStyle.Value) &&
+            Enum.TryParse<IFontStyle>(element.FontStyle.Value, true, out var parsed))
+            style = parsed;
+
+        return context.Frame.BoxContext.Fonts.GetFont(fontName, context, style);
+    }
+
+    /// <summary>
+    /// Gets the font for the current element
+    /// </summary>
+    /// <param name="element">The element to get the font from</param>
+    /// <param name="text">The text to be rendered</param>
+    /// <param name="context">The font context</param>
+    /// <returns>The font</returns>
+    public static Font GetFont(this IPositionElement element, string text, ContextScope context)
+    {
+        var auto = element.AutoFontSize.Value ?? false;
+        var font = GetRawFontFromContext(element, context);
+        if (!auto) return font;
+
+        var rect = context.Size.GetRectangle();
+
+        float padding = element.AutoFontSizePadding.Value ?? 0;
+        var targetWidth = rect.Width - (padding * 2);
+        var targetHeight = rect.Height - (padding * 2);
+
+        float minFontSize = 1;
+        var maxFontSize = targetHeight;
+
+        var currentBounds = TextMeasurer.MeasureAdvance(text, new TextOptions(font));
+        if (currentBounds.Width < targetWidth)
+            maxFontSize = MathF.Floor(maxFontSize * (targetWidth / currentBounds.Width));
+
+        while (minFontSize < maxFontSize)
+        {
+            var midFontSize = (minFontSize + maxFontSize) / 2;
+            Font midFont = new(font, midFontSize);
+            currentBounds = TextMeasurer.MeasureAdvance(text, new TextOptions(midFont)
+            {
+                WrappingLength = targetWidth
+            });
+
+            if (currentBounds.Height > targetHeight)
+                maxFontSize = midFontSize - 0.1f; 
+            else
+                minFontSize = midFontSize + 0.1f; 
+        }
+
+        return new(font, minFontSize);
     }
 }
