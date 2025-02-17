@@ -12,6 +12,7 @@ internal partial class MarkdownService : IMarkdownService
 
     public async Task RenderTableOfContents(StreamWriter writer, Docs docs)
     {
+        BuildReferences(docs);
         await writer.WriteLineAsync("# Table of Contents");
         await writer.WriteLineAsync();
         await writer.WriteLineAsync("| Type | Name | Description |");
