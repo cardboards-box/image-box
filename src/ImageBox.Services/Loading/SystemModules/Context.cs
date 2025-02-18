@@ -1,4 +1,5 @@
 ﻿using Jint.Native;
+using SixLabors.Fonts;
 
 namespace ImageBox.Services.Loading.SystemModules;
 
@@ -81,5 +82,20 @@ public class Context(
         if (index < 0) return items.First();
         if (index >= items.Length) return items.Last();
         return items[index];
+    }
+
+    /// <summary>
+    /// Gets the font from the context
+    /// </summary>
+    /// <param name="family">The optional name of the font family (defaults to the global font family)</param>
+    /// <param name="style">The optional style of the font (defaults to <see cref="FontStyle.Regular"/>)</param>
+    /// <returns>The font that fetched</returns>
+    public Font font(string? family = null, string? style = null)
+    {
+        if (!Enum.TryParse<FontStyle>(style, true, out var fontStyle))
+            fontStyle = FontStyle.Regular;
+
+        family ??= _context.LastScope.Size.FontFamily;
+        return _context.BoxContext.Fonts.GetFont(family, _context.LastScope, fontStyle);
     }
 }

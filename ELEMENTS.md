@@ -18,18 +18,18 @@
 | [Element](#element-remote-resource) | `remote-resource` | Represents a remote resource that should be cached |
 | [Type](#type-System-Object-array) | `Object[]` |  |
 | [Type](#type-System-String) | `String` |  |
-| [Type](#type-System-Boolean) | `Boolean` |  |
-| [Type](#type-System-Double) | `Double` |  |
+| [Type](#type-System-Boolean) | `Boolean` | Represents a boolean (<see langword="true" /> or <see langword="false" />) value. |
+| [Type](#type-System-Double) | `Double` | Represents a double-precision floating-point number. |
 | [Type](#type-ImageBox-Core-IOPath-IOPath) | `IOPath` | A URI path - can be remote, local, or use fancy scheme (https, ftp, etc) |
 | [Type](#type-ImageBox-Core-SizeUnits-SizeUnit) | `SizeUnit` | Unit of measurement (ex: 100vw, 50vh, 10px, 40%, 1cm, 2in, 2pc, 43pt, 1em, 1mm, 1q, 3rp) |
-| [Type](#type-SixLabors-Fonts-FontStyle) | `FontStyle` |  |
-| [Type](#type-System-Int32) | `Int32` |  |
-| [Type](#type-SixLabors-Fonts-VerticalAlignment) | `VerticalAlignment` |  |
-| [Type](#type-SixLabors-Fonts-HorizontalAlignment) | `HorizontalAlignment` |  |
-| [Type](#type-SixLabors-Fonts-TextAlignment) | `TextAlignment` |  |
+| [Type](#type-SixLabors-Fonts-FontStyle) | `FontStyle` | The font styles |
+| [Type](#type-SixLabors-Fonts-VerticalAlignment) | `VerticalAlignment` | Vertical alignment modes. |
+| [Type](#type-SixLabors-Fonts-HorizontalAlignment) | `HorizontalAlignment` | Horizontal alignment modes. |
+| [Type](#type-SixLabors-Fonts-TextAlignment) | `TextAlignment` | Text alignment modes. |
 | [Type](#type-ImageBox-Drawing-OriginType) | `OriginType` | Dictates where the origin of an object is |
 | [Type](#type-ImageBox-Services-Animation-Bezier-BezierType) | `BezierType` | The type of Bezier curve to use |
 | [Type](#type-ImageBox-Services-Animation-Bezier-EasingType) | `EasingType` | The type of easing function to use |
+| [Type](#type-System-Int32) | `Int32` |  |
 | [Type](#type-ImageBox-Core-TimeUnits-TimeUnit) | `TimeUnit` | Unit of time. (ex: 20ms, 3.2s, 1m, 2h) |
 | [Type](#type-System-UInt16) | `UInt16` |  |
 
@@ -248,7 +248,7 @@ This can be relatively expensive, so it should be avoided when possible.
 
 <a name="attribute-animation-bezier-auto-font-size-padding"></a>
 __*auto-font-size-padding*__: Sets the padding to use when determining the font size<br>
-Type: [System.Int32](#type-System-Int32).
+Type: [ImageBox.Core.SizeUnits.SizeUnit](#type-ImageBox-Core-SizeUnits-SizeUnit).
 This attribute is optional.
 This attribute can be bound to a runtime variable.
 *Remarks*: Only used when [AutoFontSize](#attribute-text-auto-font-size) is true
@@ -442,7 +442,7 @@ This can be relatively expensive, so it should be avoided when possible.
 
 <a name="attribute-image-auto-font-size-padding"></a>
 __*auto-font-size-padding*__: Sets the padding to use when determining the font size<br>
-Type: [System.Int32](#type-System-Int32).
+Type: [ImageBox.Core.SizeUnits.SizeUnit](#type-ImageBox-Core-SizeUnits-SizeUnit).
 This attribute is optional.
 This attribute can be bound to a runtime variable.
 *Remarks*: Only used when [AutoFontSize](#attribute-text-auto-font-size) is true
@@ -594,7 +594,7 @@ This can be relatively expensive, so it should be avoided when possible.
 
 <a name="attribute-rectangle-auto-font-size-padding"></a>
 __*auto-font-size-padding*__: Sets the padding to use when determining the font size<br>
-Type: [System.Int32](#type-System-Int32).
+Type: [ImageBox.Core.SizeUnits.SizeUnit](#type-ImageBox-Core-SizeUnits-SizeUnit).
 This attribute is optional.
 This attribute can be bound to a runtime variable.
 *Remarks*: Only used when [AutoFontSize](#attribute-text-auto-font-size) is true
@@ -763,7 +763,7 @@ This can be relatively expensive, so it should be avoided when possible.
 
 <a name="attribute-text-auto-font-size-padding"></a>
 __*auto-font-size-padding*__: Sets the padding to use when determining the font size<br>
-Type: [System.Int32](#type-System-Int32).
+Type: [ImageBox.Core.SizeUnits.SizeUnit](#type-ImageBox-Core-SizeUnits-SizeUnit).
 This attribute is optional.
 This attribute can be bound to a runtime variable.
 *Remarks*: Only used when [AutoFontSize](#attribute-text-auto-font-size) is true
@@ -884,9 +884,13 @@ Full Name: System.String<br>
 <a name="type-System-Boolean"></a>
 ### Type: `Boolean`
 Full Name: System.Boolean<br>
+Description:
+Represents a boolean (<see langword="true" /> or <see langword="false" />) value.
 <a name="type-System-Double"></a>
 ### Type: `Double`
 Full Name: System.Double<br>
+Description:
+Represents a double-precision floating-point number.
 <a name="type-ImageBox-Core-IOPath-IOPath"></a>
 ### Type: `IOPath`
 Full Name: ImageBox.Core.IOPath.IOPath<br>
@@ -900,46 +904,53 @@ Unit of measurement (ex: 100vw, 50vh, 10px, 40%, 1cm, 2in, 2pc, 43pt, 1em, 1mm, 
 <a name="type-SixLabors-Fonts-FontStyle"></a>
 ### Type: `FontStyle`
 Full Name: SixLabors.Fonts.FontStyle<br>
+Description:
+The font styles
 **Enum Options**:<br>
 | Name | Description | Value |
 | ---- | ----------- | ----- |
-| `Regular` |  | 0 |
-| `Bold` |  | 1 |
-| `Italic` |  | 2 |
-| `BoldItalic` |  | 3 |
+| `Regular` | Regular | 0 |
+| `Bold` | Bold | 1 |
+| `Italic` | Italic | 2 |
+| `BoldItalic` | Bold and Italic | 3 |
 
-<a name="type-System-Int32"></a>
-### Type: `Int32`
-Full Name: System.Int32<br>
 <a name="type-SixLabors-Fonts-VerticalAlignment"></a>
 ### Type: `VerticalAlignment`
 Full Name: SixLabors.Fonts.VerticalAlignment<br>
+Description:
+Vertical alignment modes.
 **Enum Options**:<br>
 | Name | Description | Value |
 | ---- | ----------- | ----- |
-| `Top` |  | 0 |
-| `Center` |  | 1 |
-| `Bottom` |  | 2 |
+| `Top` | Aligns downward from the top. | 0 |
+| `Center` | Aligns text up and down from the middle. | 1 |
+| `Bottom` | Aligns text upwards from the bottom | 2 |
 
 <a name="type-SixLabors-Fonts-HorizontalAlignment"></a>
 ### Type: `HorizontalAlignment`
 Full Name: SixLabors.Fonts.HorizontalAlignment<br>
+Description:
+Horizontal alignment modes.
 **Enum Options**:<br>
 | Name | Description | Value |
 | ---- | ----------- | ----- |
-| `Left` |  | 0 |
-| `Right` |  | 1 |
-| `Center` |  | 2 |
+| `Left` | Aligns text from the left. | 0 |
+| `Right` | Aligns text from the right. | 1 |
+| `Center` | Aligns text from the center. | 2 |
 
 <a name="type-SixLabors-Fonts-TextAlignment"></a>
 ### Type: `TextAlignment`
 Full Name: SixLabors.Fonts.TextAlignment<br>
+Description:
+Text alignment modes.
 **Enum Options**:<br>
 | Name | Description | Value |
 | ---- | ----------- | ----- |
-| `Start` |  | 0 |
-| `End` |  | 1 |
-| `Center` |  | 2 |
+| `Start` | Aligns text from the left or top when the text direction is `LeftToRight`
+and from the right or bottom when the text direction is `RightToLeft`. | 0 |
+| `End` | Aligns text from the right or bottom when the text direction is `LeftToRight`
+and from the left or top when the text direction is `RightToLeft`. | 1 |
+| `Center` | Aligns text from the center. | 2 |
 
 <a name="type-ImageBox-Drawing-OriginType"></a>
 ### Type: `OriginType`
@@ -983,6 +994,9 @@ The type of easing function to use
 | `Out` | Ease-out | 1 |
 | `InOut` | Ease-in-out | 2 |
 
+<a name="type-System-Int32"></a>
+### Type: `Int32`
+Full Name: System.Int32<br>
 <a name="type-ImageBox-Core-TimeUnits-TimeUnit"></a>
 ### Type: `TimeUnit`
 Full Name: ImageBox.Core.TimeUnits.TimeUnit<br>

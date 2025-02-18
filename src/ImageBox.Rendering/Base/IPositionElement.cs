@@ -50,5 +50,5 @@ public interface IPositionElement : IElement
     /// Sets the padding to use when determining the font size
     /// </summary>
     /// <remarks>Only used when <see cref="AutoFontSize"/> is true</remarks>
-    AstValue<int?> AutoFontSizePadding { get; }
+    AstValue<SizeUnit?> AutoFontSizePadding { get; }
 }

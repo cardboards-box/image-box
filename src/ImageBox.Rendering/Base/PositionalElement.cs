@@ -64,5 +64,5 @@ public abstract class PositionalElement : RenderElement, IPositionElement
     /// </summary>
     /// <remarks>Only used when <see cref="AutoFontSize"/> is true</remarks>
     [AstAttribute("auto-font-size-padding")]
-    public AstValue<int?> AutoFontSizePadding { get; set; } = new();
+    public AstValue<SizeUnit?> AutoFontSizePadding { get; set; } = new();
 }

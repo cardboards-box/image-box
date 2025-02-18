@@ -16,6 +16,33 @@ internal class DocReflectionService(
     IElementReflectionService _reflection,
     IEnumerable<IElement> _elements) : IDocReflectionService
 {
+    private string? _nuGetLocation;
+
+    public string? GetNuGetPath()
+    {
+        if (!string.IsNullOrEmpty(_nuGetLocation)) return _nuGetLocation;
+
+        var location = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+        var path = Path.Combine(location, ".nuget", "packages");
+        if (Directory.Exists(path)) return _nuGetLocation = path;
+
+        return null;
+    }
+
+    public string? GetPath(Assembly assembly)
+    {
+        var path = Path.ChangeExtension(assembly.Location, ".xml");
+        if (File.Exists(path)) return path;
+
+        var fileName = Path.GetFileName(path);
+
+        var nuGet = GetNuGetPath();
+        if (nuGet is null) return null;
+
+        var files = Directory.GetFiles(nuGet, fileName, SearchOption.AllDirectories);
+        return files.OrderByDescending(t => t).FirstOrDefault();
+    }
+
     public DocXmlReader GetReader()
     {
         var scripts = _reflection.GetAllOfType<IScriptItem>().Select(t => t.Assembly);
@@ -23,7 +50,7 @@ internal class DocReflectionService(
             .Select(t => t.GetType().Assembly)
             .Concat(scripts)
             .Distinct();
-        return new DocXmlReader(assemblies);
+        return new DocXmlReader(assemblies, GetPath);
     }
 
     public static TypeData GetTypeData(Type type, DocXmlReader reader, Dictionary<string, TypeData> types)
