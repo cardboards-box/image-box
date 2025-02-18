@@ -18,7 +18,7 @@
 | [Element](#element-remote-resource) | `remote-resource` | Represents a remote resource that should be cached |
 | [Type](#type-System-Object-array) | `Object[]` |  |
 | [Type](#type-System-String) | `String` |  |
-| [Type](#type-System-Boolean) | `Boolean` | Represents a boolean (<see langword="true" /> or <see langword="false" />) value. |
+| [Type](#type-System-Boolean) | `Boolean` | Represents a boolean (`true` or `false`) value. |
 | [Type](#type-System-Double) | `Double` | Represents a double-precision floating-point number. |
 | [Type](#type-ImageBox-Core-IOPath-IOPath) | `IOPath` | A URI path - can be remote, local, or use fancy scheme (https, ftp, etc) |
 | [Type](#type-ImageBox-Core-SizeUnits-SizeUnit) | `SizeUnit` | Unit of measurement (ex: 100vw, 50vh, 10px, 40%, 1cm, 2in, 2pc, 43pt, 1em, 1mm, 1q, 3rp) |
@@ -885,7 +885,7 @@ Full Name: System.String<br>
 ### Type: `Boolean`
 Full Name: System.Boolean<br>
 Description:
-Represents a boolean (<see langword="true" /> or <see langword="false" />) value.
+Represents a boolean (`true` or `false`) value.
 <a name="type-System-Double"></a>
 ### Type: `Double`
 Full Name: System.Double<br>
@@ -946,10 +946,8 @@ Text alignment modes.
 **Enum Options**:<br>
 | Name | Description | Value |
 | ---- | ----------- | ----- |
-| `Start` | Aligns text from the left or top when the text direction is `LeftToRight`
-and from the right or bottom when the text direction is `RightToLeft`. | 0 |
-| `End` | Aligns text from the right or bottom when the text direction is `LeftToRight`
-and from the left or top when the text direction is `RightToLeft`. | 1 |
+| `Start` | Aligns text from the left or top when the text direction is `LeftToRight` and from the right or bottom when the text direction is `RightToLeft`. | 0 |
+| `End` | Aligns text from the right or bottom when the text direction is `LeftToRight` and from the left or top when the text direction is `RightToLeft`. | 1 |
 | `Center` | Aligns text from the center. | 2 |
 
 <a name="type-ImageBox-Drawing-OriginType"></a>

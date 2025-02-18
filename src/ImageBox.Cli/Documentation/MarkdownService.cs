@@ -10,6 +10,12 @@ internal partial class MarkdownService : IMarkdownService
     private readonly Dictionary<string, string> _references = [];
     private const string TAB = "  ";
 
+    public static string RemoveNewlines(string? text)
+    {
+        if (string.IsNullOrEmpty(text)) return string.Empty;
+        return text.Replace("\r", " ").Replace("\n", " ").Replace("|", " ").Replace("  ", " ");
+    }
+
     public async Task RenderTableOfContents(StreamWriter writer, Docs docs)
     {
         BuildReferences(docs);
@@ -20,7 +26,7 @@ internal partial class MarkdownService : IMarkdownService
 
         foreach(var element in docs.Elements)
         {
-            await writer.WriteLineAsync($"| [Element](#{LinkElement(element)}) | `{element.Tag}` | {element.Description} |");
+            await writer.WriteLineAsync($"| [Element](#{LinkElement(element)}) | `{element.Tag}` | {RemoveNewlines(HandleReferences(element.Description, docs))} |");
         }
 
         foreach (var (key, type) in docs.Types)
@@ -28,7 +34,7 @@ internal partial class MarkdownService : IMarkdownService
             var hasElement = _references.TryGetValue(key, out var link) && link.StartsWith("element-");
             if (hasElement) continue;
 
-            await writer.WriteLineAsync($"| [Type](#{LinkType(type)}) | `{type.Name}` | {type.Description} |");
+            await writer.WriteLineAsync($"| [Type](#{LinkType(type)}) | `{type.Name}` | {RemoveNewlines(HandleReferences(type.Description, docs))} |");
         }
 
         await writer.WriteLineAsync();
@@ -76,12 +82,12 @@ internal partial class MarkdownService : IMarkdownService
         }
     }
 
-    public string HandleReferences(string text, Docs docs)
+    public string HandleReferences(string? text, Docs docs)
     {
         BuildReferences(docs);
 
         if (string.IsNullOrEmpty(text) ||
-            !text.ContainsIc("<see ")) return text;
+            !text.ContainsIc("<see ")) return text ?? string.Empty;
 
         var match = SeeRefRegex().Matches(text);
         foreach (Match m in match)
@@ -95,6 +101,14 @@ internal partial class MarkdownService : IMarkdownService
                 text = text.Replace(item, $"[{actualName}](#{link})");
             else
                 text = text.Replace(item, $"`{actualName}`");
+        }
+
+        match = LangWordRegex().Matches(text);
+        foreach (Match m in match)
+        {
+            var item = m.Groups[0].Value;
+            var lang = m.Groups[1].Value;
+            text = text.Replace(item, $"`{lang}`");
         }
 
         return text;
@@ -225,7 +239,7 @@ internal partial class MarkdownService : IMarkdownService
 
         foreach (var option in type.Options)
         {
-            await writer.WriteLineAsync($"| `{option.Name}` | {HandleReferences(option.Description, docs)} | {option.Value} |");
+            await writer.WriteLineAsync($"| `{option.Name}` | {RemoveNewlines(HandleReferences(option.Description, docs))} | {option.Value} |");
         }
 
         await writer.WriteLineAsync();
@@ -253,4 +267,7 @@ internal partial class MarkdownService : IMarkdownService
 
     [GeneratedRegex(@"<see cref=""(.*?)"" />", RegexOptions.IgnoreCase | RegexOptions.Compiled, "en-US")]
     private static partial Regex SeeRefRegex();
+
+    [GeneratedRegex(@"<see langword=""(.*?)"" />", RegexOptions.IgnoreCase | RegexOptions.Compiled, "en-US")]
+    private static partial Regex LangWordRegex();
 }
