@@ -1,7 +1,6 @@
 ﻿namespace ImageBox.Services;
 
-using Loading;
-using Loading.SystemModules;
+using SystemModules;
 
 /// <summary></summary>
 public static class DiExtensions
@@ -15,6 +14,7 @@ public static class DiExtensions
             .AddTransient<IAstLoaderService, AstLoaderService>()
             .AddTransient<IScriptExecutionService, ScriptExecutionService>()
             .AddTransient<IContextGeneratorService, ContextGeneratorService>()
-            .AddSingleton<IElementReflectionService, ElementReflectionService>();
+            .AddSingleton<IElementReflectionService, ElementReflectionService>()
+            .AddTransient<IModuleSourceService, SystemModuleLoaderService>();
     }
 }

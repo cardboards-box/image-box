@@ -12,7 +12,7 @@
 		<RepositoryUrl>https://github.com/cardboards-box/image-box</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
 		<PackageIcon>icon.jpg</PackageIcon>
-		<Version>1.0.9</Version>
+		<Version>1.1.0</Version>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
@@ -58,8 +58,10 @@
 		<ProjectReference Include="..\ImageBox.Core\ImageBox.Core.csproj" PrivateAssets="All" />
 		<ProjectReference Include="..\ImageBox.Drawing\ImageBox.Drawing.csproj" PrivateAssets="All" />
 		<ProjectReference Include="..\ImageBox.Elements\ImageBox.Elements.csproj" PrivateAssets="All" />
-		<ProjectReference Include="..\ImageBox.Rendering\ImageBox.Rendering.csproj" PrivateAssets="All" />
-		<ProjectReference Include="..\ImageBox.Scripting\ImageBox.Scripting.csproj" PrivateAssets="All" />
+		<ProjectReference Include="..\ImageBox.Elements.Directives\ImageBox.Elements.Directives.csproj" PrivateAssets="All" />
+		<ProjectReference Include="..\ImageBox.Elements.Drawing\ImageBox.Elements.Drawing.csproj" PrivateAssets="All" />
+		<ProjectReference Include="..\ImageBox.Elements.Shapes\ImageBox.Elements.Shapes.csproj" PrivateAssets="All" />
+		<ProjectReference Include="..\ImageBox.Elements.TopLevel\ImageBox.Elements.TopLevel.csproj" PrivateAssets="All" />
 		<ProjectReference Include="..\ImageBox.Services\ImageBox.Services.csproj" PrivateAssets="All" />
 	</ItemGroup>
 

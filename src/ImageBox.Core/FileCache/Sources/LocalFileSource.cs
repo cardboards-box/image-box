@@ -1,4 +1,6 @@
-﻿namespace ImageBox.Core.FileCache.Sources;
+﻿using Path = System.IO.Path;
+
+namespace ImageBox.Core.FileCache.Sources;
 
 internal class LocalFileSource : IFileSourceService
 {

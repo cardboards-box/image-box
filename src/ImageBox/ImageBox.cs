@@ -1,6 +1,6 @@
 ﻿namespace ImageBox;
 
-using Services;
+using Elements;
 
 /// <summary>
 /// Represents a render-able image box

@@ -35,12 +35,14 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\ImageBox.Ast\ImageBox.Ast.csproj" />
+		<ProjectReference Include="..\ImageBox.Cli\ImageBox.Cli.csproj" />
 		<ProjectReference Include="..\ImageBox.Core\ImageBox.Core.csproj" />
 		<ProjectReference Include="..\ImageBox.Drawing\ImageBox.Drawing.csproj" />
+		<ProjectReference Include="..\ImageBox.Elements.Directives\ImageBox.Elements.Directives.csproj" />
+		<ProjectReference Include="..\ImageBox.Elements.Drawing\ImageBox.Elements.Drawing.csproj" />
+		<ProjectReference Include="..\ImageBox.Elements.Shapes\ImageBox.Elements.Shapes.csproj" />
+		<ProjectReference Include="..\ImageBox.Elements.TopLevel\ImageBox.Elements.TopLevel.csproj" />
 		<ProjectReference Include="..\ImageBox.Elements\ImageBox.Elements.csproj" />
-		<ProjectReference Include="..\ImageBox.Rendering\ImageBox.Rendering.csproj" />
-		<ProjectReference Include="..\ImageBox.Scripting\ImageBox.Scripting.csproj" />
-		<ProjectReference Include="..\ImageBox.Services\ImageBox.Services.csproj" />
 		<ProjectReference Include="..\ImageBox\ImageBox.csproj" />
 	</ItemGroup>
 

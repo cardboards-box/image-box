@@ -12,13 +12,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <PackageReference Include="CardboardBox.Extensions" Version="2.0.2" />
-	  <PackageReference Include="HtmlAgilityPack" Version="1.11.72" />
-	  <PackageReference Include="System.Formats.Asn1" Version="8.0.2" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <ProjectReference Include="..\ImageBox.Scripting\ImageBox.Scripting.csproj" />
+		<ProjectReference Include="..\ImageBox.Core\ImageBox.Core.csproj" />
 	</ItemGroup>
 
 </Project>

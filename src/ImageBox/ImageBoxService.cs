@@ -1,10 +1,8 @@
-﻿using SixLabors.ImageSharp;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 
 namespace ImageBox;
 
-using Services;
-using Services.Loading;
+using Elements;
 
 using Configure = Action<IImageRendererEvents>;
 using Variables = Dictionary<string, object?>;

@@ -1,4 +1,4 @@
-﻿namespace ImageBox.Elements.Attributes;
+﻿namespace ImageBox.Elements;
 
 /// <summary>
 /// Indicates that the class is available as a custom element in the drawing abstract syntax tree

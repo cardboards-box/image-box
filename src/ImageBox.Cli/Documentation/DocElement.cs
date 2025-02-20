@@ -1,6 +1,6 @@
 ﻿namespace ImageBox.Cli.Documentation;
 
-using Elements.Base;
+using Elements;
 
 public record class DocElement(
     string Type,

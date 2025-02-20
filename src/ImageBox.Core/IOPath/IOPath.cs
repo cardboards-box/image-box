@@ -1,4 +1,6 @@
-﻿namespace ImageBox.Core.IOPath;
+﻿using Path = System.IO.Path;
+
+namespace ImageBox.Core.IOPath;
 
 /// <summary>
 /// A URI path - can be remote, local, or use fancy scheme (https, ftp, etc)

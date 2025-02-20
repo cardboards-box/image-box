@@ -1,15 +1,12 @@
-﻿using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Formats.Gif;
+﻿using SixLabors.ImageSharp.Formats.Gif;
 using SixLabors.ImageSharp.PixelFormats;
-using System.Collections.Concurrent;
 
 using Variables = System.Collections.Generic.Dictionary<string, object?>;
+using Path = System.IO.Path;
 
 namespace ImageBox;
 
-using Rendering.Base;
-using Services;
-using Services.Loading;
+using Elements;
 
 /// <summary>
 /// The event handlers for rendering an image
@@ -245,7 +242,7 @@ internal class ImageRenderer(
         using var frame = new ContextFrame(frameNum, image, _box, variables, _scripting, Token)
         {
             //Get the elements to render
-            Elements = _elements.BindTemplates(_box.Template.Children, false).ToArray()
+            Elements = _elements.BindTemplates(_box.Template.Children, false, _box.TemplateElement).ToArray()
         };
         //Execute and bind the script
         await _scripting.Execute(frame);

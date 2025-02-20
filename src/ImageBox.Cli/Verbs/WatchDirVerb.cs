@@ -1,10 +1,11 @@
-﻿using System.Collections.Concurrent;
-using System.Diagnostics;
+﻿using System.Diagnostics;
+
+using Path = System.IO.Path;
 
 namespace ImageBox.Cli.Verbs;
 
 using Drawing;
-using Services;
+using Elements;
 
 [Verb("watch-directory", false, ["watch-dir", "wd"], HelpText = "Watches a directory for changes and regenerates the image")]
 public class WatchDirVerbOptions

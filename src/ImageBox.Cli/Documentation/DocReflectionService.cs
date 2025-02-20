@@ -1,11 +1,10 @@
 ﻿using LoxSmoke.DocXml;
 
+using Path = System.IO.Path;
+
 namespace ImageBox.Cli.Documentation;
 
-using Elements.Attributes;
-using Elements.Base;
-using Services;
-using Services.Loading;
+using Elements;
 
 public interface IDocReflectionService
 {

@@ -2,7 +2,7 @@
 
 using Ast;
 using Drawing;
-using Rendering;
+using Elements;
 using Services;
 
 /// <summary>
@@ -10,6 +10,15 @@ using Services;
 /// </summary>
 public static class DiExtensions
 {
+    internal static IServiceCollection AddElements(this IServiceCollection services)
+    {
+        return services
+            .AddDirectiveElements()
+            .AddDrawingElements()
+            .AddShapeElements()
+            .AddTopLevelElements();
+    }
+
     /// <summary>
     /// Adds all of the image box services to the service collection
     /// </summary>
@@ -52,9 +61,11 @@ public static class DiExtensions
         yield return typeof(Ast.DiExtensions).Assembly;
         yield return typeof(Core.DiExtensions).Assembly;
         yield return typeof(Drawing.DiExtensions).Assembly;
-        yield return typeof(Elements.TemplateElem).Assembly;
-        yield return typeof(Rendering.DiExtensions).Assembly;
-        yield return typeof(Scripting.Extensions).Assembly;
+        yield return typeof(Elements.Extensions).Assembly;
+        yield return typeof(Elements.Directives.IfDir).Assembly;
+        yield return typeof(Elements.Drawing.ClearElem).Assembly;
+        yield return typeof(Elements.Shapes.RectangleElem).Assembly;
+        yield return typeof(Elements.TopLevel.TemplateElem).Assembly;
         yield return typeof(Services.DiExtensions).Assembly;
     }
 
@@ -70,7 +81,7 @@ public static class DiExtensions
             .AddAst()
             .AddDrawing()
             .AddServices()
-            .AddCustomElements()
+            .AddElements()
             .AddTransient<IImageBoxService, ImageBoxService>();
     }
 }

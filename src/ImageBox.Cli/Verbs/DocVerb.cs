@@ -1,4 +1,6 @@
-﻿namespace ImageBox.Cli.Verbs;
+﻿using Path = System.IO.Path;
+
+namespace ImageBox.Cli.Verbs;
 
 using Documentation;
 

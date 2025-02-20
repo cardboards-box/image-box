@@ -9,16 +9,11 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\ImageBox.Drawing\ImageBox.Drawing.csproj" />
-		<ProjectReference Include="..\ImageBox.Elements\ImageBox.Elements.csproj" />
+		<ProjectReference Include="..\ImageBox.Elements.TopLevel\ImageBox.Elements.TopLevel.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<Compile Include="./../global.cs" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <PackageReference Include="CardboardBox.Extensions" Version="2.0.2" />
-	  <PackageReference Include="System.Formats.Asn1" Version="8.0.2" />
 	</ItemGroup>
 
 </Project>

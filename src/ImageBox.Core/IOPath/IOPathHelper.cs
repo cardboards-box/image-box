@@ -1,4 +1,6 @@
-﻿namespace ImageBox.Core.IOPath;
+﻿using Path = System.IO.Path;
+
+namespace ImageBox.Core.IOPath;
 
 /// <summary>
 /// Helper utility class for dealing with IO paths

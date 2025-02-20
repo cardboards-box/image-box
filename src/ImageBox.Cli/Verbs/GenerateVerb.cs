@@ -1,4 +1,6 @@
-﻿namespace ImageBox.Cli.Verbs;
+﻿using Path = System.IO.Path;
+
+namespace ImageBox.Cli.Verbs;
 
 [Verb("generate", isDefault: true, HelpText = "Generates an image from a template")]
 public class GenerateVerbOptions

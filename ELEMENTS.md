@@ -6,30 +6,36 @@
 | [Element](#element-script) | `script` | Represents a script that can be executed to calculate contexts |
 | [Element](#element-template) | `template` | Represents the root of a template |
 | [Element](#element-animation-bezier) | `animation-bezier` | Renders the children of the element with a Bezier animation |
+| [Element](#element-case) | `case` | The case statement for the [SwitchDir](#element-switch) directive |
+| [Element](#element-circle) | `circle` | Represents a circle that can be filled or bordered |
 | [Element](#element-clear) | `clear` | The clear element |
+| [Element](#element-default) | `default` | The default case for a switch statement |
 | [Element](#element-foreach) | `foreach` | Represents a for-each directive |
 | [Element](#element-if) | `if` | If directive for templates |
 | [Element](#element-image) | `image` | Represents an image that can be drawn to the image |
+| [Element](#element-line) | `line` | Represents a line that can be filled or bordered |
 | [Element](#element-range) | `range` | Represents a for directive |
 | [Element](#element-rectangle) | `rectangle` | Represents a rectangle that can be filled or bordered |
+| [Element](#element-switch) | `switch` | Switch directive for templates |
 | [Element](#element-text) | `text` | Represents text to be drawn to the image |
 | [Element](#element-font-family) | `font-family` | Element to allow for importing of custom fonts |
 | [Element](#element-point) | `point` | Represents a point in the render context |
 | [Element](#element-remote-resource) | `remote-resource` | Represents a remote resource that should be cached |
 | [Type](#type-System-Object-array) | `Object[]` |  |
 | [Type](#type-System-String) | `String` |  |
-| [Type](#type-System-Boolean) | `Boolean` | Represents a boolean (`true` or `false`) value. |
 | [Type](#type-System-Double) | `Double` | Represents a double-precision floating-point number. |
-| [Type](#type-ImageBox-Core-IOPath-IOPath) | `IOPath` | A URI path - can be remote, local, or use fancy scheme (https, ftp, etc) |
-| [Type](#type-ImageBox-Core-SizeUnits-SizeUnit) | `SizeUnit` | Unit of measurement (ex: 100vw, 50vh, 10px, 40%, 1cm, 2in, 2pc, 43pt, 1em, 1mm, 1q, 3rp) |
-| [Type](#type-SixLabors-Fonts-FontStyle) | `FontStyle` | The font styles |
+| [Type](#type-System-Boolean) | `Boolean` | Represents a boolean (`true` or `false`) value. |
+| [Type](#type-System-Object) | `Object` |  |
 | [Type](#type-SixLabors-Fonts-VerticalAlignment) | `VerticalAlignment` | Vertical alignment modes. |
 | [Type](#type-SixLabors-Fonts-HorizontalAlignment) | `HorizontalAlignment` | Horizontal alignment modes. |
 | [Type](#type-SixLabors-Fonts-TextAlignment) | `TextAlignment` | Text alignment modes. |
 | [Type](#type-ImageBox-Drawing-OriginType) | `OriginType` | Dictates where the origin of an object is |
-| [Type](#type-ImageBox-Services-Animation-Bezier-BezierType) | `BezierType` | The type of Bezier curve to use |
-| [Type](#type-ImageBox-Services-Animation-Bezier-EasingType) | `EasingType` | The type of easing function to use |
-| [Type](#type-System-Int32) | `Int32` |  |
+| [Type](#type-ImageBox-Core-SizeUnits-SizeUnit) | `SizeUnit` | Unit of measurement (ex: 100vw, 50vh, 10px, 40%, 1cm, 2in, 2pc, 43pt, 1em, 1mm, 1q, 3rp) |
+| [Type](#type-SixLabors-Fonts-FontStyle) | `FontStyle` | The font styles |
+| [Type](#type-SixLabors-Fonts-WordBreaking) | `WordBreaking` | Defines modes to determine when line breaks should appear when words overflow their content box. |
+| [Type](#type-ImageBox-Core-IOPath-IOPath) | `IOPath` | A URI path - can be remote, local, or use fancy scheme (https, ftp, etc) |
+| [Type](#type-ImageBox-Drawing-Models-Bezier-BezierType) | `BezierType` | The type of Bezier curve to use |
+| [Type](#type-ImageBox-Drawing-Models-Bezier-EasingType) | `EasingType` | The type of easing function to use |
 | [Type](#type-ImageBox-Core-TimeUnits-TimeUnit) | `TimeUnit` | Unit of time. (ex: 20ms, 3.2s, 1m, 2h) |
 | [Type](#type-System-UInt16) | `UInt16` |  |
 
@@ -170,11 +176,6 @@ Renders the children of the element with a Bezier animation
   y="" 
   width="" 
   height="" 
-  font-size="" 
-  font-family="" 
-  font-style="" 
-  auto-font-size="" 
-  auto-font-size-padding="" 
 >
   <!-- CHILDREN HERE -->
 </animation-bezier>
@@ -184,74 +185,126 @@ Renders the children of the element with a Bezier animation
 
 <a name="attribute-animation-bezier-type"></a>
 __*type*__: The type of Bezier curve to use<br>
-Type: [ImageBox.Services.Animation.Bezier.BezierType](#type-ImageBox-Services-Animation-Bezier-BezierType).
+Type: [ImageBox.Drawing.Models.Bezier.BezierType](#type-ImageBox-Drawing-Models-Bezier-BezierType).
 This attribute is optional.
 This attribute can be bound to a runtime variable.
 You can use the following aliases: `interpolation`.
 
 <a name="attribute-animation-bezier-easing"></a>
 __*easing*__: The easing function to use<br>
-Type: [ImageBox.Services.Animation.Bezier.EasingType](#type-ImageBox-Services-Animation-Bezier-EasingType).
+Type: [ImageBox.Drawing.Models.Bezier.EasingType](#type-ImageBox-Drawing-Models-Bezier-EasingType).
 This attribute is optional.
 This attribute can be bound to a runtime variable.
 You can use the following aliases: `timing`.
 
 <a name="attribute-animation-bezier-x"></a>
-__*x*__: The X offset<br>
+__*x*__: <br>
 Type: [ImageBox.Core.SizeUnits.SizeUnit](#type-ImageBox-Core-SizeUnits-SizeUnit).
 This attribute is optional.
 This attribute can be bound to a runtime variable.
 
 <a name="attribute-animation-bezier-y"></a>
-__*y*__: The Y offset<br>
+__*y*__: <br>
 Type: [ImageBox.Core.SizeUnits.SizeUnit](#type-ImageBox-Core-SizeUnits-SizeUnit).
 This attribute is optional.
 This attribute can be bound to a runtime variable.
 
 <a name="attribute-animation-bezier-width"></a>
-__*width*__: The width of the rectangle<br>
+__*width*__: <br>
 Type: [ImageBox.Core.SizeUnits.SizeUnit](#type-ImageBox-Core-SizeUnits-SizeUnit).
 This attribute is optional.
 This attribute can be bound to a runtime variable.
 
 <a name="attribute-animation-bezier-height"></a>
-__*height*__: The height of the rectangle<br>
+__*height*__: <br>
 Type: [ImageBox.Core.SizeUnits.SizeUnit](#type-ImageBox-Core-SizeUnits-SizeUnit).
 This attribute is optional.
 This attribute can be bound to a runtime variable.
 
-<a name="attribute-animation-bezier-font-size"></a>
-__*font-size*__: The font size<br>
-Type: [ImageBox.Core.SizeUnits.SizeUnit](#type-ImageBox-Core-SizeUnits-SizeUnit).
+
+<a name="element-case"></a>
+## Element: `<case>`
+The case statement for the [SwitchDir](#element-switch) directive
+
+**Example**:<br>
+```html
+<case when="" >
+  <!-- CHILDREN HERE -->
+</case>
+```
+
+### Attributes
+
+<a name="attribute-case-when"></a>
+__*when*__: The value to compare against<br>
+Type: [System.Object](#type-System-Object).
 This attribute is optional.
 This attribute can be bound to a runtime variable.
+You can use the following aliases: `con`, `condition`, `value`.
 
-<a name="attribute-animation-bezier-font-family"></a>
-__*font-family*__: The font family to use for the text<br>
+
+<a name="element-circle"></a>
+## Element: `<circle>`
+Represents a circle that can be filled or bordered
+
+**Example**:<br>
+```html
+<circle 
+  color="" 
+  border-color="" 
+  border-width="" 
+  x="" 
+  y="" 
+  width="" 
+  height="" 
+>
+  <!-- CHILDREN HERE -->
+</circle>
+```
+
+### Attributes
+
+<a name="attribute-circle-color"></a>
+__*color*__: The color to fill with<br>
 Type: [System.String](#type-System-String).
 This attribute is optional.
 This attribute can be bound to a runtime variable.
 
-<a name="attribute-animation-bezier-font-style"></a>
-__*font-style*__: The style of the font to use<br>
-Type: [SixLabors.Fonts.FontStyle](#type-SixLabors-Fonts-FontStyle).
+<a name="attribute-circle-border-color"></a>
+__*border-color*__: The color of the border of the rectangle<br>
+Type: [System.String](#type-System-String).
 This attribute is optional.
 This attribute can be bound to a runtime variable.
 
-<a name="attribute-animation-bezier-auto-font-size"></a>
-__*auto-font-size*__: Whether to automatically determine the font size based on the box size<br>
-Type: [System.Boolean](#type-System-Boolean).
-This attribute is optional.
-This attribute can be bound to a runtime variable.
-*Remarks*: If true, [FontSize](#attribute-text-font-size) will be ignored. 
-This can be relatively expensive, so it should be avoided when possible.
-
-<a name="attribute-animation-bezier-auto-font-size-padding"></a>
-__*auto-font-size-padding*__: Sets the padding to use when determining the font size<br>
+<a name="attribute-circle-border-width"></a>
+__*border-width*__: The width of the border of the rectangle<br>
 Type: [ImageBox.Core.SizeUnits.SizeUnit](#type-ImageBox-Core-SizeUnits-SizeUnit).
 This attribute is optional.
 This attribute can be bound to a runtime variable.
-*Remarks*: Only used when [AutoFontSize](#attribute-text-auto-font-size) is true
+
+<a name="attribute-circle-x"></a>
+__*x*__: <br>
+Type: [ImageBox.Core.SizeUnits.SizeUnit](#type-ImageBox-Core-SizeUnits-SizeUnit).
+This attribute is optional.
+This attribute can be bound to a runtime variable.
+
+<a name="attribute-circle-y"></a>
+__*y*__: <br>
+Type: [ImageBox.Core.SizeUnits.SizeUnit](#type-ImageBox-Core-SizeUnits-SizeUnit).
+This attribute is optional.
+This attribute can be bound to a runtime variable.
+
+<a name="attribute-circle-width"></a>
+__*width*__: <br>
+Type: [ImageBox.Core.SizeUnits.SizeUnit](#type-ImageBox-Core-SizeUnits-SizeUnit).
+This attribute is optional.
+This attribute can be bound to a runtime variable.
+
+<a name="attribute-circle-height"></a>
+__*height*__: <br>
+Type: [ImageBox.Core.SizeUnits.SizeUnit](#type-ImageBox-Core-SizeUnits-SizeUnit).
+This attribute is optional.
+This attribute can be bound to a runtime variable.
 
 
 <a name="element-clear"></a>
@@ -271,6 +324,17 @@ Type: [System.String](#type-System-String).
 This attribute is optional.
 This attribute can be bound to a runtime variable.
 
+
+<a name="element-default"></a>
+## Element: `<default>`
+The default case for a switch statement
+
+**Example**:<br>
+```html
+<default >
+  <!-- CHILDREN HERE -->
+</default>
+```
 
 <a name="element-foreach"></a>
 ## Element: `<foreach>`
@@ -337,11 +401,6 @@ Represents an image that can be drawn to the image
   y="" 
   width="" 
   height="" 
-  font-size="" 
-  font-family="" 
-  font-style="" 
-  auto-font-size="" 
-  auto-font-size-padding="" 
 />
 ```
 
@@ -391,61 +450,92 @@ This attribute is optional.
 This attribute can be bound to a runtime variable.
 
 <a name="attribute-image-x"></a>
-__*x*__: The X offset<br>
+__*x*__: <br>
 Type: [ImageBox.Core.SizeUnits.SizeUnit](#type-ImageBox-Core-SizeUnits-SizeUnit).
 This attribute is optional.
 This attribute can be bound to a runtime variable.
 
 <a name="attribute-image-y"></a>
-__*y*__: The Y offset<br>
+__*y*__: <br>
 Type: [ImageBox.Core.SizeUnits.SizeUnit](#type-ImageBox-Core-SizeUnits-SizeUnit).
 This attribute is optional.
 This attribute can be bound to a runtime variable.
 
 <a name="attribute-image-width"></a>
-__*width*__: The width of the rectangle<br>
+__*width*__: <br>
 Type: [ImageBox.Core.SizeUnits.SizeUnit](#type-ImageBox-Core-SizeUnits-SizeUnit).
 This attribute is optional.
 This attribute can be bound to a runtime variable.
 
 <a name="attribute-image-height"></a>
-__*height*__: The height of the rectangle<br>
+__*height*__: <br>
 Type: [ImageBox.Core.SizeUnits.SizeUnit](#type-ImageBox-Core-SizeUnits-SizeUnit).
 This attribute is optional.
 This attribute can be bound to a runtime variable.
 
-<a name="attribute-image-font-size"></a>
-__*font-size*__: The font size<br>
-Type: [ImageBox.Core.SizeUnits.SizeUnit](#type-ImageBox-Core-SizeUnits-SizeUnit).
-This attribute is optional.
-This attribute can be bound to a runtime variable.
 
-<a name="attribute-image-font-family"></a>
-__*font-family*__: The font family to use for the text<br>
+<a name="element-line"></a>
+## Element: `<line>`
+Represents a line that can be filled or bordered
+
+**Example**:<br>
+```html
+<line 
+  color="" 
+  border-color="" 
+  border-width="" 
+  x="" 
+  y="" 
+  width="" 
+  height="" 
+>
+  <!-- CHILDREN HERE -->
+</line>
+```
+
+### Attributes
+
+<a name="attribute-line-color"></a>
+__*color*__: The color to fill with<br>
 Type: [System.String](#type-System-String).
 This attribute is optional.
 This attribute can be bound to a runtime variable.
 
-<a name="attribute-image-font-style"></a>
-__*font-style*__: The style of the font to use<br>
-Type: [SixLabors.Fonts.FontStyle](#type-SixLabors-Fonts-FontStyle).
+<a name="attribute-line-border-color"></a>
+__*border-color*__: The color of the border of the rectangle<br>
+Type: [System.String](#type-System-String).
 This attribute is optional.
 This attribute can be bound to a runtime variable.
 
-<a name="attribute-image-auto-font-size"></a>
-__*auto-font-size*__: Whether to automatically determine the font size based on the box size<br>
-Type: [System.Boolean](#type-System-Boolean).
-This attribute is optional.
-This attribute can be bound to a runtime variable.
-*Remarks*: If true, [FontSize](#attribute-text-font-size) will be ignored. 
-This can be relatively expensive, so it should be avoided when possible.
-
-<a name="attribute-image-auto-font-size-padding"></a>
-__*auto-font-size-padding*__: Sets the padding to use when determining the font size<br>
+<a name="attribute-line-border-width"></a>
+__*border-width*__: The width of the border of the rectangle<br>
 Type: [ImageBox.Core.SizeUnits.SizeUnit](#type-ImageBox-Core-SizeUnits-SizeUnit).
 This attribute is optional.
 This attribute can be bound to a runtime variable.
-*Remarks*: Only used when [AutoFontSize](#attribute-text-auto-font-size) is true
+
+<a name="attribute-line-x"></a>
+__*x*__: <br>
+Type: [ImageBox.Core.SizeUnits.SizeUnit](#type-ImageBox-Core-SizeUnits-SizeUnit).
+This attribute is optional.
+This attribute can be bound to a runtime variable.
+
+<a name="attribute-line-y"></a>
+__*y*__: <br>
+Type: [ImageBox.Core.SizeUnits.SizeUnit](#type-ImageBox-Core-SizeUnits-SizeUnit).
+This attribute is optional.
+This attribute can be bound to a runtime variable.
+
+<a name="attribute-line-width"></a>
+__*width*__: <br>
+Type: [ImageBox.Core.SizeUnits.SizeUnit](#type-ImageBox-Core-SizeUnits-SizeUnit).
+This attribute is optional.
+This attribute can be bound to a runtime variable.
+
+<a name="attribute-line-height"></a>
+__*height*__: <br>
+Type: [ImageBox.Core.SizeUnits.SizeUnit](#type-ImageBox-Core-SizeUnits-SizeUnit).
+This attribute is optional.
+This attribute can be bound to a runtime variable.
 
 
 <a name="element-range"></a>
@@ -506,11 +596,6 @@ Represents a rectangle that can be filled or bordered
   y="" 
   width="" 
   height="" 
-  font-size="" 
-  font-family="" 
-  font-style="" 
-  auto-font-size="" 
-  auto-font-size-padding="" 
 >
   <!-- CHILDREN HERE -->
 </rectangle>
@@ -543,61 +628,49 @@ This attribute is optional.
 This attribute can be bound to a runtime variable.
 
 <a name="attribute-rectangle-x"></a>
-__*x*__: The X offset<br>
+__*x*__: <br>
 Type: [ImageBox.Core.SizeUnits.SizeUnit](#type-ImageBox-Core-SizeUnits-SizeUnit).
 This attribute is optional.
 This attribute can be bound to a runtime variable.
 
 <a name="attribute-rectangle-y"></a>
-__*y*__: The Y offset<br>
+__*y*__: <br>
 Type: [ImageBox.Core.SizeUnits.SizeUnit](#type-ImageBox-Core-SizeUnits-SizeUnit).
 This attribute is optional.
 This attribute can be bound to a runtime variable.
 
 <a name="attribute-rectangle-width"></a>
-__*width*__: The width of the rectangle<br>
+__*width*__: <br>
 Type: [ImageBox.Core.SizeUnits.SizeUnit](#type-ImageBox-Core-SizeUnits-SizeUnit).
 This attribute is optional.
 This attribute can be bound to a runtime variable.
 
 <a name="attribute-rectangle-height"></a>
-__*height*__: The height of the rectangle<br>
+__*height*__: <br>
 Type: [ImageBox.Core.SizeUnits.SizeUnit](#type-ImageBox-Core-SizeUnits-SizeUnit).
 This attribute is optional.
 This attribute can be bound to a runtime variable.
 
-<a name="attribute-rectangle-font-size"></a>
-__*font-size*__: The font size<br>
-Type: [ImageBox.Core.SizeUnits.SizeUnit](#type-ImageBox-Core-SizeUnits-SizeUnit).
-This attribute is optional.
-This attribute can be bound to a runtime variable.
 
-<a name="attribute-rectangle-font-family"></a>
-__*font-family*__: The font family to use for the text<br>
-Type: [System.String](#type-System-String).
-This attribute is optional.
-This attribute can be bound to a runtime variable.
+<a name="element-switch"></a>
+## Element: `<switch>`
+Switch directive for templates
 
-<a name="attribute-rectangle-font-style"></a>
-__*font-style*__: The style of the font to use<br>
-Type: [SixLabors.Fonts.FontStyle](#type-SixLabors-Fonts-FontStyle).
-This attribute is optional.
-This attribute can be bound to a runtime variable.
+**Example**:<br>
+```html
+<switch value="" >
+  <!-- CHILDREN HERE -->
+</switch>
+```
 
-<a name="attribute-rectangle-auto-font-size"></a>
-__*auto-font-size*__: Whether to automatically determine the font size based on the box size<br>
-Type: [System.Boolean](#type-System-Boolean).
-This attribute is optional.
-This attribute can be bound to a runtime variable.
-*Remarks*: If true, [FontSize](#attribute-text-font-size) will be ignored. 
-This can be relatively expensive, so it should be avoided when possible.
+### Attributes
 
-<a name="attribute-rectangle-auto-font-size-padding"></a>
-__*auto-font-size-padding*__: Sets the padding to use when determining the font size<br>
-Type: [ImageBox.Core.SizeUnits.SizeUnit](#type-ImageBox-Core-SizeUnits-SizeUnit).
+<a name="attribute-switch-value"></a>
+__*value*__: The value to switch on<br>
+Type: [System.Object](#type-System-Object).
 This attribute is optional.
 This attribute can be bound to a runtime variable.
-*Remarks*: Only used when [AutoFontSize](#attribute-text-auto-font-size) is true
+You can use the following aliases: `target`, `condition`, `con`.
 
 
 <a name="element-text"></a>
@@ -619,15 +692,16 @@ Represents text to be drawn to the image
   origin-type="" 
   origin-x="" 
   origin-y="" 
-  x="" 
-  y="" 
-  width="" 
-  height="" 
   font-size="" 
   font-family="" 
   font-style="" 
   auto-font-size="" 
   auto-font-size-padding="" 
+  auto-font-size-word-breaking="" 
+  x="" 
+  y="" 
+  width="" 
+  height="" 
 />
 ```
 
@@ -711,62 +785,65 @@ This attribute is optional.
 This attribute can be bound to a runtime variable.
 *Remarks*: Requires [OriginX](#attribute-text-origin-x) to be set as well
 
-<a name="attribute-text-x"></a>
-__*x*__: The X offset<br>
-Type: [ImageBox.Core.SizeUnits.SizeUnit](#type-ImageBox-Core-SizeUnits-SizeUnit).
-This attribute is optional.
-This attribute can be bound to a runtime variable.
-
-<a name="attribute-text-y"></a>
-__*y*__: The Y offset<br>
-Type: [ImageBox.Core.SizeUnits.SizeUnit](#type-ImageBox-Core-SizeUnits-SizeUnit).
-This attribute is optional.
-This attribute can be bound to a runtime variable.
-
-<a name="attribute-text-width"></a>
-__*width*__: The width of the rectangle<br>
-Type: [ImageBox.Core.SizeUnits.SizeUnit](#type-ImageBox-Core-SizeUnits-SizeUnit).
-This attribute is optional.
-This attribute can be bound to a runtime variable.
-
-<a name="attribute-text-height"></a>
-__*height*__: The height of the rectangle<br>
-Type: [ImageBox.Core.SizeUnits.SizeUnit](#type-ImageBox-Core-SizeUnits-SizeUnit).
-This attribute is optional.
-This attribute can be bound to a runtime variable.
-
 <a name="attribute-text-font-size"></a>
-__*font-size*__: The font size<br>
+__*font-size*__: <br>
 Type: [ImageBox.Core.SizeUnits.SizeUnit](#type-ImageBox-Core-SizeUnits-SizeUnit).
 This attribute is optional.
 This attribute can be bound to a runtime variable.
 
 <a name="attribute-text-font-family"></a>
-__*font-family*__: The font family to use for the text<br>
+__*font-family*__: <br>
 Type: [System.String](#type-System-String).
 This attribute is optional.
 This attribute can be bound to a runtime variable.
 
 <a name="attribute-text-font-style"></a>
-__*font-style*__: The style of the font to use<br>
+__*font-style*__: <br>
 Type: [SixLabors.Fonts.FontStyle](#type-SixLabors-Fonts-FontStyle).
 This attribute is optional.
 This attribute can be bound to a runtime variable.
 
 <a name="attribute-text-auto-font-size"></a>
-__*auto-font-size*__: Whether to automatically determine the font size based on the box size<br>
+__*auto-font-size*__: <br>
 Type: [System.Boolean](#type-System-Boolean).
 This attribute is optional.
 This attribute can be bound to a runtime variable.
-*Remarks*: If true, [FontSize](#attribute-text-font-size) will be ignored. 
-This can be relatively expensive, so it should be avoided when possible.
 
 <a name="attribute-text-auto-font-size-padding"></a>
-__*auto-font-size-padding*__: Sets the padding to use when determining the font size<br>
+__*auto-font-size-padding*__: <br>
 Type: [ImageBox.Core.SizeUnits.SizeUnit](#type-ImageBox-Core-SizeUnits-SizeUnit).
 This attribute is optional.
 This attribute can be bound to a runtime variable.
-*Remarks*: Only used when [AutoFontSize](#attribute-text-auto-font-size) is true
+
+<a name="attribute-text-auto-font-size-word-breaking"></a>
+__*auto-font-size-word-breaking*__: <br>
+Type: [SixLabors.Fonts.WordBreaking](#type-SixLabors-Fonts-WordBreaking).
+This attribute is optional.
+This attribute can be bound to a runtime variable.
+
+<a name="attribute-text-x"></a>
+__*x*__: <br>
+Type: [ImageBox.Core.SizeUnits.SizeUnit](#type-ImageBox-Core-SizeUnits-SizeUnit).
+This attribute is optional.
+This attribute can be bound to a runtime variable.
+
+<a name="attribute-text-y"></a>
+__*y*__: <br>
+Type: [ImageBox.Core.SizeUnits.SizeUnit](#type-ImageBox-Core-SizeUnits-SizeUnit).
+This attribute is optional.
+This attribute can be bound to a runtime variable.
+
+<a name="attribute-text-width"></a>
+__*width*__: <br>
+Type: [ImageBox.Core.SizeUnits.SizeUnit](#type-ImageBox-Core-SizeUnits-SizeUnit).
+This attribute is optional.
+This attribute can be bound to a runtime variable.
+
+<a name="attribute-text-height"></a>
+__*height*__: <br>
+Type: [ImageBox.Core.SizeUnits.SizeUnit](#type-ImageBox-Core-SizeUnits-SizeUnit).
+This attribute is optional.
+This attribute can be bound to a runtime variable.
 
 
 <a name="element-font-family"></a>
@@ -800,21 +877,10 @@ Represents a point in the render context
 
 **Example**:<br>
 ```html
-<point 
-  i="" 
-  x="" 
-  y="" 
-/>
+<point x="" y="" />
 ```
 
 ### Attributes
-
-<a name="attribute-point-i"></a>
-__*i*__: The index of the point in the point list<br>
-Type: [System.Int32](#type-System-Int32).
-This attribute is optional.
-This attribute can be bound to a runtime variable.
-You can use the following aliases: `index`.
 
 <a name="attribute-point-x"></a>
 __*x*__: The X offset<br>
@@ -881,39 +947,19 @@ Full Name: System.Object[]<br>
 <a name="type-System-String"></a>
 ### Type: `String`
 Full Name: System.String<br>
-<a name="type-System-Boolean"></a>
-### Type: `Boolean`
-Full Name: System.Boolean<br>
-Description:
-Represents a boolean (`true` or `false`) value.
 <a name="type-System-Double"></a>
 ### Type: `Double`
 Full Name: System.Double<br>
 Description:
 Represents a double-precision floating-point number.
-<a name="type-ImageBox-Core-IOPath-IOPath"></a>
-### Type: `IOPath`
-Full Name: ImageBox.Core.IOPath.IOPath<br>
+<a name="type-System-Boolean"></a>
+### Type: `Boolean`
+Full Name: System.Boolean<br>
 Description:
-A URI path - can be remote, local, or use fancy scheme (https, ftp, etc)
-<a name="type-ImageBox-Core-SizeUnits-SizeUnit"></a>
-### Type: `SizeUnit`
-Full Name: ImageBox.Core.SizeUnits.SizeUnit<br>
-Description:
-Unit of measurement (ex: 100vw, 50vh, 10px, 40%, 1cm, 2in, 2pc, 43pt, 1em, 1mm, 1q, 3rp)
-<a name="type-SixLabors-Fonts-FontStyle"></a>
-### Type: `FontStyle`
-Full Name: SixLabors.Fonts.FontStyle<br>
-Description:
-The font styles
-**Enum Options**:<br>
-| Name | Description | Value |
-| ---- | ----------- | ----- |
-| `Regular` | Regular | 0 |
-| `Bold` | Bold | 1 |
-| `Italic` | Italic | 2 |
-| `BoldItalic` | Bold and Italic | 3 |
-
+Represents a boolean (`true` or `false`) value.
+<a name="type-System-Object"></a>
+### Type: `Object`
+Full Name: System.Object<br>
 <a name="type-SixLabors-Fonts-VerticalAlignment"></a>
 ### Type: `VerticalAlignment`
 Full Name: SixLabors.Fonts.VerticalAlignment<br>
@@ -968,9 +1014,46 @@ Dictates where the origin of an object is
 | `BottomCenter` | Bottom center | 7 |
 | `BottomRight` | Bottom right corner | 8 |
 
-<a name="type-ImageBox-Services-Animation-Bezier-BezierType"></a>
+<a name="type-ImageBox-Core-SizeUnits-SizeUnit"></a>
+### Type: `SizeUnit`
+Full Name: ImageBox.Core.SizeUnits.SizeUnit<br>
+Description:
+Unit of measurement (ex: 100vw, 50vh, 10px, 40%, 1cm, 2in, 2pc, 43pt, 1em, 1mm, 1q, 3rp)
+<a name="type-SixLabors-Fonts-FontStyle"></a>
+### Type: `FontStyle`
+Full Name: SixLabors.Fonts.FontStyle<br>
+Description:
+The font styles
+**Enum Options**:<br>
+| Name | Description | Value |
+| ---- | ----------- | ----- |
+| `Regular` | Regular | 0 |
+| `Bold` | Bold | 1 |
+| `Italic` | Italic | 2 |
+| `BoldItalic` | Bold and Italic | 3 |
+
+<a name="type-SixLabors-Fonts-WordBreaking"></a>
+### Type: `WordBreaking`
+Full Name: SixLabors.Fonts.WordBreaking<br>
+Description:
+Defines modes to determine when line breaks should appear when words overflow
+their content box.
+**Enum Options**:<br>
+| Name | Description | Value |
+| ---- | ----------- | ----- |
+| `Standard` | Use the default line break rule. | 0 |
+| `BreakAll` | To prevent overflow, word breaks should be inserted between any two characters (excluding Chinese/Japanese/Korean text). | 1 |
+| `KeepAll` | Word breaks should not be used for Chinese/Japanese/Korean (CJK) text. Non-CJK text behavior is the same as for `Standard` | 2 |
+| `BreakWord` | Uses a combination of `Standard` and `BreakAll` rules in that order. | 3 |
+
+<a name="type-ImageBox-Core-IOPath-IOPath"></a>
+### Type: `IOPath`
+Full Name: ImageBox.Core.IOPath.IOPath<br>
+Description:
+A URI path - can be remote, local, or use fancy scheme (https, ftp, etc)
+<a name="type-ImageBox-Drawing-Models-Bezier-BezierType"></a>
 ### Type: `BezierType`
-Full Name: ImageBox.Services.Animation.Bezier.BezierType<br>
+Full Name: ImageBox.Drawing.Models.Bezier.BezierType<br>
 Description:
 The type of Bezier curve to use
 **Enum Options**:<br>
@@ -980,9 +1063,9 @@ The type of Bezier curve to use
 | `Quadratic` | Quadratic interpolation | 1 |
 | `Cubic` | Cubic interpolation | 2 |
 
-<a name="type-ImageBox-Services-Animation-Bezier-EasingType"></a>
+<a name="type-ImageBox-Drawing-Models-Bezier-EasingType"></a>
 ### Type: `EasingType`
-Full Name: ImageBox.Services.Animation.Bezier.EasingType<br>
+Full Name: ImageBox.Drawing.Models.Bezier.EasingType<br>
 Description:
 The type of easing function to use
 **Enum Options**:<br>
@@ -992,9 +1075,6 @@ The type of easing function to use
 | `Out` | Ease-out | 1 |
 | `InOut` | Ease-in-out | 2 |
 
-<a name="type-System-Int32"></a>
-### Type: `Int32`
-Full Name: System.Int32<br>
 <a name="type-ImageBox-Core-TimeUnits-TimeUnit"></a>
 ### Type: `TimeUnit`
 Full Name: ImageBox.Core.TimeUnits.TimeUnit<br>

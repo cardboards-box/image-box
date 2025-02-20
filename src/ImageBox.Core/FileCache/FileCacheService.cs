@@ -1,4 +1,6 @@
-﻿namespace ImageBox.Core.FileCache;
+﻿using Path = System.IO.Path;
+
+namespace ImageBox.Core.FileCache;
 
 /// <summary>
 /// A service for downloading and caching files from remote sources

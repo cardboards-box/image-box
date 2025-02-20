@@ -1,4 +1,4 @@
-﻿namespace ImageBox.Elements.Attributes;
+﻿namespace ImageBox.Elements;
 
 /// <summary>
 /// Indicates that the property can be bound to an attribute in the drawing abstract syntax tree
