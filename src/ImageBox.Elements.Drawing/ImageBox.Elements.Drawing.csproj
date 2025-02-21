@@ -8,6 +8,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<ProjectReference Include="..\ImageBox.Elements.Shapes\ImageBox.Elements.Shapes.csproj" />
 		<ProjectReference Include="..\ImageBox.Elements\ImageBox.Elements.csproj" />
 	</ItemGroup>
 

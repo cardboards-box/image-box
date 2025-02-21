@@ -342,7 +342,11 @@ Represents a for-each directive
 
 **Example**:<br>
 ```html
-<foreach each="" let="" >
+<foreach 
+  each="" 
+  let="" 
+  index="" 
+>
   <!-- CHILDREN HERE -->
 </foreach>
 ```
@@ -357,6 +361,12 @@ This attribute can be bound to a runtime variable.
 
 <a name="attribute-foreach-let"></a>
 __*let*__: What to name the value in the children template contexts<br>
+Type: [System.String](#type-System-String).
+This attribute is optional.
+This attribute cannot be bound to a runtime variable.
+
+<a name="attribute-foreach-index"></a>
+__*index*__: What to name the index in the children template contexts<br>
 Type: [System.String](#type-System-String).
 This attribute is optional.
 This attribute cannot be bound to a runtime variable.
@@ -692,6 +702,7 @@ Represents text to be drawn to the image
   origin-type="" 
   origin-x="" 
   origin-y="" 
+  draw-along-path="" 
   font-size="" 
   font-family="" 
   font-style="" 
@@ -702,7 +713,9 @@ Represents text to be drawn to the image
   y="" 
   width="" 
   height="" 
-/>
+>
+  <!-- CHILDREN HERE -->
+</text>
 ```
 
 ### Attributes
@@ -785,6 +798,13 @@ This attribute is optional.
 This attribute can be bound to a runtime variable.
 *Remarks*: Requires [OriginX](#attribute-text-origin-x) to be set as well
 
+<a name="attribute-text-draw-along-path"></a>
+__*draw-along-path*__: Whether or not to draw the text along the path<br>
+Type: [System.Boolean](#type-System-Boolean).
+This attribute is optional.
+This attribute can be bound to a runtime variable.
+*Remarks*: This requires that the child either be a collection of points or a path element.
+
 <a name="attribute-text-font-size"></a>
 __*font-size*__: <br>
 Type: [ImageBox.Core.SizeUnits.SizeUnit](#type-ImageBox-Core-SizeUnits-SizeUnit).
@@ -820,6 +840,7 @@ __*auto-font-size-word-breaking*__: <br>
 Type: [SixLabors.Fonts.WordBreaking](#type-SixLabors-Fonts-WordBreaking).
 This attribute is optional.
 This attribute can be bound to a runtime variable.
+You can use the following aliases: `word-breaking`.
 
 <a name="attribute-text-x"></a>
 __*x*__: <br>

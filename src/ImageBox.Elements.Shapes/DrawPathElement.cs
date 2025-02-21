@@ -34,8 +34,9 @@ public abstract class DrawPathElement : PositionalElement, IParentElement
     /// Get the path of the current element
     /// </summary>
     /// <param name="context">The size of the current context</param>
+    /// <param name="origin">The origin to use for the path</param>
     /// <returns>The path</returns>
-    public abstract IPath GetPath(SizeContext context);
+    public abstract IPath GetPath(SizeContext context, Vector2? origin = null);
 
     /// <summary>
     /// Applies the element to the render context

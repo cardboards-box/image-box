@@ -10,8 +10,9 @@ public class LineElem : DrawPathElement, IPathElement
     /// Get the path of the current element
     /// </summary>
     /// <param name="context">The size of the current context</param>
+    /// <param name="origin">The origin to use</param>
     /// <returns>The path</returns>
-    public override IPath GetPath(SizeContext context)
+    public override IPath GetPath(SizeContext context, Vector2? origin = null)
     {
         var points = this.GetPoints(context).ToArray();
         if (points.Length < 2)
@@ -19,6 +20,9 @@ public class LineElem : DrawPathElement, IPathElement
 
         var path = new PathBuilder()
             .StartFigure();
+
+        if (origin is not null)
+            path.SetOrigin(origin.Value);
 
         Point previous = points[0];
         foreach(Point point in points.Skip(1))

@@ -3,11 +3,13 @@ using EOriginType = ImageBox.Drawing.OriginType;
 
 namespace ImageBox.Elements.Drawing;
 
+using Shapes;
+
 /// <summary>
 /// Represents text to be drawn to the image
 /// </summary>
 [AstElement("text", ScopeType.Template)]
-public class TextElem : FontElement
+public class TextElem : FontElement, IPathElement
 {
     /// <summary>
     /// The value of the text to draw to the image
@@ -88,6 +90,20 @@ public class TextElem : FontElement
     public AstValue<SizeUnit?> OriginY { get; set; } = new();
 
     /// <summary>
+    /// Whether or not to draw the text along the path
+    /// </summary>
+    /// <remarks>
+    /// This requires that the child either be a collection of points or a path element.
+    /// </remarks>
+    [AstAttribute("draw-along-path")]
+    public AstValue<bool?> DrawAlongPath { get; set; } = new();
+
+    /// <summary>
+    /// The children of the text element
+    /// </summary>
+    public IElement[] Children { get; set; } = [];
+
+    /// <summary>
     /// Determines the origin point of the text
     /// </summary>
     /// <param name="context">The current scope's context</param>
@@ -125,7 +141,7 @@ public class TextElem : FontElement
                 return new(x, y);
             }
 
-            if (Enum.TryParse<OriginType>(RotateOriginType.Value, true, out var type))
+            if (Enum.TryParse<EOriginType>(RotateOriginType.Value, true, out var type))
                 return bounds.Origin(type);
 
             return DetermineOrigin(context, bounds);
@@ -143,20 +159,49 @@ public class TextElem : FontElement
     }
 
     /// <summary>
-    /// Applies the element to the render context
+    /// Gets the path to draw the text along
     /// </summary>
-    /// <param name="context">The rendering context</param>
-    /// <returns></returns>
-    public override Task Render(ContextFrame context)
+    /// <param name="scope">The current scope of the context</param>
+    /// <param name="origin">The origin to use for the path</param>
+    /// <returns>The path or null if <see cref="DrawAlongPath"/> is null</returns>
+    /// <exception cref="RenderContextException">Thrown if there was no path provided</exception>
+    public IPath? GetPath(ContextScope scope, Vector2 origin)
     {
-        if (string.IsNullOrWhiteSpace(Value.Value))
-            return Task.CompletedTask;
+        if (!(DrawAlongPath.Value ?? false) ||
+            Children.Length <= 0)
+            return null;
 
-        using var scope = this.Scoped(context);
+        var points = this.GetPoints(scope.Size).ToArray();
+        if (points.Length > 0)
+        {
+            var path = new PathBuilder()
+                .StartFigure()
+                .SetOrigin(origin);
 
-        var rect = scope.Size.GetRectangle();
-        var color = Color.Value.ParseColor(IColor.Black);
+            Point previous = points[0];
+            foreach (Point point in points.Skip(1))
+            {
+                path.AddLine(previous, point);
+                previous = point;
+            }
 
+            return path.CloseFigure().Build();
+        }
+
+        var pathElem = Children.OfType<DrawPathElement>().FirstOrDefault()
+            ?? throw new RenderContextException("The text element must have a path to draw along", Context);
+        return pathElem.GetPath(scope.Size, origin);
+    }
+
+    /// <summary>
+    /// Gets the text options for the current element
+    /// </summary>
+    /// <param name="scope">The current scope of the element</param>
+    /// <param name="bounds">The bounds to draw the text in</param>
+    /// <param name="text">The text that should be written</param>
+    /// <returns>The text options to use for drawing the text</returns>
+    public RichTextOptions GetTextOptions(ContextScope scope, Rectangle bounds, string text)
+    {
         if (!Enum.TryParse<VerticalAlignment>(AlignVertical.Value, true, out var vAlign))
             vAlign = VerticalAlignment.Center;
 
@@ -166,20 +211,52 @@ public class TextElem : FontElement
         if (!Enum.TryParse<TextAlignment>(AlignText.Value, true, out var tAlign))
             tAlign = TextAlignment.Center;
 
-        if (!Enum.TryParse<WordBreaking>(WordBreaking?.Value, true, out var workBreaking))
-            workBreaking = SixLabors.Fonts.WordBreaking.Standard;
+        if (!Enum.TryParse<WordBreaking>(WordBreaking?.Value, true, out var wordBreaking))
+            wordBreaking = SixLabors.Fonts.WordBreaking.Standard;
 
-        var text = Value.Value;
-        var drawing = GetDrawingOptions(scope, rect);
-        var opts = new RichTextOptions(this.GetFont(text, scope))
+        var font = this.GetFont(text, scope);
+        var origin = DetermineOrigin(scope, bounds);
+        var path = GetPath(scope, origin);
+        if (path is null)
+            return new RichTextOptions(font)
+            {
+                HorizontalAlignment = hAlign,
+                VerticalAlignment = vAlign,
+                TextAlignment = tAlign,
+                Origin = origin,
+                WrappingLength = bounds.Width,
+                WordBreaking = wordBreaking,
+            };
+
+        return new RichTextOptions(font)
         {
             HorizontalAlignment = hAlign,
             VerticalAlignment = vAlign,
             TextAlignment = tAlign,
-            Origin = DetermineOrigin(scope, rect),
-            WrappingLength = rect.Width,
-            WordBreaking = workBreaking
+            Path = path,
+            WrappingLength = path.ComputeLength()
         };
+    }
+
+    /// <summary>
+    /// Applies the element to the render context
+    /// </summary>
+    /// <param name="context">The rendering context</param>
+    /// <returns></returns>
+    public override Task Render(ContextFrame context)
+    {
+        if (string.IsNullOrWhiteSpace(Value.Value))
+            return Task.CompletedTask;
+
+        var text = Value.Value!;
+
+        using var scope = this.Scoped(context);
+
+        var rect = scope.Size.GetRectangle();
+        var color = Color.Value.ParseColor(IColor.Black);
+
+        var drawing = GetDrawingOptions(scope, rect);
+        var opts = GetTextOptions(scope, rect, text);
         var brush = new SolidBrush(color);
         context.Image.Mutate(i => i.DrawText(drawing, opts, text, brush, null));
         return Task.CompletedTask;

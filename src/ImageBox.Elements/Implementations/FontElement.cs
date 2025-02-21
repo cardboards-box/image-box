@@ -45,6 +45,6 @@ public abstract class FontElement : PositionalElement, IFontElement
     /// <summary>
     /// Sets the word breaking to use when determining the font size
     /// </summary>
-    [AstAttribute("auto-font-size-word-breaking", typeof(WordBreaking))]
+    [AstAttribute("auto-font-size-word-breaking", typeof(WordBreaking)), AstAttribute("word-breaking", typeof(WordBreaking))]
     public AstValue<string?> WordBreaking { get; set; } = new();
 }

@@ -12,11 +12,12 @@ public class CircleElem : DrawPathElement
     /// Get the path of the current element
     /// </summary>
     /// <param name="context">The size of the current context</param>
+    /// <param name="origin">Sets the origin for the circle</param>
     /// <returns>The path</returns>
-    public override IPath GetPath(SizeContext context)
+    public override IPath GetPath(SizeContext context, Vector2? origin = null)
     {
         var rect = context.GetRectangle();
-        return new EllipsePolygon(rect.X, rect.Y, rect.Width, rect.Height)
-            .Translate(rect.X + (rect.Width / 2), rect.Y + (rect.Height / 2));
+        var center = origin ?? new Vector2(rect.X + (rect.Width / 2), rect.Y + (rect.Height / 2));
+        return new EllipsePolygon(center.X, center.Y, rect.Width, rect.Height);
     }
 }

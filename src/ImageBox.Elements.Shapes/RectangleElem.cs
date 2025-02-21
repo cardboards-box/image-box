@@ -18,8 +18,9 @@ public class RectangleElem : DrawPathElement
     /// Get the path of the current element
     /// </summary>
     /// <param name="context">The size of the current context</param>
+    /// <param name="origin">This has no effect on rectangles</param>
     /// <returns>The path</returns>
-    public override IPath GetPath(SizeContext context)
+    public override IPath GetPath(SizeContext context, Vector2? origin = null)
     {
         var radius = (Radius.Value ?? SizeUnit.Zero).Pixels(context);
         return context.GetRectangle().Rounded(radius);
