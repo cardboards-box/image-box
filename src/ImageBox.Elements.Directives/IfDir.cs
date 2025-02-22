@@ -22,9 +22,6 @@ public class IfDir : DirectiveElement
         if (!Condition.Value)
             return;
 
-        using var scope = context.Scope(this);
-        foreach (var child in Children)
-            if (child is RenderElement render)
-                await render.Render(context);
+        await this.RenderChildren(context);
     }
 }

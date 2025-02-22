@@ -64,9 +64,6 @@ public abstract class DrawPathElement : PositionalElement, IParentElement
 
         if (Children.Length == 0) return;
 
-        using var childScope = context.Scope(this, current);
-        foreach (var child in Children)
-            if (child is RenderElement render)
-                await render.Render(context);
+        await this.RenderChildren(context, current);
     }
 }

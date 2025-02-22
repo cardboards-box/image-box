@@ -46,10 +46,8 @@ public class RangeDir : DirectiveElement
             var vars = new Dictionary<string, object?>();
             if (!string.IsNullOrWhiteSpace(Let))
                 vars.Add(Let, i);
-            using var scope = context.Scope(this, null, vars);
-            foreach (var child in Children)
-                if (child is RenderElement render)
-                    await render.Render(context);
+
+            await this.RenderChildren(context, null, vars);
         }
     }
 }

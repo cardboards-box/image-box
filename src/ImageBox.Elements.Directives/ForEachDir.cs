@@ -44,10 +44,7 @@ public class ForEachDir : DirectiveElement
             if (!string.IsNullOrEmpty(Index))
                 vars.Add(Index, index);
 
-            using var scope = context.Scope(this, null, vars);
-            foreach (var child in Children)
-                if (child is RenderElement render)
-                    await render.Render(context);
+            await this.RenderChildren(context, null, vars);
         }
     }
 }

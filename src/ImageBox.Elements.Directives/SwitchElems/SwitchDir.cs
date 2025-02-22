@@ -31,14 +31,6 @@ public class SwitchDir : DirectiveElement
     /// <exception cref="NotImplementedException">Thrown if there are no cases or defaults</exception>
     public override async Task Render(ContextFrame context)
     {
-        async Task RenderChildren(IParentElement element)
-        {
-            using var scope = context.Scope(this);
-            foreach (var child in element.Children)
-                if (child is RenderElement render)
-                    await render.Render(context);
-        }
-
         var cases = Cases;
         var defaults = Defaults;
 
@@ -55,11 +47,11 @@ public class SwitchDir : DirectiveElement
 
             if (!isMatch) continue;
 
-            await RenderChildren(item);
+            await item.RenderChildren(context);
             return;
         }
 
         foreach (var item in defaults)
-            await RenderChildren(item);
+            await item.RenderChildren(context);
     }
 }

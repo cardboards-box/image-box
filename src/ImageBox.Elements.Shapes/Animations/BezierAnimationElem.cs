@@ -69,13 +69,7 @@ public class BezierAnimationElem : PositionalElement, IPathElement
             ["height"] = newSize.Height,
         };
         point.ApplyToScope(vars);
-        using var scope = context.Scope(this, newSize, vars);
 
-        foreach (var child in Children)
-        {
-            if (child is not RenderElement render) continue;
-
-            await render.Render(context);
-        }
+        await this.RenderChildren(context, newSize, vars);
     }
 }

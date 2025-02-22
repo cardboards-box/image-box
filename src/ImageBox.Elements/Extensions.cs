@@ -3,7 +3,6 @@
 namespace ImageBox.Elements;
 
 using Drawing;
-using Drawing.Models;
 
 /// <summary>
 /// Extension methods for rendering the modules
@@ -169,5 +168,21 @@ public static class Extensions
             yield return current;
             current = Next(current);
         }
+    }
+
+    /// <summary>
+    /// Renders all of the child elements of the given element
+    /// </summary>
+    /// <param name="element">The element whose children should be rendered</param>
+    /// <param name="context">The context of the element</param>
+    /// <param name="size">The size of the context</param>
+    /// <param name="vars">The variables to give the new scope</param>
+    /// <param name="bindCurrent">Whether or not to just bind the child elements or the current element as well</param>
+    public static async Task RenderChildren(this IParentElement element, ContextFrame context, SizeContext? size = null, Dictionary<string, object?>? vars = null, bool bindCurrent = false)
+    {
+        using var scope = context.Scope(element, size, vars, bindCurrent);
+        foreach (var child in element.Children)
+            if (child is RenderElement render)
+                await render.Render(context);
     }
 }
