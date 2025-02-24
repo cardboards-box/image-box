@@ -77,7 +77,7 @@ public class Context(
     /// <remarks>If the index is invalid, the result will be capped to either the first or last item</remarks>
     public JsValue pickOne(double progress, params JsValue[] items)
     {
-        var index = (int)Math.Round((items.Length - 1) * progress, 0);
+        var index = (int)Math.Max(Math.Min(items.Length * progress, items.Length - 1), 0);
         if (index < 0) return items.First();
         if (index >= items.Length) return items.Last();
         return items[index];
