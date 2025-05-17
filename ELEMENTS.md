@@ -29,6 +29,7 @@
 | [Type](#type-SixLabors-Fonts-VerticalAlignment) | `VerticalAlignment` | Vertical alignment modes. |
 | [Type](#type-SixLabors-Fonts-HorizontalAlignment) | `HorizontalAlignment` | Horizontal alignment modes. |
 | [Type](#type-SixLabors-Fonts-TextAlignment) | `TextAlignment` | Text alignment modes. |
+| [Type](#type-System-Single) | `Single` | Represents a single-precision floating-point number. |
 | [Type](#type-ImageBox-Drawing-OriginType) | `OriginType` | Dictates where the origin of an object is |
 | [Type](#type-ImageBox-Core-SizeUnits-SizeUnit) | `SizeUnit` | Unit of measurement (ex: 100vw, 50vh, 10px, 40%, 1cm, 2in, 2pc, 43pt, 1em, 1mm, 1q, 3rp) |
 | [Type](#type-SixLabors-Fonts-FontStyle) | `FontStyle` | The font styles |
@@ -253,6 +254,9 @@ Represents a circle that can be filled or bordered
   color="" 
   border-color="" 
   border-width="" 
+  rotate="" 
+  rotate-origin-x="" 
+  rotate-origin-y="" 
   x="" 
   y="" 
   width="" 
@@ -281,6 +285,26 @@ __*border-width*__: The width of the border of the rectangle<br>
 Type: [ImageBox.Core.SizeUnits.SizeUnit](#type-ImageBox-Core-SizeUnits-SizeUnit).
 This attribute is optional.
 This attribute can be bound to a runtime variable.
+
+<a name="attribute-circle-rotate"></a>
+__*rotate*__: The number of degrees to rotate the path (around it's center) before rendering<br>
+Type: [System.Single](#type-System-Single).
+This attribute is optional.
+This attribute can be bound to a runtime variable.
+
+<a name="attribute-circle-rotate-origin-x"></a>
+__*rotate-origin-x*__: The x coordinate of the origin point of the text rotation<br>
+Type: [ImageBox.Core.SizeUnits.SizeUnit](#type-ImageBox-Core-SizeUnits-SizeUnit).
+This attribute is optional.
+This attribute can be bound to a runtime variable.
+*Remarks*: Requires [RotateOriginY](#attribute-rectangle-rotate-origin-y) to be set as well
+
+<a name="attribute-circle-rotate-origin-y"></a>
+__*rotate-origin-y*__: The y coordinate of the origin point of the text rotation<br>
+Type: [ImageBox.Core.SizeUnits.SizeUnit](#type-ImageBox-Core-SizeUnits-SizeUnit).
+This attribute is optional.
+This attribute can be bound to a runtime variable.
+*Remarks*: Requires [RotateOriginX](#attribute-rectangle-rotate-origin-x) to be set as well
 
 <a name="attribute-circle-x"></a>
 __*x*__: <br>
@@ -494,6 +518,9 @@ Represents a line that can be filled or bordered
   color="" 
   border-color="" 
   border-width="" 
+  rotate="" 
+  rotate-origin-x="" 
+  rotate-origin-y="" 
   x="" 
   y="" 
   width="" 
@@ -522,6 +549,26 @@ __*border-width*__: The width of the border of the rectangle<br>
 Type: [ImageBox.Core.SizeUnits.SizeUnit](#type-ImageBox-Core-SizeUnits-SizeUnit).
 This attribute is optional.
 This attribute can be bound to a runtime variable.
+
+<a name="attribute-line-rotate"></a>
+__*rotate*__: The number of degrees to rotate the path (around it's center) before rendering<br>
+Type: [System.Single](#type-System-Single).
+This attribute is optional.
+This attribute can be bound to a runtime variable.
+
+<a name="attribute-line-rotate-origin-x"></a>
+__*rotate-origin-x*__: The x coordinate of the origin point of the text rotation<br>
+Type: [ImageBox.Core.SizeUnits.SizeUnit](#type-ImageBox-Core-SizeUnits-SizeUnit).
+This attribute is optional.
+This attribute can be bound to a runtime variable.
+*Remarks*: Requires [RotateOriginY](#attribute-rectangle-rotate-origin-y) to be set as well
+
+<a name="attribute-line-rotate-origin-y"></a>
+__*rotate-origin-y*__: The y coordinate of the origin point of the text rotation<br>
+Type: [ImageBox.Core.SizeUnits.SizeUnit](#type-ImageBox-Core-SizeUnits-SizeUnit).
+This attribute is optional.
+This attribute can be bound to a runtime variable.
+*Remarks*: Requires [RotateOriginX](#attribute-rectangle-rotate-origin-x) to be set as well
 
 <a name="attribute-line-x"></a>
 __*x*__: <br>
@@ -602,6 +649,9 @@ Represents a rectangle that can be filled or bordered
   color="" 
   border-color="" 
   border-width="" 
+  rotate="" 
+  rotate-origin-x="" 
+  rotate-origin-y="" 
   x="" 
   y="" 
   width="" 
@@ -636,6 +686,26 @@ __*border-width*__: The width of the border of the rectangle<br>
 Type: [ImageBox.Core.SizeUnits.SizeUnit](#type-ImageBox-Core-SizeUnits-SizeUnit).
 This attribute is optional.
 This attribute can be bound to a runtime variable.
+
+<a name="attribute-rectangle-rotate"></a>
+__*rotate*__: The number of degrees to rotate the path (around it's center) before rendering<br>
+Type: [System.Single](#type-System-Single).
+This attribute is optional.
+This attribute can be bound to a runtime variable.
+
+<a name="attribute-rectangle-rotate-origin-x"></a>
+__*rotate-origin-x*__: The x coordinate of the origin point of the text rotation<br>
+Type: [ImageBox.Core.SizeUnits.SizeUnit](#type-ImageBox-Core-SizeUnits-SizeUnit).
+This attribute is optional.
+This attribute can be bound to a runtime variable.
+*Remarks*: Requires [RotateOriginY](#attribute-rectangle-rotate-origin-y) to be set as well
+
+<a name="attribute-rectangle-rotate-origin-y"></a>
+__*rotate-origin-y*__: The y coordinate of the origin point of the text rotation<br>
+Type: [ImageBox.Core.SizeUnits.SizeUnit](#type-ImageBox-Core-SizeUnits-SizeUnit).
+This attribute is optional.
+This attribute can be bound to a runtime variable.
+*Remarks*: Requires [RotateOriginX](#attribute-rectangle-rotate-origin-x) to be set as well
 
 <a name="attribute-rectangle-x"></a>
 __*x*__: <br>
@@ -752,7 +822,7 @@ This attribute can be bound to a runtime variable.
 
 <a name="attribute-text-rotate"></a>
 __*rotate*__: The number of degrees to rotate the image before rendering<br>
-Type: [System.Double](#type-System-Double).
+Type: [System.Single](#type-System-Single).
 This attribute is optional.
 This attribute can be bound to a runtime variable.
 
@@ -1017,6 +1087,11 @@ Text alignment modes.
 | `End` | Aligns text from the right or bottom when the text direction is `LeftToRight` and from the left or top when the text direction is `RightToLeft`. | 1 |
 | `Center` | Aligns text from the center. | 2 |
 
+<a name="type-System-Single"></a>
+### Type: `Single`
+Full Name: System.Single<br>
+Description:
+Represents a single-precision floating-point number.
 <a name="type-ImageBox-Drawing-OriginType"></a>
 ### Type: `OriginType`
 Full Name: ImageBox.Drawing.OriginType<br>

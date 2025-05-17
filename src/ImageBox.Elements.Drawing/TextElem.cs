@@ -45,7 +45,7 @@ public class TextElem : FontElement, IPathElement
     /// The number of degrees to rotate the image before rendering
     /// </summary>
     [AstAttribute("rotate")]
-    public AstValue<double?> Rotate { get; set; } = new();
+    public AstValue<float?> Rotate { get; set; } = new();
 
     /// <summary>
     /// How to determine the origin point of the text rotation within the current box
@@ -150,7 +150,7 @@ public class TextElem : FontElement, IPathElement
         if (!Rotate.Value.HasValue) return new DrawingOptions();
 
         var point = DetermineRotationOrigin();
-        var rotation = (float)Rotate.Value.Value;
+        var rotation = Rotate.Value.Value;
         var transform = Matrix3x2Extensions.CreateRotationDegrees(rotation, point);
         return new DrawingOptions
         {

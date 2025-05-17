@@ -26,6 +26,26 @@ public abstract class DrawPathElement : PositionalElement, IParentElement
     public AstValue<SizeUnit?> BorderWidth { get; set; } = new();
 
     /// <summary>
+    /// The number of degrees to rotate the path (around it's center) before rendering
+    /// </summary>
+    [AstAttribute("rotate")]
+    public AstValue<float?> Rotate { get; set; } = new();
+
+    /// <summary>
+    /// The x coordinate of the origin point of the text rotation
+    /// </summary>
+    /// <remarks>Requires <see cref="RotateOriginY"/> to be set as well</remarks>
+    [AstAttribute("rotate-origin-x")]
+    public AstValue<SizeUnit?> RotateOriginX { get; set; } = new();
+
+    /// <summary>
+    /// The y coordinate of the origin point of the text rotation
+    /// </summary>
+    /// <remarks>Requires <see cref="RotateOriginX"/> to be set as well</remarks>
+    [AstAttribute("rotate-origin-y")]
+    public AstValue<SizeUnit?> RotateOriginY { get; set; } = new();
+
+    /// <summary>
     /// All of the child elements on the parent element
     /// </summary>
     public IElement[] Children { get; set; } = [];
@@ -39,6 +59,41 @@ public abstract class DrawPathElement : PositionalElement, IParentElement
     public abstract IPath GetPath(SizeContext context, Vector2? origin = null);
 
     /// <summary>
+    /// Applies any transforms for the current element
+    /// </summary>
+    /// <param name="context">The size of the current context</param>
+    /// <param name="path">The path of the element</param>
+    /// <returns>The transformed path</returns>
+    public virtual IPath ApplyTransforms(SizeContext context, IPath path)
+    {
+        IPath ApplyRotate(IPath path)
+        {
+            //If not rotation is specified, skip rotates.
+            if (!Rotate.Value.HasValue)
+                return path;
+
+            var degrees = Rotate.Value.Value;
+
+            //If no rotate origin is specified, use the built in
+            //transform for rotating around the center
+            if (!RotateOriginX.Value.HasValue ||
+                !RotateOriginY.Value.HasValue)
+                return path.RotateDegree(degrees);
+
+            //Get the origin point
+            var x = RotateOriginX.Value.Value.Pixels(context, true);
+            var y = RotateOriginY.Value.Value.Pixels(context, false);
+            //Get the transform from the rotation
+            var transform = Matrix3x2Extensions.CreateRotationDegrees(degrees, new Vector2(x, y));
+            //Apply the transform to the path
+            return path.Transform(transform);
+        }
+
+        //Change all of the transforms (only rotates for now)
+        return ApplyRotate(path);
+    }
+
+    /// <summary>
     /// Applies the element to the render context
     /// </summary>
     /// <param name="context">The rendering context</param>
@@ -48,6 +103,7 @@ public abstract class DrawPathElement : PositionalElement, IParentElement
         var scope = context.LastScope;
         var current = this.BoundContext(scope.Size);
         var path = GetPath(current);
+        path = ApplyTransforms(scope.Size, path);
 
         if (!string.IsNullOrWhiteSpace(Color.Value))
         {
