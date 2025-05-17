@@ -26,7 +26,7 @@
 
 	<ItemGroup>
 	  <PackageReference Include="LoxSmoke.DocXml" Version="3.8.0" />
-	  <PackageReference Include="System.Formats.Asn1" Version="8.0.2" />
+	  <PackageReference Include="System.Formats.Asn1" Version="9.0.5" />
 	</ItemGroup>
 
 	<ItemGroup>

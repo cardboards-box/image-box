@@ -12,15 +12,15 @@
         <PackageReference Include="CardboardBox.Http" Version="3.0.1" />
         <PackageReference Include="CardboardBox.Json" Version="2.0.0" />
         <PackageReference Include="CardboardBox.Setup" Version="2.0.0" />
-		<PackageReference Include="HtmlAgilityPack" Version="1.11.72" />
-		<PackageReference Include="Jint" Version="4.2.0" />
+		<PackageReference Include="HtmlAgilityPack" Version="1.12.1" />
+		<PackageReference Include="Jint" Version="4.2.2" />
         <PackageReference Include="MimeTypes" Version="2.5.2">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="SixLabors.ImageSharp.Drawing" Version="2.1.5" />
-        <PackageReference Include="System.Formats.Asn1" Version="8.0.2" />
-        <PackageReference Include="System.Security.Cryptography.Pkcs" Version="8.0.0" />
+        <PackageReference Include="SixLabors.ImageSharp.Drawing" Version="2.1.6" />
+        <PackageReference Include="System.Formats.Asn1" Version="9.0.5" />
+        <PackageReference Include="System.Security.Cryptography.Pkcs" Version="9.0.5" />
 	    <PackageReference Include="Svg" Version="3.4.7" />
     </ItemGroup>
 
