@@ -1,4 +1,7 @@
-﻿using IFontStyle = SixLabors.Fonts.FontStyle;
+﻿using Jint;
+using Jint.Native.Object;
+using System.Diagnostics.CodeAnalysis;
+using IFontStyle = SixLabors.Fonts.FontStyle;
 
 namespace ImageBox.Elements;
 
@@ -51,7 +54,10 @@ public static class Extensions
     /// <returns>The properties to use when fetching the file</returns>
     public static FileFetchProperties Properties(this IFileElement element, SizeContext size, string? workDir)
     {
-        return new(element.Source.Value)
+        if (element.Source.Value is null)
+            throw new RenderContextException("File source is required for this element", element.Context);
+
+        return new(element.Source.Value.Value)
         {
             Width = element.Width.Value?.Pixels(size, true),
             Height = element.Height.Value?.Pixels(size, false),
@@ -184,5 +190,163 @@ public static class Extensions
         foreach (var child in element.Children)
             if (child is RenderElement render)
                 await render.Render(context);
+    }
+
+    /// <summary>
+    /// Tries to get the template size property from the given JS object
+    /// </summary>
+    /// <param name="obj">The JS Object to get the property from</param>
+    /// <param name="name">The name of the property</param>
+    /// <param name="defCtx">The default size context to use</param>
+    /// <param name="isWidth">Whether or not this property is width/x-axis aligned or height/y-axis aligned</param>
+    /// <param name="output">The value of the property</param>
+    /// <returns>Whether or not the property was valid</returns>
+    public static bool TryGetSize(this ObjectInstance? obj, string name, SizeContext defCtx, bool isWidth, [MaybeNullWhen(false)] out int output)
+    {
+        output = default;
+        if (!obj.TryGetString(name, out var value))
+            return false;
+
+        var size = SizeUnit.Parse(value);
+        if (size == SizeUnit.Zero) return false;
+
+        var pixels = size.Pixels(defCtx, isWidth);
+        if (pixels <= 0) return false;
+
+        output = pixels;
+        return true;
+    }
+
+    /// <summary>
+    /// Tries to get the time unit property from the given JS object
+    /// </summary>
+    /// <param name="obj">The JS Object to get the property from</param>
+    /// <param name="name">The name of the property</param>
+    /// <param name="output">The value of the property</param>
+    /// <returns>Whether or not the property was valid</returns>
+    public static bool TryGetTime(this ObjectInstance? obj, string name, [MaybeNullWhen(false)] out TimeUnit output)
+    {
+        output = default;
+        if (!obj.TryGetString(name, out var value))
+            return false;
+
+        var time = TimeUnit.Parse(value);
+        if (time == TimeUnit.Zero) return false;
+
+        output = time;
+        return true;
+    }
+
+    /// <summary>
+    /// Tries to get the int from the given JS object
+    /// </summary>
+    /// <param name="obj">The JS Object to get the property from</param>
+    /// <param name="name">The name of the property</param>
+    /// <param name="output">The value of the property</param>
+    /// <returns>Whether or not the property was valid</returns>
+    public static bool TryGetInt(this ObjectInstance? obj, string name, [MaybeNullWhen(false)] out int output)
+    {
+        output = default;
+        if (obj is null ||
+            !obj.TryGetValue(name, out var value) ||
+            value.IsUndefined()) return false;
+
+        if (value.IsNumber())
+        {
+            output = (int)value.AsNumber();
+            return true;
+        }
+
+        return value.IsString() && int.TryParse(value.ToString(), out output);
+    }
+
+    /// <summary>
+    /// Tries to get the int from the given JS object
+    /// </summary>
+    /// <param name="obj">The JS Object to get the property from</param>
+    /// <param name="name">The name of the property</param>
+    /// <param name="output">The value of the property</param>
+    /// <returns>Whether or not the property was valid</returns>
+    public static bool TryGetUint(this ObjectInstance? obj, string name, [MaybeNullWhen(false)] out uint output)
+    {
+        output = default;
+        if (obj is null ||
+            !obj.TryGetValue(name, out var value) ||
+            value.IsUndefined()) return false;
+
+        if (value.IsNumber())
+        {
+            output = (uint)value.AsNumber();
+            return true;
+        }
+
+        return value.IsString() && uint.TryParse(value.ToString(), out output);
+    }
+
+    /// <summary>
+    /// Tries to get the int from the given JS object
+    /// </summary>
+    /// <param name="obj">The JS Object to get the property from</param>
+    /// <param name="name">The name of the property</param>
+    /// <param name="output">The value of the property</param>
+    /// <returns>Whether or not the property was valid</returns>
+    public static bool TryGetUshort(this ObjectInstance? obj, string name, [MaybeNullWhen(false)] out ushort output)
+    {
+        output = default;
+        if (obj is null ||
+            !obj.TryGetValue(name, out var value) ||
+            value.IsUndefined()) return false;
+
+        if (value.IsNumber())
+        {
+            output = (ushort)value.AsNumber();
+            return true;
+        }
+
+        return value.IsString() && ushort.TryParse(value.ToString(), out output);
+    }
+
+    /// <summary>
+    /// Tries to get the int from the given JS object
+    /// </summary>
+    /// <param name="obj">The JS Object to get the property from</param>
+    /// <param name="name">The name of the property</param>
+    /// <param name="output">The value of the property</param>
+    /// <returns>Whether or not the property was valid</returns>
+    public static bool TryGetDouble(this ObjectInstance? obj, string name, [MaybeNullWhen(false)] out double output)
+    {
+        output = default;
+        if (obj is null ||
+            !obj.TryGetValue(name, out var value) ||
+            value.IsUndefined()) return false;
+
+        if (value.IsNumber())
+        {
+            output = (double)value.AsNumber();
+            return true;
+        }
+
+        return value.IsString() && double.TryParse(value.ToString(), out output);
+    }
+
+    /// <summary>
+    /// Tries to get the string from the given JS object
+    /// </summary>
+    /// <param name="obj">The JS Object to get the property from</param>
+    /// <param name="name">The name of the property</param>
+    /// <param name="output">The value of the property</param>
+    /// <returns>Whether or not the property was valid</returns>
+    public static bool TryGetString(this ObjectInstance? obj, string name, [MaybeNullWhen(false)] out string output)
+    {
+        output = default;
+        if (obj is null ||
+            !obj.TryGetValue(name, out var value) ||
+            value.IsUndefined()) return false;
+
+        var str = value.ToString();
+        if (string.IsNullOrWhiteSpace(str)) return false;
+
+        output = str;
+        return true;
     }
 }

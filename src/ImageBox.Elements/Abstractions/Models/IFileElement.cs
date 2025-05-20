@@ -8,7 +8,7 @@ public interface IFileElement : IPositionElement
     /// <summary>
     /// The file's source
     /// </summary>
-    AstValue<IOPath> Source { get; }
+    AstValue<IOPath?> Source { get; }
 
     /// <summary>
     /// The optional User-Agent header for fetching the file

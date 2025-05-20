@@ -1,6 +1,5 @@
 ﻿using Jint;
 using Jint.Native;
-using SixLabors.ImageSharp;
 
 namespace ImageBox.Services.SystemModules;
 
@@ -10,7 +9,7 @@ using ImageBox.Drawing.Models;
 /// Provides a set of functions related to image drawing and units
 /// </summary>
 /// <param name="_context"></param>
-[System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = JUSTIFICATION)]
+[SuppressMessage("Style", "IDE1006:Naming Styles", Justification = JUSTIFICATION)]
 public class Drawing(
     ContextFrame _context) : IScriptItem
 {

@@ -27,7 +27,6 @@ public class SwitchDir : DirectiveElement
     /// Switches based on the <see cref="Value"/>
     /// </summary>
     /// <param name="context">The rendering context</param>
-    /// <returns></returns>
     /// <exception cref="NotImplementedException">Thrown if there are no cases or defaults</exception>
     public override async Task Render(ContextFrame context)
     {

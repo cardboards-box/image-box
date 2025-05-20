@@ -6,7 +6,7 @@
 public interface IParentElement : IElement
 {
     /// <summary>
-    /// All of the child elements on the parent element
+    /// All of the child elements on the this element
     /// </summary>
     IElement[] Children { get; set; }
 }

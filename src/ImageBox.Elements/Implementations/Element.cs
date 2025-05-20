@@ -9,27 +9,17 @@ public abstract class Element : IElement
 {
     private string? _elementName;
 
-    /// <summary>
-    /// The index of this element within it's siblings
-    /// </summary>
+    /// <inheritdoc/>
     public int SiblingIndex { get; set; }
 
-    /// <summary>
-    /// The <see cref="AstElement"/> that created this element
-    /// </summary>
-    /// <remarks>This can be used to find the original position of the element within AST</remarks>
+    /// <inheritdoc/>
+    public IElement? ParentElement { get; set; }
+
+    /// <inheritdoc/>
     public AstElement? Context { get; set; }
 
-    /// <summary>
-    /// The <see cref="ReflectedElement"/> information for this element
-    /// </summary>
+    /// <inheritdoc/>
     public ReflectedElement? Reflected { get; set; }
-
-    /// <summary>
-    /// The parent of the current element
-    /// </summary>
-    /// <remarks>Null if the element is a top-level element</remarks>
-    public IElement? ParentElement { get; set; }
 
     /// <summary>
     /// The tag name the element is represented by in the AST

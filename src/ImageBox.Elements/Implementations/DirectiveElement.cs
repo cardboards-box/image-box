@@ -5,8 +5,6 @@
 /// </summary>
 public abstract class DirectiveElement : RenderElement, IParentElement
 {
-    /// <summary>
-    /// The children elements of the directive
-    /// </summary>
+    /// <inheritdoc/>
     public IElement[] Children { get; set; } = [];
 }

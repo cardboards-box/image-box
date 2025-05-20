@@ -10,17 +10,7 @@ internal class AstLoaderService(
     IAstParserService _parser,
     ILogger<AstLoaderService> _logger) : IAstLoaderService
 {
-    /// <summary>
-    /// Loads the <see cref="LoadedAst"/> from the given path
-    /// </summary>
-    /// <param name="path">The path to load</param>
-    /// <returns>The loaded <see cref="LoadedAst"/></returns>
-    /// <exception cref="FileNotFoundException">Thrown if the file could not be found</exception>
-    /// <exception cref="InvalidOperationException">Thrown if the loaded boxed image is null</exception>
-    /// <exception cref="InvalidOperationException">Thrown if the file does not exist after downloading</exception>
-    /// <exception cref="InvalidOperationException">Thrown if the zip file contains another zip file</exception>
-    /// <exception cref="InvalidOperationException">Thrown if a module with the same name is already loaded</exception>
-    /// <exception cref="RenderContextException">Thrown if there is a top-level bind or spread</exception>
+    /// <inheritdoc/>
     public Task<LoadedAst> Load(IOPath path)
     {
         return path.Local
@@ -161,7 +151,7 @@ internal class AstLoaderService(
     /// <param name="path">The path to check</param>
     /// <returns>The file's path and the type of resolver</returns>
     /// <exception cref="FileNotFoundException">Thrown if the file could not be found</exception>
-    public (string filePath, EntryPointType type) DetermineEntryPoint(string path)
+    public static (string filePath, EntryPointType type) DetermineEntryPoint(string path)
     {
         //Check if the file exists
         if (File.Exists(path))

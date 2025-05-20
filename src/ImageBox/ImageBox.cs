@@ -24,23 +24,15 @@ public interface IImageBox
     ContextBox? Context { get; set;  }
 }
 
-/// <summary>
-/// Represents an instance of an image box and its render context
-/// </summary>
+/// <inheritdoc/>
 public class ImageBox : IImageBox
 {
-    /// <summary>
-    /// The path to the image box file
-    /// </summary>
+    /// <inheritdoc/>
     public required IOPath Path { get; init; }
 
-    /// <summary>
-    /// The data loaded from the image box file
-    /// </summary>
+    /// <inheritdoc/>
     public LoadedAst? Data { get; set; }
 
-    /// <summary>
-    /// The render box context for the image box
-    /// </summary>
+    /// <inheritdoc/>
     public ContextBox? Context { get; set; }
 }

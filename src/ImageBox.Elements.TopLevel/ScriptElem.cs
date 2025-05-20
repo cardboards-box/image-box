@@ -13,6 +13,12 @@ public class ScriptElem : Element, IValueElement
     public bool Setup { get; set; }
 
     /// <summary>
+    /// Whether or not the script should be used for template initialization
+    /// </summary>
+    [AstAttribute("init")]
+    public bool Init { get; set; }
+
+    /// <summary>
     /// The name of the module to use when injecting into other scripts
     /// </summary>
     [AstAttribute("name"), AstAttribute("module")]

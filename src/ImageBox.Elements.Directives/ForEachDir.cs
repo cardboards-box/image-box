@@ -31,17 +31,15 @@ public class ForEachDir : DirectiveElement
     /// <returns></returns>
     public override async Task Render(ContextFrame context)
     {
-        if (string.IsNullOrWhiteSpace(Let))
-            throw new RenderContextException(
-                "The 'let' attribute is required for the foreach directive",
-                context.BoxContext.Ast, Context);
-
         int index = -1;
         foreach (var value in Each.Value ?? [])
         {
             index++;
-            var vars = new Dictionary<string, object?> { [Let] = value };
-            if (!string.IsNullOrEmpty(Index))
+            var vars = new Dictionary<string, object?>{};
+            if (!string.IsNullOrWhiteSpace(Let))
+                vars.Add(Let, value);
+
+            if (!string.IsNullOrWhiteSpace(Index))
                 vars.Add(Index, index);
 
             await this.RenderChildren(context, null, vars);

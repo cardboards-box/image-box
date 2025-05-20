@@ -1,6 +1,7 @@
 ﻿namespace ImageBox.Services;
 
 using Ast;
+using Jint.Native.Object;
 
 internal class ElementReflectionService(
     IServiceProvider _services,
@@ -243,6 +244,17 @@ internal class ElementReflectionService(
         var isNullable = notNullType is not null;
         //Get the non-nullable type for conversion
         var nonNullable = notNullType ?? property.PropertyType;
+        //Ensure we unwrap ObjectInstances from Jint
+        if (value is ObjectInstance obj)
+            value = obj.GetType().GetProperty("Target")?.GetValue(obj);
+
+        //Ensure we unwrap tasks as well
+        if (value is Task tsk)
+        {
+            tsk.Wait();
+            value = tsk.GetType().GetProperty("Result")?.GetValue(tsk);
+        }
+
         //Null value? Ignore it and continue
         if (value is null)
         {
@@ -250,10 +262,12 @@ internal class ElementReflectionService(
                 Set(null);
             return;
         }
+
         var valueType = value.GetType();
         //If the property types match, just set the value
         if (property.PropertyType == valueType ||
-            nonNullable == valueType)
+            nonNullable == valueType ||
+            nonNullable.IsAssignableFrom(valueType))
         {
             Set(value);
             return;

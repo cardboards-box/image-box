@@ -3,7 +3,6 @@ using Jint;
 
 namespace ImageBox.Services;
 
-using Ast;
 using Elements.TopLevel;
 
 internal class ContextGeneratorService(
@@ -11,6 +10,7 @@ internal class ContextGeneratorService(
     IFileResolverService _resolver,
     IElementReflectionService _elements,
     IEnumerable<IModuleSourceService> _modules,
+    ISettingsResolverService _settings,
     ILogger<ContextGeneratorService> _logger) : IContextGeneratorService
 {
     /// <summary>
@@ -25,40 +25,19 @@ internal class ContextGeneratorService(
         //Get the template element from the boxed image
         var template = GetTemplate(image, elements);
         //Get the script runner from the script elements
-        var runner = await GetRunner(image, elements);
-        //Get the size context from the template element's attributes
-        var context = GetContext(template, image);
+        var (setup, init) = await GetRunner(image, elements);
         //Get all of the font families from the image
         var (fonts, _) = await GetResources(image, elements);
-        //Determine animation stuff
-        uint totalFrames = 1, frameDelay = 0;
-        ushort frameRepeat = _config.Render.AnimateRepeat;
-        if (template.Animate)
-        {
-            if (template.AnimateDuration is null)
-                throw new RenderContextException("Template animation is enabled but animation duration is not set", image, template.Context);
-            //Total number of seconds for the animation
-            var duration = template.AnimateDuration.Value.Milliseconds / 1000;
-            //Total number of frames
-            var fps = template.AnimateFps ?? _config.Render.AnimateFps;
-            totalFrames = (uint)Math.Round(duration * fps, 0);
-            frameDelay = (uint)(template.AnimateDuration.Value.Milliseconds / totalFrames);
-            frameRepeat = template.AnimateRepeat ?? _config.Render.AnimateRepeat;
-            //Validate the total number of frames that can be rendered
-            if (_config.Render.MaxTotalFrames is not null && _config.Render.MaxTotalFrames > 0)
-                Validate(totalFrames, nameof(totalFrames), template.Context, image, _config.Render.MaxTotalFrames.Value);
-        }
+        //Get the template settings
+        var settings = await _settings.GetSettings(template, image, init);
 
         return new ContextBox
         {
             Ast = image,
             TemplateElement = template,
             Fonts = fonts,
-            Size = context,
-            Runner = runner,
-            TotalFrames = totalFrames,
-            FrameDelay = frameDelay,
-            FrameRepeat = frameRepeat,
+            Runner = setup,
+            Settings = settings,
         };
     }
 
@@ -94,83 +73,19 @@ internal class ContextGeneratorService(
     }
 
     /// <summary>
-    /// Validates the value of a property
-    /// </summary>
-    /// <param name="value">The value being validated</param>
-    /// <param name="property">The name of the property being validated</param>
-    /// <param name="element">The element being validated</param>
-    /// <param name="image">The image being validated</param>
-    /// <param name="max">The maximum value allowed for the property</param>
-    /// <param name="min">The minimum value allowed for the property</param>
-    /// <exception cref="RenderContextException">Thrown if the property isn't valid</exception>
-    public static void Validate(double value, string property, AstElement? element, LoadedAst image, double max, double min = 1)
-    {
-        if (value < min)
-            throw new RenderContextException($"Invalid {property} - Current Value: {value}. Must be greater than {min}", image, element);
-
-        if (value > max)
-            throw new RenderContextException($"Invalid {property} - Current Value: {value}. Must be less than {max}", image, element);
-    }
-
-    /// <summary>
-    /// Validates the width and height of the image
-    /// </summary>
-    /// <param name="width">The width of the image in pixels</param>
-    /// <param name="height">The height of the image in pixels</param>
-    /// <param name="image">The image being validated</param>
-    /// <param name="element">The element being validated</param>
-    public void Validate(int width, int height, LoadedAst image, AstElement? element)
-    {
-        if (_config.Render.MaxHeightUnit is not null)
-            Validate(height, nameof(height), element, image, _config.Render.MaxHeightUnit.Value.Pixels(null, false));
-
-        if (_config.Render.MaxWidthUnit is not null)
-            Validate(width, nameof(width), element, image, _config.Render.MaxWidthUnit.Value.Pixels(null, true));
-    }
-
-    /// <summary>
-    /// Determines the size of the image from the context
-    /// </summary>
-    /// <param name="template">The template to get the context from</param>
-    /// <param name="image">The image the template is from</param>
-    /// <returns>The size context of the image</returns>
-    /// <exception cref="RenderContextException">Thrown if a required property is missing</exception>
-    /// <exception cref="RenderContextException">Thrown if a property is invalid</exception>
-    public SizeContext GetContext(TemplateElem template, LoadedAst image)
-    {
-        var widthUnit = template.Width ?? _config.Render.WidthUnit;
-        var heightUnit = template.Height ?? _config.Render.HeightUnit;
-        //Validate width and height
-        if (widthUnit.Value <= 0)
-            throw new RenderContextException("Template width could not be determined", image, template.Context);
-        if (heightUnit.Value <= 0)
-            throw new RenderContextException("Template height could not be determined", image, template.Context);
-        //Get the font size, width, and height
-        var fontSize = (template.FontSize ?? _config.Render.FontSizeUnit).Pixels();
-        var width = widthUnit.Pixels(null, true);
-        var height = heightUnit.Pixels(null, false);
-        var fontFamily = template.FontFamily ?? _config.Render.FontFamily ?? string.Empty;
-        //Validate the width and height
-        Validate(width, height, image, template.Context);
-        //Generate size context from sizing units
-        return SizeContext.ForRoot(width, height, fontSize, fontFamily);
-    }
-
-    /// <summary>
     /// Gets the script runner for the boxed image
     /// </summary>
     /// <param name="image">The boxed image</param>
     /// <param name="elements">The elements to get the script for</param>
     /// <returns>The script runner</returns>
     /// <exception cref="RenderContextException">Thrown if any exception occurs during preparation</exception>
-    public async Task<ScriptRunner?> GetRunner(LoadedAst image, IElement[] elements)
+    public async Task<(ScriptRunner? setup, ScriptRunner? init)> GetRunner(LoadedAst image, IElement[] elements)
     {
-        try
+        async Task<ScriptRunner?> GetSingleRunner(ScriptElem? script, RenderModule[] modules)
         {
-            //Get all of the scripts for the context
-            var scripts = GetScripts(image, elements, out var setupScript);
-            //No setup script? don't bother processing
-            if (setupScript is null) return null;
+            //If the script doesn't exist, skip it.
+            if (script is null) return null;
+
             //Setup the script runner
             var runner = new ScriptRunner(
                 _config.Scripts.TimeoutUnit.Milliseconds * 1000,
@@ -179,23 +94,36 @@ internal class ContextGeneratorService(
             //Add the standard context to the runner
             //This adds the `system` module with drawing and context classes
             await AddStandardContext(runner, image);
-            //Prepare the setup script
-            var setup = await GetScript(setupScript, image);
-            //Add the setup script to the runner
-            runner.AddModule("face-script", setup);
-            //Get all of the compiled scripts
-            var compiledScripts = Modules(scripts, image);
+            //Prepare the main script
+            var main = await GetScript(script, image);
+            //Add the main script to the runner
+            runner.AddModule("main-script", main);
             //Add the compiled scripts to the runner
-            await foreach (var script in compiledScripts)
-                runner.AddModule(script.Name, script.Module);
+            foreach (var module in modules)
+                runner.AddModule(module.Name, module.Module);
             //Set the main script to the runner
             runner.SetScript(@"
-import FaceScript from 'face-script';
-export function main(args) { 
-    return FaceScript(args); 
+import MainScript from 'main-script';
+
+export async function main(args) { 
+    return await MainScript(args); 
 }");
-            //return the prepared context
             return runner;
+        }
+
+        try
+        {
+            //Get all of the scripts for the context
+            var scripts = GetScripts(image, elements, out var setupScript, out var initScript);
+            //No setup or init script? don't bother processing
+            if (setupScript is null && initScript is null) return (null, null);
+            //Get all of the compiled scripts
+            var modules = await Modules(scripts, image).ToArrayAsync();
+            //Get the compiled setup script
+            var setup = await GetSingleRunner(setupScript, modules);
+            //Get the compiled init script
+            var init = await GetSingleRunner(initScript, modules);
+            return (setup, init);
         }
         catch (RenderContextException)
         {
@@ -274,7 +202,7 @@ export function main(args) {
             throw new RenderContextException(
                 "Script body is empty (or script body resolved from remote source)",
                 image,
-                script.Context);
+                script?.Context);
         //Prepare the script and return it
         return ScriptRunner.Prepare(value);
     }
@@ -285,18 +213,36 @@ export function main(args) {
     /// <param name="image">The image to get the template from</param>
     /// <param name="elements">The elements to get the scripts from</param>
     /// <param name="setup">The setup script (if one is included)</param>
+    /// <param name="init">The initialization script (if one is included)</param>
     /// <returns>All of the script elements</returns>
     /// <exception cref="RenderContextException">Thrown if multiple setup scripts listed in the template</exception>
     /// <exception cref="RenderContextException">Thrown if a script module name is not set</exception>
     /// <exception cref="RenderContextException">Thrown if no setup script is listed in the template and there are other scripts</exception>
-    public static ScriptElem[] GetScripts(LoadedAst image, IElement[] elements, out ScriptElem? setup)
+    public static ScriptElem[] GetScripts(LoadedAst image, IElement[] elements, out ScriptElem? setup, out ScriptElem? init)
     {
         setup = null;
+        init = null;
         var scripts = new List<ScriptElem>();
         //Iterate through all of the script elements in the root context of the template
         foreach (var script in elements.OfType<ScriptElem>())
         {
-            //If the script is setup, treat it differently
+            //If the script is an initialization script, treat it differently
+            if (script.Init)
+            {
+                //THERE CAN ONLY BE ONE!!
+                if (init is not null)
+                    throw new RenderContextException(
+                        "Multiple initialization scripts found",
+                        image,
+                        init.Context,
+                        script.Context);
+                //Set the setup script
+                init = script;
+                continue;
+
+            }
+
+            //If the script is setup, treat it differently as well
             if (script.Setup)
             {
                 //THERE CAN ONLY BE ONE!!
@@ -310,6 +256,7 @@ export function main(args) {
                 setup = script;
                 continue;
             }
+
             //Ensure the script module name is set
             if (string.IsNullOrEmpty(script.Module))
                 throw new RenderContextException(
@@ -319,10 +266,10 @@ export function main(args) {
             //Add the script to the output
             scripts.Add(script);
         }
-        //Ensure there is a setup script if there are other scripts
-        if (setup is null && scripts.Count > 0)
+        //Ensure there is a setup or init script if there are other scripts
+        if (setup is null && init is null && scripts.Count > 0)
             throw new RenderContextException(
-                "Module scripts included in element but no setup script listed",
+                "Module scripts included in element but no setup or initialization script listed",
                 image,
                 scripts.Select(t => t.Context).ToArray());
         //Return the non-setup scripts

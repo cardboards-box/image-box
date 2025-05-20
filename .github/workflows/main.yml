@@ -2,23 +2,35 @@ name: CI
 
 on:
   push:
-    branches: [ release/* ]
+    tags:
+      - "v[0-9]+.[0-9]+.[0-9]+"
+
+env:
+  PROJECT: "ImageBox"
     
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v2
-      
+
       - name: Setup dotnet
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: '8.x'
+
+      - name: Get version
+        id: version
+        run: |
+          echo "version-without-v=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+          echo "csproj=./src/${{ env.PROJECT }}/${{ env.PROJECT }}.csproj" >> $GITHUB_OUTPUT
      
       - name: Publish Extensions Nuget Package
         id: publish_nuget_extensions
-        uses: alirezanet/publish-nuget@v3.0.4
+        uses: cardboards-box/publish-nuget@v1.0.0
         with:
-          PROJECT_FILE_PATH: src/ImageBox/ImageBox.csproj
-          TAG_COMMIT: true
+          PROJECT_FILE_PATH: ${{ steps.version.outputs.csproj }}
+          TAG_COMMIT: false
           NUGET_KEY: ${{secrets.NUGET_API_KEY}}
+          VERSION_STATIC: ${{ steps.version.outputs.version-without-v }}

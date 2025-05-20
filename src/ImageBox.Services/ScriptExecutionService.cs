@@ -91,6 +91,7 @@ internal class ScriptExecutionService(
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Error occurred while binding spread attribute: {name}", ast.Name);
                 throw new RenderContextException($"Error occurred while binding spread attribute: {ast.Name}", ex, context.BoxContext.Ast, instance.Context);
             }
         }

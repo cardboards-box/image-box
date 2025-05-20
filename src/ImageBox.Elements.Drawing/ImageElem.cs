@@ -10,8 +10,8 @@ public class ImageElem(IFileResolverService _resolver) : PositionalElement, IFil
     /// <summary>
     /// The images source
     /// </summary>
-    [AstAttribute("src", true), AstAttribute("source", true)]
-    public AstValue<IOPath> Source { get; set; } = new();
+    [AstAttribute("src"), AstAttribute("source")]
+    public AstValue<IOPath?> Source { get; set; } = new();
 
     /// <summary>
     /// The number of degrees to rotate the image before rendering
@@ -50,17 +50,42 @@ public class ImageElem(IFileResolverService _resolver) : PositionalElement, IFil
     public AstValue<bool?> ShouldCache { get; set; } = new();
 
     /// <summary>
+    /// The value of the image fetched from the `imaging` service
+    /// </summary>
+    [AstAttribute("data"), AstAttribute("image-data")]
+    public AstValue<Image?> Data { get; set; } = new();
+
+    /// <summary>
     /// Gets the image stream from the path
     /// </summary>
     /// <param name="context">The scoped context</param>
-    /// <param name="path">The path to fetch the image from</param>
     /// <returns>The stream for the image</returns>
-    public async Task<Stream> HandleImage(ContextScope context, IOPath path)
+    public async Task<Stream> HandleImage(ContextScope context)
     {
         var wrkDir = context.Frame.BoxContext.Ast.WorkingDirectory;
         var props = this.Properties(context.Size, wrkDir);
         var (stream, _, _, _) = await _resolver.Fetch(props);
         return stream;
+    }
+
+    /// <summary>
+    /// Gets the image from the source or data
+    /// </summary>
+    /// <param name="context">The frame of the image</param>
+    /// <param name="scope">The scope to render in</param>
+    /// <returns>The image and whether or not it should be disposed</returns>
+    /// <exception cref="RenderContextException">Thrown if no source is set</exception>
+    public async Task<(Image image, bool dispose)> GetImage(ContextFrame context, ContextScope scope)
+    {
+        if (Data.Value is not null) return (Data.Value, false);
+
+        if (Source.Value is null)
+            throw new RenderContextException("Either the image source or image data must be set",
+                context.BoxContext.Ast, Context);
+
+        var stream = await HandleImage(scope);
+        var image = Image.Load(stream);
+        return (image, true);
     }
 
     /// <summary>
@@ -73,8 +98,7 @@ public class ImageElem(IFileResolverService _resolver) : PositionalElement, IFil
         using var scope = this.Scoped(context);
 
         var rect = scope.Size.GetRectangle();
-        using var imageStream = await HandleImage(scope, Source.Value);
-        using var image = Image.Load(imageStream);
+        var (image, dispose) = await GetImage(context, scope);
         image.Mutate(i => i.Resize(rect.Width, rect.Height));
 
         if (FlipVertical.Value || FlipHorizontal.Value)
@@ -94,5 +118,8 @@ public class ImageElem(IFileResolverService _resolver) : PositionalElement, IFil
         }
 
         context.Image.Mutate(i => i.DrawImage(image, new Point(rect.X - (int)output.X, rect.Y - (int)output.Y), 1));
+
+        if (dispose)
+            image.Dispose();
     }
 }

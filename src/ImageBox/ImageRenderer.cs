@@ -303,9 +303,11 @@ internal class ImageRenderer(
         //Get the meta data and set the repeat count
         var meta = gif.Metadata.GetGifMetadata();
         meta.RepeatCount = _box.FrameRepeat;
+        var delay = (int)(_box.FrameDelay / 10);
         //Get the root frame to set the frame delay
         var frame = gif.Frames.RootFrame.Metadata.GetGifMetadata();
-        frame.FrameDelay = 0;
+        frame.FrameDelay = delay;
+        frame.DisposalMethod = GifDisposalMethod.RestoreToBackground;
         //Render the first frame of the gif
         await RenderFrame(1, Token, _variables, gif);
         //Get the frames to render
@@ -317,7 +319,7 @@ internal class ImageRenderer(
             CancellationToken = Token
         };
         //Lock object for adding frames to the gif
-        var obj = new object();
+        var semaphore = new SemaphoreSlim(1);
         //Render the frames in parallel
         await Parallel.ForEachAsync(frameCounts, opts, async (frameNum, token) =>
         {
@@ -325,7 +327,7 @@ internal class ImageRenderer(
             var image = await RenderFrame(frameNum, token, _variables);
             //Set the meta data for the frame
             var nf = image.Frames.RootFrame.Metadata.GetGifMetadata();
-            nf.FrameDelay = (int)_box.FrameDelay / 10;
+            nf.FrameDelay = delay;
             nf.DisposalMethod = GifDisposalMethod.RestoreToBackground;
 
             if (SaveFrames)
@@ -338,11 +340,15 @@ internal class ImageRenderer(
                 image.SaveAsPng(fs);
             }
 
-            //Lock the gif to add the frame
-            lock (obj)
+            try
             {
+                await semaphore.WaitAsync(token);
                 RenderFrames.AddOrUpdate(frameNum, image, (_, _) => image);
                 AppendFrames(gif);
+            }
+            finally
+            {
+                semaphore.Release();
             }
         });
         Rendering = false;

@@ -5,27 +5,19 @@
 /// </summary>
 public abstract class PositionalElement : RenderElement, IPositionElement
 {
-    /// <summary>
-    /// The X offset
-    /// </summary>
+    /// <inheritdoc/>
     [AstAttribute("x")]
     public AstValue<SizeUnit?> X { get; set; } = new();
 
-    /// <summary>
-    /// The Y offset
-    /// </summary>
+    /// <inheritdoc/>
     [AstAttribute("y")]
     public AstValue<SizeUnit?> Y { get; set; } = new();
 
-    /// <summary>
-    /// The width of the rectangle
-    /// </summary>
+    /// <inheritdoc/>
     [AstAttribute("width")]
     public AstValue<SizeUnit?> Width { get; set; } = new();
 
-    /// <summary>
-    /// The height of the rectangle
-    /// </summary>
+    /// <inheritdoc/>
     [AstAttribute("height")]
     public AstValue<SizeUnit?> Height { get; set; } = new();
 }

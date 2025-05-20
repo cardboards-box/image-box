@@ -3,7 +3,8 @@
 namespace ImageBox.Services.SystemModules;
 
 internal class SystemModuleLoaderService(
-    ILogger<SystemModuleLoaderService> _logger) : IModuleSourceService
+    ILogger<SystemModuleLoaderService> _logger,
+    IFileResolverService _resolver) : IModuleSourceService
 {
     public string Name => "system";
 
@@ -14,7 +15,8 @@ internal class SystemModuleLoaderService(
             builder
                 .ExportType<Drawing>()
                 .ExportType<Context>()
-                .ExportObject("logger", new Logger(_logger, image));
+                .ExportObject("logger", new Logger(_logger, image))
+                .ExportObject("imaging", new Imaging(_resolver, image));
         }
 
         return Task.FromResult(Builder);

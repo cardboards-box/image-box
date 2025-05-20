@@ -256,6 +256,8 @@ public class ScriptRunner(
         var result = engine.Invoke(method, parameters);
         //Process any tasks that are pending
         engine.Advanced.ProcessTasks();
+        //Ensure to unwrap promises
+        result = result.UnwrapIfPromise();
         //Massage the result to either be null or the result of the return value
         return result == JsValue.Undefined ? null : result;
     }

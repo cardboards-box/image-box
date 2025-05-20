@@ -15,6 +15,7 @@ public static class DiExtensions
             .AddTransient<IScriptExecutionService, ScriptExecutionService>()
             .AddTransient<IContextGeneratorService, ContextGeneratorService>()
             .AddSingleton<IElementReflectionService, ElementReflectionService>()
-            .AddTransient<IModuleSourceService, SystemModuleLoaderService>();
+            .AddTransient<IModuleSourceService, SystemModuleLoaderService>()
+            .AddTransient<ISettingsResolverService, SettingsResolverService>();
     }
 }

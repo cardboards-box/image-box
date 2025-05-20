@@ -33,33 +33,27 @@ public class ContextBox : IScriptItem
     public required ContextFonts Fonts { get; init; }
 
     /// <summary>
-    /// The size of the image
+    /// The settings for the template
     /// </summary>
-    public required SizeContext Size { get; init; }
+    public required TemplateSettings Settings { get; init; }
 
     /// <summary>
     /// The script runner for the setup module in the template
     /// </summary>
     public required ScriptRunner? Runner { get; init; }
 
-    /// <summary>
-    /// The total number of frames in the image
-    /// </summary>
-    public uint TotalFrames { get; set; } = 1;
+    /// <inheritdoc cref="TemplateSettings.Size" />
+    public SizeContext Size => Settings.Size;
 
-    /// <summary>
-    /// The delay between frames in milliseconds
-    /// </summary>
-    public uint FrameDelay { get; set; } = 100;
+    /// <inheritdoc cref="TemplateSettings.TotalFrames" />
+    public uint TotalFrames => Settings.TotalFrames;
 
-    /// <summary>
-    /// How many times to repeat the gif
-    /// </summary>
-    /// <remarks>0 is repeat forever, x is repeat number of times</remarks>
-    public ushort FrameRepeat { get; set; } = 0;
+    /// <inheritdoc cref="TemplateSettings.FrameDelay" />
+    public uint FrameDelay => Settings.FrameDelay;
 
-    /// <summary>
-    /// Whether or not animation is enabled
-    /// </summary>
-    public bool Animate => TotalFrames > 1;
+    /// <inheritdoc cref="TemplateSettings.FrameRepeat" />
+    public ushort FrameRepeat => Settings.FrameRepeat;
+
+    /// <inheritdoc cref="TemplateSettings.Animate" />
+    public bool Animate => Settings.Animate;
 }

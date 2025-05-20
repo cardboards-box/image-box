@@ -3,7 +3,7 @@
 namespace ImageBox.Elements;
 
 /// <summary>
-/// Represents properties 
+/// Represents a GDI element that has text and font properties
 /// </summary>
 public interface IFontElement : IPositionElement
 {
