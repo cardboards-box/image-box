@@ -1,0 +1,79 @@
+name: imagebox-cli
+on:
+  push:
+    tags:
+      - "v[0-9]+.[0-9]+.[0-9]+"
+
+env:
+  DOTNETVERSION: "8.0"
+  APP: "ImageBox.Cli"
+  CLI: "imagebox"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Setup .NET Core SDK ${{ env.DOTNETVERSION }}
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: ${{ env.DOTNETVERSION }}.x
+
+      - name: Get version
+        id: version
+        run: |
+          echo "version-without-v=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+      - name: Set paths
+        id: paths
+        run: |
+          echo "csproj-path=./src/${{ env.APP }}/${{ env.APP }}.csproj" >> $GITHUB_OUTPUT
+          echo "linux-artifact=linux-x64-${{ steps.version.outputs.version-without-v }}" >> $GITHUB_OUTPUT
+          echo "linux-output=./${{ env.CLI }}-linux-x64" >> $GITHUB_OUTPUT
+          echo "windows-artifact=win-x64-${{ steps.version.outputs.version-without-v }}" >> $GITHUB_OUTPUT
+          echo "windows-output=./${{ env.CLI }}-win-x64" >> $GITHUB_OUTPUT
+
+      - name: Get previous release tag
+        id: previousTag
+        run: |
+          PREV_REV=$(git rev-list --tags --max-count=1 --skip=1 --no-walk)
+          PREV_TAG=$(git describe --tags ${PREV_REV})
+          echo "tag=${PREV_TAG}" >> $GITHUB_OUTPUT
+
+      - name: Build Windows
+        run: dotnet publish ${{ steps.paths.outputs.csproj-path }} --configuration Release --runtime win-x64 --self-contained --output ${{ steps.paths.outputs.windows-output }} -p:PublishSingleFile=true  /p:Version=${{ steps.version.outputs.version-without-v }}
+
+      - name: Upload windows app build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.paths.outputs.windows-artifact }}
+          path: ${{ steps.paths.outputs.windows-output }}
+
+      - name: ZIP windows release artifact
+        run: zip -r ${{ steps.paths.outputs.windows-artifact }}.zip ${{ steps.paths.outputs.windows-output }}
+
+      - name: Build Linux
+        run: dotnet publish ${{ steps.paths.outputs.csproj-path }} --configuration Release --runtime linux-x64 --self-contained --output ${{ steps.paths.outputs.linux-output }} -p:PublishSingleFile=true -p:Version=${{ steps.version.outputs.version-without-v }}
+
+      - name: Upload linux app build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.paths.outputs.linux-artifact }}
+          path: ${{ steps.paths.outputs.linux-output }}
+
+      - name: ZIP linux release artifact
+        run: zip -r ${{ steps.paths.outputs.linux-artifact }}.zip ${{ steps.paths.outputs.linux-output }}
+
+      - name: GitHub release
+        id: release
+        run: gh release create ${{ github.ref }} "${{ steps.paths.outputs.linux-artifact }}.zip" "${{ steps.paths.outputs.windows-artifact }}.zip" -t "${{ steps.version.outputs.version-without-v }}" --generate-notes --notes-start-tag ${{ steps.previousTag.outputs.tag }} 
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
