@@ -35,6 +35,7 @@
 | [Type](#type-SixLabors-Fonts-FontStyle) | `FontStyle` | The font styles |
 | [Type](#type-SixLabors-Fonts-WordBreaking) | `WordBreaking` | Defines modes to determine when line breaks should appear when words overflow their content box. |
 | [Type](#type-ImageBox-Core-IOPath-IOPath) | `IOPath` | A URI path - can be remote, local, or use fancy scheme (https, ftp, etc) |
+| [Type](#type-SixLabors-ImageSharp-Image) | `Image` | Encapsulates an image, which consists of the pixel data for a graphics image and its attributes. For the non-generic [Image](#type-SixLabors-ImageSharp-Image) type, the pixel type is only known at runtime. [Image](#type-SixLabors-ImageSharp-Image) is always implemented by a pixel-specific `Image`1` instance. |
 | [Type](#type-ImageBox-Drawing-Models-Bezier-BezierType) | `BezierType` | The type of Bezier curve to use |
 | [Type](#type-ImageBox-Drawing-Models-Bezier-EasingType) | `EasingType` | The type of easing function to use |
 | [Type](#type-ImageBox-Core-TimeUnits-TimeUnit) | `TimeUnit` | Unit of time. (ex: 20ms, 3.2s, 1m, 2h) |
@@ -62,6 +63,7 @@ Represents a script that can be executed to calculate contexts
 ```html
 <script 
   setup="" 
+  init="" 
   name="" 
   src="" 
 >
@@ -73,6 +75,12 @@ Represents a script that can be executed to calculate contexts
 
 <a name="attribute-script-setup"></a>
 __*setup*__: Whether or not the script is the entry point to the image<br>
+Type: [System.Boolean](#type-System-Boolean).
+This attribute is optional.
+This attribute cannot be bound to a runtime variable.
+
+<a name="attribute-script-init"></a>
+__*init*__: Whether or not the script should be used for template initialization<br>
 Type: [System.Boolean](#type-System-Boolean).
 This attribute is optional.
 This attribute cannot be bound to a runtime variable.
@@ -431,6 +439,7 @@ Represents an image that can be drawn to the image
   user-agent="" 
   accepts="" 
   should-cache="" 
+  data="" 
   x="" 
   y="" 
   width="" 
@@ -443,7 +452,7 @@ Represents an image that can be drawn to the image
 <a name="attribute-image-src"></a>
 __*src*__: The images source<br>
 Type: [ImageBox.Core.IOPath.IOPath](#type-ImageBox-Core-IOPath-IOPath).
-This attribute is **Required**.
+This attribute is optional.
 This attribute can be bound to a runtime variable.
 You can use the following aliases: `source`.
 
@@ -482,6 +491,13 @@ __*should-cache*__: Indicates whether or not the file should be cached locally<b
 Type: [System.Boolean](#type-System-Boolean).
 This attribute is optional.
 This attribute can be bound to a runtime variable.
+
+<a name="attribute-image-data"></a>
+__*data*__: The value of the image fetched from the `imaging` service<br>
+Type: [SixLabors.ImageSharp.Image](#type-SixLabors-ImageSharp-Image).
+This attribute is optional.
+This attribute can be bound to a runtime variable.
+You can use the following aliases: `image-data`.
 
 <a name="attribute-image-x"></a>
 __*x*__: <br>
@@ -1147,6 +1163,13 @@ their content box.
 Full Name: ImageBox.Core.IOPath.IOPath<br>
 Description:
 A URI path - can be remote, local, or use fancy scheme (https, ftp, etc)
+<a name="type-SixLabors-ImageSharp-Image"></a>
+### Type: `Image`
+Full Name: SixLabors.ImageSharp.Image<br>
+Description:
+Encapsulates an image, which consists of the pixel data for a graphics image and its attributes.
+For the non-generic [Image](#type-SixLabors-ImageSharp-Image) type, the pixel type is only known at runtime.
+[Image](#type-SixLabors-ImageSharp-Image) is always implemented by a pixel-specific `Image`1` instance.
 <a name="type-ImageBox-Drawing-Models-Bezier-BezierType"></a>
 ### Type: `BezierType`
 Full Name: ImageBox.Drawing.Models.Bezier.BezierType<br>
