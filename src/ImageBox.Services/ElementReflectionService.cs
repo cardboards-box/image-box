@@ -246,7 +246,11 @@ internal class ElementReflectionService(
         var nonNullable = notNullType ?? property.PropertyType;
         //Ensure we unwrap ObjectInstances from Jint
         if (value is ObjectInstance obj)
-            value = obj.GetType().GetProperty("Target")?.GetValue(obj);
+        {
+            var check = obj.GetType().GetProperty("Target")?.GetValue(obj);
+            if (check is not null)
+                value = check;
+        }
 
         //Ensure we unwrap tasks as well
         if (value is Task tsk)

@@ -9,12 +9,16 @@ public class DocVerbOptions
 {
     public const string DEFAULT_JSON_FILE_NAME = "image-box-docs.json";
     public const string DEFAULT_MARKDOWN_FILE_NAME = "image-box-docs.md";
+    public const string DEFAULT_DIRECTORY = "docs";
 
     [Option('j', "json-output", HelpText = "The file to write the documentation json to", Default = DEFAULT_JSON_FILE_NAME)]
     public string JsonOutput { get; set; } = DEFAULT_JSON_FILE_NAME;
 
     [Option('m', "markdown-output", HelpText = "The file to write the documentation markdown to", Default = DEFAULT_MARKDOWN_FILE_NAME)]
     public string MarkdownOutput { get; set; } = DEFAULT_MARKDOWN_FILE_NAME;
+
+    [Option('d', "directory", HelpText = "The directory to write the documentation files to", Default = DEFAULT_DIRECTORY)]
+    public string Directory { get; set; } = DEFAULT_DIRECTORY;
 }
 
 internal class DocVerb(

@@ -29,7 +29,7 @@ internal class ContextGeneratorService(
         //Get all of the font families from the image
         var (fonts, _) = await GetResources(image, elements);
         //Get the template settings
-        var settings = await _settings.GetSettings(template, image, init);
+        var settings = await _settings.GetSettings(template, image, init, fonts);
 
         return new ContextBox
         {

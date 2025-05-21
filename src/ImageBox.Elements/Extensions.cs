@@ -207,6 +207,17 @@ public static class Extensions
         if (!obj.TryGetString(name, out var value))
             return false;
 
+        if (string.IsNullOrWhiteSpace(value))
+            return false;
+
+        value = value.Trim();
+
+        if (float.TryParse(value, out var fo))
+        {
+            output = (int)fo;
+            return true;
+        }
+
         var size = SizeUnit.Parse(value);
         if (size == SizeUnit.Zero) return false;
 

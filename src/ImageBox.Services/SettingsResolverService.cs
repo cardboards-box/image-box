@@ -17,11 +17,14 @@ public interface ISettingsResolverService
     /// <param name="template">The template element</param>
     /// <param name="image">The template AST</param>
     /// <param name="init">The initialization script</param>
+    /// <param name="fonts">The fonts for the context</param>
     /// <returns>The template settings</returns>
-    Task<TemplateSettings> GetSettings(TemplateElem template, LoadedAst image, ScriptRunner? init);
+    Task<TemplateSettings> GetSettings(TemplateElem template, LoadedAst image, ScriptRunner? init, ContextFonts fonts);
 }
 
-internal class SettingsResolverService(IServiceConfig _config) : ISettingsResolverService
+internal class SettingsResolverService(
+    IServiceConfig _config,
+    IScriptExecutionService _scripting) : ISettingsResolverService
 {
     /// <summary>
     /// Validates the value of a property
@@ -92,7 +95,7 @@ internal class SettingsResolverService(IServiceConfig _config) : ISettingsResolv
     /// <param name="ctx">The default context to use</param>
     /// <param name="init">The script runner for the init function</param>
     /// <returns>The fetched JSValue</returns>
-    public static async Task<ObjectInstance?> GetSettingsFromInit(SizeContext ctx, ScriptRunner? init)
+    public static async Task<ObjectInstance?> GetSettingsFromInit(ContextFrame ctx, ScriptRunner? init)
     {
         //No init? skip it
         if (init is null) return null;
@@ -142,7 +145,7 @@ internal class SettingsResolverService(IServiceConfig _config) : ISettingsResolv
     }
 
     /// <inheritdoc/>
-    public async Task<TemplateSettings> GetSettings(TemplateElem template, LoadedAst image, ScriptRunner? init)
+    public async Task<TemplateSettings> GetSettings(TemplateElem template, LoadedAst image, ScriptRunner? init, ContextFonts fonts)
     {
         bool DetermineAnimate(ObjectInstance? settings)
         {
@@ -209,10 +212,27 @@ internal class SettingsResolverService(IServiceConfig _config) : ISettingsResolv
             return template.AnimateRepeat ?? _config.Render.AnimateRepeat;
         }
 
+        ContextFrame DefaultFrame(SizeContext size)
+        {
+            var box = new ContextBox 
+            {
+                Settings = new TemplateSettings { Size = size },
+                Ast = image, 
+                TemplateElement = template,
+                Runner = null,
+                Fonts = fonts,
+            };
+            return new ContextFrame(0, null!, box, [], _scripting, CancellationToken.None)
+            { 
+                Elements = box.Elements 
+            };
+        }
+
         //Get the default size context from the settings or template
         var defSize = GetDefaultContext(template, image);
         //Get the settings from the init function
-        var settings = await GetSettingsFromInit(defSize, init);
+        var frame = DefaultFrame(defSize);
+        var settings = await GetSettingsFromInit(frame, init);
         //Get the final size to use for the template
         var size = SizeFromInit(defSize, settings, image, template);
         //Get the current template settings

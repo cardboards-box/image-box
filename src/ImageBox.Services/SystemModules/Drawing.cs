@@ -132,4 +132,96 @@ public class Drawing(
         var yValue = fromUnitString(y, false);
         return new BoxPoint(xValue, yValue);
     }
+
+    /// <summary>
+    /// Measures the bounding box of the given text
+    /// </summary>
+    /// <param name="text">The text to measure</param>
+    /// <param name="options">
+    /// <para>The text options. The following properties are supported:</para>
+    /// <para>fontFamily - string</para>
+    /// <para>fontSize - number / <see cref="SizeUnit"/></para>
+    /// <para>fontStyle - string / <see cref="FontStyle"/> enum</para>
+    /// <para>width - number / <see cref="SizeUnit"/></para>
+    /// <para>lineSpacing - number / <see cref="SizeUnit"/></para>
+    /// <para>wordBreaking - string / <see cref="WordBreaking"/> enum</para>
+    /// <para>textDirection - string / <see cref="TextDirection"/> enum</para>
+    /// <para>textAlignment - string / <see cref="TextAlignment"/> enum</para>
+    /// <para>horizontalAlignment - string / <see cref="HorizontalAlignment"/> enum</para>
+    /// <para>verticalAlignment - string / <see cref="VerticalAlignment"/> enum</para>
+    /// <para>layoutMode - string / <see cref="LayoutMode"/> enum</para>
+    /// <para>textJustification - string / <see cref="TextJustification"/> enum</para>
+    /// </param>
+    /// <returns>The x, y, width and height of the bounds that were measured</returns>
+    /// <exception cref="RenderContextException">Thrown if the <paramref name="options"/> are invalid</exception>
+    public object measureText(string text, JsValue? options = null)
+    {
+        Font GetFont()
+        {
+            string? family;
+            if (options is null)
+            {
+                family = _context.LastScope.Size.FontFamily;
+                return _context.BoxContext.Fonts.GetFont(family, _context.LastScope, FontStyle.Regular);
+            }
+
+            var obj = options.AsObject();
+
+            var font = obj.AsInstance<Font>();
+            if (font is not null) return font;
+
+            var size = DetermineFloat("fontSize", _context.LastScope.Size.FontSize, true);
+            var style = DetermineEnum("fontStyle", FontStyle.Regular);
+
+            family = obj.Get("fontFamily").AsString();
+            if (string.IsNullOrEmpty(family))
+                family = _context.LastScope.Size.FontFamily;
+
+            if (!_context.BoxContext.Fonts.Families.TryGetValue(family, out var fontFamily))
+                throw new RenderContextException($"Font family '{family}' not found in context", _context.LastScope.AstElement);
+
+            return fontFamily.Get((int)size, style);
+        }
+
+        float DetermineFloat(string name, float defaultValue, bool isWidth = true)
+        {
+            if (options is null) return defaultValue;
+            var value = options.AsObject().Get(name);
+            if (value.IsUndefined() || value.IsNull())
+                return defaultValue;
+            return (float)fromUnitString(value, isWidth);
+        }
+
+        T DetermineEnum<T>(string name, T defaultValue) where T : struct, Enum
+        {
+            if (options is null) return defaultValue;
+            var value = options.AsObject().Get(name);
+            if (value.IsUndefined() || value.IsNull()) return defaultValue;
+            if (!Enum.TryParse<T>(value.AsString(), true, out var result))
+                throw new RenderContextException($"Invalid enum value '{value}' for {name}", _context.LastScope.AstElement);
+            return result;
+        }
+
+        var textOptions = new TextOptions(GetFont())
+        {
+            WrappingLength = DetermineFloat("width", _context.LastScope.Size.Width),
+            TabWidth = DetermineFloat("tabWidth", -1F, true),
+            LineSpacing = DetermineFloat("lineSpacing", 1F, false),
+            WordBreaking = DetermineEnum("wordBreaking", WordBreaking.Standard),
+            TextDirection = DetermineEnum("textDirection", TextDirection.Auto),
+            TextAlignment = DetermineEnum("textAlignment", TextAlignment.Center),
+            HorizontalAlignment = DetermineEnum("horizontalAlignment", HorizontalAlignment.Center),
+            VerticalAlignment = DetermineEnum("verticalAlignment", VerticalAlignment.Center),
+            LayoutMode = DetermineEnum("layoutMode", LayoutMode.HorizontalTopBottom),
+            TextJustification = DetermineEnum("textJustification", TextJustification.None),
+        };
+        var rect = TextMeasurer.MeasureAdvance(text, textOptions);
+        return new
+        {
+            x = rect.X,
+            y = rect.Y,
+            width = rect.Width,
+            height = rect.Height,
+        };
+    }
 }

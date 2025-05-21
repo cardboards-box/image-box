@@ -239,4 +239,16 @@ public class Imaging(IFileResolverService _resolver, LoadedAst _ast) : IScriptIt
         image.Mutate(x => x.Vignette(c));
         return image;
     }
+
+    /// <summary>
+    /// Applies the opacity value to the image
+    /// </summary>
+    /// <param name="image">The image</param>
+    /// <param name="amount">The amount</param>
+    /// <returns>The image</returns>
+    public Image opacity(Image image, float amount)
+    {
+        image.Mutate(x => x.Opacity(amount));
+        return image;
+    }
 }
