@@ -24,6 +24,18 @@ public class TextElem : FontElement, IPathElement
     public AstValue<string?> Color { get; set; } = new();
 
     /// <summary>
+    /// The color of the outline of the text
+    /// </summary>
+    [AstAttribute("outline-color")]
+    public AstValue<string?> OutlineColor { get; set; } = new();
+
+    /// <summary>
+    /// The thickness of the text outline
+    /// </summary>
+    [AstAttribute("outline-thickness")]
+    public AstValue<SizeUnit?> OutlineThickness { get; set; } = new();
+
+    /// <summary>
     /// Where to align the text vertically in the rectangle
     /// </summary>
     [AstAttribute("align-vertical", typeof(VerticalAlignment))]
@@ -238,6 +250,26 @@ public class TextElem : FontElement, IPathElement
         };
     }
 
+	/// <summary>
+	/// Determines the brush and pen to use for drawing the text
+	/// </summary>
+	/// <param name="scope">The current scope of the element</param>
+	/// <returns>The brush and optional pen for the text</returns>
+	public (Brush, Pen?) DetermineColors(ContextScope scope)
+    {
+		var color = Color.Value.ParseColor(IColor.Black);
+        var brush = new SolidBrush(color);
+
+        Pen? pen = null;
+        if (string.IsNullOrEmpty(OutlineColor.Value) ||
+			!IColor.TryParse(OutlineColor.Value, out var outlineColor))
+            return (brush, pen);
+
+        var thickness = OutlineThickness.Value?.Pixels(scope.Size, true) ?? 2;
+        pen = new SolidPen(outlineColor, thickness);
+        return (brush, pen);
+	}
+
     /// <summary>
     /// Applies the element to the render context
     /// </summary>
@@ -251,14 +283,11 @@ public class TextElem : FontElement, IPathElement
         var text = Value.Value!;
 
         using var scope = this.Scoped(context);
-
-        var rect = scope.Size.GetRectangle();
-        var color = Color.Value.ParseColor(IColor.Black);
-
-        var drawing = GetDrawingOptions(scope, rect);
+		var (brush, pen) = DetermineColors(scope);
+		var rect = scope.Size.GetRectangle();
+		var drawing = GetDrawingOptions(scope, rect);
         var opts = GetTextOptions(scope, rect, text);
-        var brush = new SolidBrush(color);
-        context.Image.Mutate(i => i.DrawText(drawing, opts, text, brush, null));
+        context.Image.Mutate(i => i.DrawText(drawing, opts, text, brush, pen));
         return Task.CompletedTask;
     }
 }

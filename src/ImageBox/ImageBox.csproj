@@ -62,6 +62,7 @@
 		<ProjectReference Include="..\ImageBox.Elements.Drawing\ImageBox.Elements.Drawing.csproj" PrivateAssets="All" />
 		<ProjectReference Include="..\ImageBox.Elements.Shapes\ImageBox.Elements.Shapes.csproj" PrivateAssets="All" />
 		<ProjectReference Include="..\ImageBox.Elements.TopLevel\ImageBox.Elements.TopLevel.csproj" PrivateAssets="All" />
+		<ProjectReference Include="..\ImageBox.Scripting\ImageBox.Scripting.csproj" />
 		<ProjectReference Include="..\ImageBox.Services\ImageBox.Services.csproj" PrivateAssets="All" />
 	</ItemGroup>
 

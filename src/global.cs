@@ -26,6 +26,7 @@ global using SixLabors.ImageSharp.Processing;
 global using System.Collections;
 global using System.Collections.Concurrent;
 global using System.Data;
+global using System.Diagnostics.CodeAnalysis;
 global using System.Net;
 global using System.Numerics;
 global using System.Reflection;

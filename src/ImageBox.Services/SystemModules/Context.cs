@@ -6,7 +6,7 @@ namespace ImageBox.Services.SystemModules;
 /// Providers a way of easily accessing variables in the current context
 /// </summary>
 /// <param name="_context"></param>
-[System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = JUSTIFICATION)]
+[SuppressMessage("Style", "IDE1006:Naming Styles", Justification = JUSTIFICATION)]
 public class Context(
     ContextFrame _context) : IScriptItem
 {
